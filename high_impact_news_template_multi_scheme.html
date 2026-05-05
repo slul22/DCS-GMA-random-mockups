@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>High Impact News - myUL</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .email-wrapper {
+      max-width: 100%;
+      width: 100%;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #dddddd;
+    }
+    .email-header {
+      padding: 20px 30px 10px 30px;
+      border-bottom: 2px solid #eeeeee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .email-header .brand {
+      font-size: 26px;
+      font-weight: bold;
+      color: #cc0000;
+    }
+    .email-header .brand span {
+      font-size: 14px;
+      vertical-align: super;
+    }
+    .ul-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #cc0000;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .email-body {
+      padding: 30px;
+    }
+    .email-body p {
+      font-size: 14px;
+      color: #333333;
+      line-height: 1.6;
+    }
+
+    /* Responsive table wrapper */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table thead tr {
+      background-color: #4a4a4a;
+      color: #ffffff;
+    }
+    table thead th {
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: normal;
+      white-space: nowrap;
+    }
+    table tbody tr {
+      border-bottom: 1px solid #dddddd;
+    }
+    table tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    table tbody td {
+      padding: 10px 12px;
+      color: #333333;
+      vertical-align: top;
+    }
+    table tbody td a {
+      color: #0066cc;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    table tbody td a:hover {
+      text-decoration: underline;
+    }
+    .email-footer {
+      padding: 20px 30px;
+      border-top: 1px solid #eeeeee;
+      font-size: 13px;
+      color: #555555;
+    }
+    .email-footer a {
+      color: #0066cc;
+    }
+    .email-footer p {
+      margin: 6px 0;
+    }
+
+    /* Tablet */
+    @media (max-width: 600px) {
+      .email-wrapper {
+        margin: 0;
+        border: none;
+      }
+      .email-header {
+        padding: 16px 16px 10px 16px;
+      }
+      .email-header .brand {
+        font-size: 22px;
+      }
+      .email-body {
+        padding: 16px;
+      }
+      .email-footer {
+        padding: 16px;
+      }
+    }
+
+    /* Mobile: stack table cells as labeled blocks */
+    @media (max-width: 480px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+      }
+      table thead {
+        display: none;
+      }
+      table tbody td {
+        border: none;
+        border-bottom: 1px solid #eeeeee;
+        padding: 8px 12px;
+        position: relative;
+        padding-left: 45%;
+        min-height: 36px;
+      }
+      table tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 12px;
+        width: 42%;
+        font-weight: bold;
+        color: #4a4a4a;
+        font-size: 12px;
+        top: 8px;
+      }
+      table tbody tr {
+        border: 1px solid #dddddd;
+        margin-bottom: 12px;
+        background-color: #ffffff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+
+    <!-- Header -->
+    <div class="email-header">
+      <div class="brand">myUL<span>®</span></div>
+      <div class="ul-logo">UL</div>
+    </div>
+
+    <!-- Body -->
+    <div class="email-body">
+      <p>Dear Sharvanika Lakshminarayanan,</p>
+
+      <p>
+        Information to review about a Global certification requirement changes are available in GCM.
+        This information requires prompt attention to ensure the continuity of product certification.
+      </p>
+
+      <!-- Data Table -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>News Name</th>
+              <th>Scheme</th>
+              <th>Certificate Name</th>
+              <th>Mandatory Date</th>
+              <th>View Certificate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="News Name">European Union - CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 - Safety Requirements for Audio/Video, Information and Communication Technology Equipment</td>
+              <td data-label="Scheme">
+                <ul style="margin: 0; padding-left: 18px; line-height: 2;">
+                  <li>D-Mark scheme</li>
+                  <li>ANZ Certification scheme</li>
+                  <li>Aruba - DTC</li>
+                  <li>Bahamas - URCA</li>
+                  <li>Benin - ARCP</li>
+                  <li>Cambodia - ARC</li>
+                  <li>Chile - SEC</li>
+                </ul>
+              </td>
+              <td data-label="Certificate Name">D-11617</td>
+              <td data-label="Mandatory Date">04/24/2027</td>
+              <td data-label="View Certificate"><a href="{{CertificatePortalLink}}" target="_blank">View in Portal</a></td>
+            </tr>
+            <tr>
+              <td data-label="News Name">North American Union - CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 - Safety Requirements, Information and Communication Technology Equipment</td>
+              <td data-label="Scheme">
+                <ul style="margin: 0; padding-left: 18px; line-height: 2;">
+                  <li>D-Mark scheme</li>
+                  <li>ANZ Certification scheme</li>
+                  <li>Aruba - DTC</li>
+                  <li>Bahamas - URCA</li>
+                  <li>Benin - ARCP</li>
+                  <li>Cambodia - ARC</li>
+                  <li>Chile - SEC</li>
+                </ul>
+              </td>
+              <td data-label="Certificate Name">D-0031</td>
+              <td data-label="Mandatory Date">04/24/2027</td>
+              <td data-label="View Certificate"><a href="{{CertificatePortalLink}}" target="_blank">View in Portal</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        <strong>Best Regards,</strong><br/>
+        GCM Support Team<br/>
+        UL Solutions
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="email-footer">
+      <p>
+        Please do not reply to this message. This email is generated automatically. If you have any questions,
+        please <a href="{{ContactUsLink}}"><strong>Contact Us</strong></a>.
+      </p>
+      <p>UL and the UL logo are trademarks of UL LLC &copy; 2020 All Rights Reserved.</p>
+      <p style="margin-top: 14px; font-size: 12px; color: #777777; border-top: 1px solid #eeeeee; padding-top: 12px;">
+        This e-mail may contain privileged or confidential information. If you are not the intended recipient:
+        (1) you may not disclose, use, distribute, copy, or rely upon this message or attachment(s); and
+        (2) please notify the sender by reply e-mail and then delete this message and its attachment(s).
+        Underwriters Laboratories Inc. and its affiliates disclaim all liability for any errors, omissions,
+        corruption, or virus in this message or any attachments.
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
