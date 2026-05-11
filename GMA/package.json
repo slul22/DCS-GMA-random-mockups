@@ -1,0 +1,12 @@
+{
+  "name": "gma-news-app",
+  "version": "1.0.0",
+  "description": "GMA News Admin App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GMA News</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans', -apple-system, 'Segoe UI', sans-serif; font-size: 14px; background: #F5F7FA; color: #111827; min-height: 100vh; display: flex; flex-direction: column; }
+    button, a { font-family: inherit; }
+
+    /* ── NAVBAR ── */
+    .nav { height: 52px; background: #fff; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; flex-shrink: 0; }
+    .nav-left  { display: flex; align-items: center; gap: 0; }
+    .nav-brand { font-size: 15px; font-weight: 700; color: #CC0000; letter-spacing: -.3px; }
+    .nav-sep   { color: #D1D5DB; margin: 0 10px; }
+    .nav-section { font-size: 15px; color: #374151; font-weight: 600; }
+    .nav-center { display: flex; align-items: center; gap: 2px; }
+    .nav-pill { padding: 5px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; color: #6B7280; border: none; background: none; font-family: inherit; transition: background .15s; }
+    .nav-pill:hover { background: #F3F4F6; color: #111827; }
+    .nav-pill.active { background: #CC0000; color: #fff; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-user  { font-size: 13px; color: #6B7280; }
+    .nav-avatar { width: 32px; height: 32px; background: #CC0000; color: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+
+    /* ── APP SHELL / VIEWS ── */
+    .app-shell { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .view { display: none; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
+    .view.active { display: flex; }
+    .scroll-wrap { flex: 1; overflow-y: auto; }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid #D1D5DB; background: #fff; color: #374151; font-family: inherit; transition: background .12s, border-color .12s; white-space: nowrap; text-decoration: none; }
+    .btn:hover { background: #F9FAFB; }
+    .btn-primary { background: #CC0000; border-color: #CC0000; color: #fff; }
+    .btn-primary:hover { background: #AA0000; border-color: #AA0000; }
+    .btn-outline-purple { border-color: #7C3AED; color: #7C3AED; }
+    .btn-outline-purple:hover { background: #F5F3FF; }
+    .btn-ghost { border-color: transparent; background: transparent; color: #6B7280; }
+    .btn-ghost:hover { background: #F3F4F6; color: #374151; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-success { background: #15803D; border-color: #15803D; color: #fff; }
+    .btn-success:hover { background: #166534; }
+
+    /* ── CHIPS / BADGES ── */
+    .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .chip-approved  { background: #DCFCE7; color: #15803D; } .chip-approved::before  { background: #15803D; }
+    .chip-review    { background: #DBEAFE; color: #1E40AF; } .chip-review::before    { background: #1E40AF; }
+    .chip-draft     { background: #FEF3C7; color: #92400E; } .chip-draft::before     { background: #F59E0B; }
+    .chip-inactive  { background: #F3F4F6; color: #6B7280; } .chip-inactive::before  { background: #9CA3AF; }
+    .chip-active    { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
+    .chip-active::before { background: #15803D; }
+    .chip-noicon::before { display: none; }
+    .vbadge { display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 10px; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .vbadge-sm { font-size: 10px; padding: 1px 7px; }
+    .vbadge-approved { background: #DCFCE7; color: #15803D; border-color: #BBF7D0; }
+    .vbadge-draft    { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+    .ct-tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+    .ct-initial     { background: #F3F4F6; color: #6B7280; }
+    .ct-minor       { background: #DBEAFE; color: #1E40AF; }
+    .ct-substantive { background: #F5F3FF; color: #7C3AED; }
+    .nl-tag { font-size: 12.5px; font-weight: 600; }
+    .nl-finalized   { color: #15803D; }
+    .nl-development { color: #92400E; }
+    .nl-draft       { color: #6B7280; }
+    .rt-tag { display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+    .rt-supersedes  { background: #F5F3FF; color: #7C3AED; }
+    .rt-related     { background: #EFF6FF; color: #2563EB; }
+    .rt-amends      { background: #FFF7ED; color: #C2410C; }
+
+    /* ── LIST VIEW ── */
+    .list-topbar { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .list-topbar-title { font-size: 18px; font-weight: 700; }
+    .list-tabs { display: flex; align-items: center; padding: 0 28px; background: #fff; border-bottom: 1px solid #E5E7EB; flex-shrink: 0; }
+    .list-tab { padding: 11px 14px; font-size: 13px; color: #6B7280; cursor: pointer; border-bottom: 2.5px solid transparent; margin-bottom: -1px; font-weight: 500; white-space: nowrap; }
+    .list-tab.active { color: #CC0000; border-bottom-color: #CC0000; font-weight: 700; }
+    .list-tab:hover:not(.active) { color: #374151; }
+    .tab-count { font-size: 11px; background: #F3F4F6; color: #6B7280; border-radius: 10px; padding: 1px 7px; margin-left: 5px; }
+    .list-toolbar { padding: 10px 28px; background: #fff; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .search-box { display: flex; align-items: center; gap: 8px; border: 1.5px solid #E5E7EB; border-radius: 6px; padding: 6px 12px; width: 270px; background: #fff; }
+    .search-box:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .search-box input { border: none; outline: none; font-size: 13px; color: #374151; width: 100%; font-family: inherit; background: transparent; }
+    .search-icon { color: #9CA3AF; font-size: 13px; }
+
+    /* ── TABLE ── */
+    .tbl-outer { overflow-x: auto; background: #fff; }
+    table.news-tbl { width: 100%; border-collapse: collapse; }
+    .news-tbl thead th { font-size: 10.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .6px; text-align: left; padding: 10px 14px; border-bottom: 1.5px solid #E5E7EB; background: #fff; white-space: nowrap; }
+    .news-tbl tbody td { padding: 13px 14px; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+    .news-tbl tbody tr:hover td { background: #F9FAFB; }
+    .col-id { font-size: 12.5px; font-weight: 700; color: #2563EB; cursor: pointer; white-space: nowrap; background: none; border: none; padding: 0; font-family: inherit; }
+    .col-id:hover { text-decoration: underline; }
+    .col-title-cell { font-size: 13px; font-weight: 600; color: #111827; cursor: pointer; max-width: 280px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .col-title-cell:hover { color: #2563EB; }
+
+    /* ── VERSION COLUMN POPOVER ── */
+    .ver-col { position: relative; white-space: nowrap; }
+    .ver-col-inner { display: flex; align-items: center; gap: 7px; }
+    .ver-hist-btn { font-size: 11px; color: #6B7280; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 10px; padding: 2px 8px; cursor: pointer; font-weight: 600; font-family: inherit; white-space: nowrap; transition: background .12s; }
+    .ver-hist-btn:hover { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
+    .ver-pop { display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 300; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,.13); min-width: 350px; overflow: hidden; }
+    .ver-pop.open { display: block; }
+    .vp-hdr { padding: 11px 16px 9px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; }
+    .vp-hdr-title { font-size: 12px; font-weight: 700; color: #374151; }
+    .vp-close { background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 17px; line-height: 1; padding: 0; }
+    .vp-close:hover { color: #374151; }
+    .vp-row { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #F9FAFB; }
+    .vp-row:last-child { border-bottom: none; }
+    .vp-row.vp-cur { background: #F0F9FF; }
+    .vp-spine { display: flex; flex-direction: column; align-items: center; width: 18px; flex-shrink: 0; }
+    .vp-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #1D4ED8; background: #fff; flex-shrink: 0; margin-top: 3px; }
+    .vp-dot.cur { background: #1D4ED8; }
+    .vp-line { flex: 1; width: 1.5px; background: #BFDBFE; min-height: 12px; }
+    .vp-info { flex: 1; min-width: 0; }
+    .vp-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
+    .vp-meta { font-size: 11px; color: #9CA3AF; }
+    .vp-reason { font-size: 11.5px; color: #374151; line-height: 1.4; margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .vp-footer { padding: 9px 16px; border-top: 1px solid #F3F4F6; background: #F9FAFB; }
+    .vp-footer-btn { font-size: 12px; color: #2563EB; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; font-weight: 600; }
+    .vp-footer-btn:hover { text-decoration: underline; }
+
+    /* ── KEBAB ── */
+    .actions-cell { position: relative; text-align: right; }
+    .kebab-btn { background: none; border: none; font-size: 18px; color: #9CA3AF; cursor: pointer; padding: 4px 8px; border-radius: 4px; line-height: 1; }
+    .kebab-btn:hover { background: #F3F4F6; color: #374151; }
+    .kebab-menu { position: absolute; right: 4px; top: 100%; background: #fff; border: 1px solid #E5E7EB; border-radius: 7px; min-width: 185px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 200; display: none; overflow: hidden; }
+    .kebab-menu.open { display: block; }
+    .km-item { display: flex; align-items: center; gap: 9px; padding: 10px 14px; font-size: 13px; color: #374151; cursor: pointer; white-space: nowrap; }
+    .km-item:hover { background: #F9FAFB; }
+    .km-item.km-revise { color: #7C3AED; font-weight: 600; }
+    .km-item.km-revise:hover { background: #F5F3FF; }
+    .km-item.km-archive { color: #DC2626; }
+    .km-item.km-archive:hover { background: #FEF2F2; }
+    .km-item.km-disabled { color: #D1D5DB; pointer-events: none; cursor: default; }
+    .km-sep { height: 1px; background: #F3F4F6; margin: 3px 0; }
+
+    /* ── DETAIL VIEW ── */
+    .snapshot-banner { background: #FFFBEB; border-bottom: 1.5px solid #FDE68A; padding: 9px 28px; display: none; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .snapshot-banner.visible { display: flex; }
+    .sbn-text { font-size: 13px; color: #92400E; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .detail-topbar { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 18px 28px 20px; flex-shrink: 0; }
+    .back-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #2563EB; cursor: pointer; margin-bottom: 14px; background: none; border: none; font-family: inherit; font-weight: 600; padding: 0; }
+    .back-link:hover { text-decoration: underline; }
+    .detail-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    .detail-h1 { font-size: 21px; font-weight: 700; color: #111827; line-height: 1.3; flex: 1; }
+    .detail-subid { font-size: 13px; color: #9CA3AF; margin-top: 5px; }
+    .detail-btns { display: flex; gap: 10px; flex-shrink: 0; align-items: flex-start; }
+
+    /* Metadata bar */
+    .meta-bar { display: grid; grid-template-columns: repeat(8, 1fr); border: 1px solid #E5E7EB; border-radius: 7px; overflow: hidden; margin: 18px 0 0; background: #fff; }
+    .meta-item { padding: 12px 14px; border-right: 1px solid #E5E7EB; }
+    .meta-item:last-child { border-right: none; }
+    .meta-lbl { font-size: 9.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
+    .meta-val { font-size: 13px; color: #111827; font-weight: 600; }
+    .meta-val-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+
+    /* Detail content */
+    .detail-body { padding: 20px 28px 40px; }
+    .det-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; padding: 20px 24px; margin-bottom: 14px; }
+    .det-card-title { font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 14px; }
+    .det-text { font-size: 14px; color: #374151; line-height: 1.75; }
+    .det-text p  { margin-bottom: 10px; }
+    .det-text ul { padding-left: 20px; margin-bottom: 10px; }
+    .det-text li { margin-bottom: 5px; }
+    .det-text strong { font-weight: 700; color: #111827; }
+
+    /* Relationships */
+    .rel-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+    .rel-row:last-child { border-bottom: none; }
+    .rel-info { flex: 1; }
+    .rel-title-link { font-size: 13.5px; font-weight: 600; color: #2563EB; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; text-align: left; }
+    .rel-title-link:hover { text-decoration: underline; }
+    .rel-meta-row { font-size: 12px; color: #9CA3AF; margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+    .rel-dot-sep { font-size: 8px; }
+    .rel-what { font-size: 12.5px; color: #6B7280; margin-top: 5px; line-height: 1.5; }
+    .rel-what strong { color: #374151; }
+    .rel-sub-hdr { font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .6px; margin: 16px 0 10px; }
+
+    /* Version history timeline */
+    .vh-row { display: flex; gap: 0; }
+    .vh-spine { display: flex; flex-direction: column; align-items: center; width: 34px; flex-shrink: 0; padding-top: 2px; }
+    .vh-dot { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid #1D4ED8; background: #F5F7FA; flex-shrink: 0; z-index: 1; }
+    .vh-dot.cur { background: #1D4ED8; }
+    .vh-line { width: 1.5px; flex: 1; background: #BFDBFE; min-height: 14px; }
+    .vh-content { flex: 1; padding-bottom: 22px; }
+    .vh-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+    .vh-ver { font-size: 13.5px; font-weight: 700; color: #111827; }
+    .vh-change-text { font-size: 13px; color: #2563EB; line-height: 1.55; margin-top: 3px; }
+    .vh-fields { font-size: 12px; color: #9CA3AF; margin-top: 3px; }
+    .vh-right { margin-left: auto; text-align: right; font-size: 12px; color: #9CA3AF; white-space: nowrap; padding-left: 20px; padding-top: 1px; }
+    .vh-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+    /* ── FORM / REVISE VIEW ── */
+    .form-topbar { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .form-tb-left { display: flex; flex-direction: column; gap: 3px; }
+    .form-tb-title { font-size: 16px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 10px; }
+    .form-tb-meta { font-size: 12px; color: #9CA3AF; }
+    .form-tb-actions { display: flex; gap: 10px; }
+    .form-body { padding: 22px 28px 40px; max-width: 900px; margin: 0 auto; }
+    .revision-banner { background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 8px; padding: 14px 18px; margin-bottom: 22px; display: flex; gap: 12px; }
+    .rb-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .rb-text { font-size: 13px; color: #92400E; line-height: 1.55; }
+    .rb-text strong { font-weight: 700; }
+    .form-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; padding: 22px 26px; margin-bottom: 14px; }
+    .fc-title { font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #F3F4F6; }
+    .fg { margin-bottom: 18px; }
+    .fg:last-child { margin-bottom: 0; }
+    .fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .fg-row:last-child { margin-bottom: 0; }
+    .fg-row .fg { margin-bottom: 0; }
+    .fl { display: block; font-size: 10.5px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .fl .req { color: #CC0000; margin-left: 2px; }
+    .fi { width: 100%; padding: 9px 12px; border: 1.5px solid #D1D5DB; border-radius: 5px; font-size: 13.5px; font-family: inherit; color: #111827; background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; height: 40px; }
+    .fi:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .fi:disabled { background: #F9FAFB; color: #9CA3AF; cursor: not-allowed; border-color: #E5E7EB; }
+    .fi-sel { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; cursor: pointer; }
+    .fi-sel:disabled { cursor: not-allowed; }
+    .fi-date { max-width: 220px; }
+    .fi-ta { min-height: 72px; resize: vertical; height: auto; }
+    .fi-ta:disabled { resize: none; }
+    .locked-hint { font-size: 11px; color: #D1D5DB; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .edit-hint { font-size: 11px; color: #2563EB; margin-top: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .locked-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 10px; border: 1.5px solid #E5E7EB; border-radius: 5px; background: #F9FAFB; min-height: 40px; align-items: center; }
+    .locked-chip { display: inline-flex; align-items: center; background: #F3F4F6; color: #6B7280; border-radius: 10px; padding: 2px 10px; font-size: 12.5px; }
+    .editable-fg .fl { color: #2563EB; }
+    .editable-fg .fl::after { content: 'EDITABLE'; font-size: 9px; font-weight: 700; background: #2563EB; color: #fff; border-radius: 3px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
+    .editable-fg .fi { border-color: #93C5FD; }
+    .editable-fg .fi:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .editable-fg .rte-wrap { border-color: #93C5FD; }
+    /* RTE */
+    .rte-wrap { border: 1.5px solid #D1D5DB; border-radius: 5px; overflow: hidden; }
+    .rte-toolbar { background: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 6px 10px; display: flex; gap: 2px; align-items: center; flex-wrap: wrap; }
+    .rte-wrap.rte-locked .rte-toolbar { opacity: .5; pointer-events: none; }
+    .rtb { background: none; border: none; padding: 3px 6px; cursor: pointer; border-radius: 3px; font-size: 13px; color: #374151; font-family: inherit; }
+    .rtb:hover { background: #E5E7EB; }
+    .rte-sep { width: 1px; height: 15px; background: #E5E7EB; margin: 0 4px; }
+    .rte-body { min-height: 120px; padding: 12px; outline: none; font-size: 13.5px; line-height: 1.65; color: #374151; background: #fff; }
+    .rte-body.locked { background: #F9FAFB; color: #9CA3AF; pointer-events: none; }
+    .rte-body p { margin-bottom: 8px; }
+    .rte-body ul { padding-left: 20px; margin-bottom: 8px; }
+    .form-footer { background: #fff; border-top: 1px solid #E5E7EB; padding: 13px 28px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .form-footer-left { font-size: 12.5px; color: #9CA3AF; display: flex; align-items: center; gap: 6px; }
+    .form-footer-right { display: flex; gap: 10px; }
+
+    /* ── MODAL ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(17,24,39,.52); display: flex; align-items: center; justify-content: center; z-index: 600; }
+    .modal-box { background: #fff; border-radius: 10px; width: 540px; max-width: 95vw; box-shadow: 0 24px 60px rgba(0,0,0,.2); overflow: hidden; }
+    .mhdr { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid #F3F4F6; }
+    .mhdr h3 { font-size: 16px; font-weight: 700; }
+    .mclose { background: none; border: none; font-size: 22px; color: #9CA3AF; cursor: pointer; line-height: 1; padding: 0 2px; }
+    .mclose:hover { color: #374151; }
+    .mbody { padding: 22px 22px 18px; }
+    .mftr { padding: 14px 22px; border-top: 1px solid #F3F4F6; display: flex; justify-content: flex-end; gap: 10px; background: #F9FAFB; }
+    .m-source-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; padding: 12px 16px; margin-bottom: 18px; }
+    .msc-lbl { font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+    .msc-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; line-height: 1.3; }
+    .msc-meta { font-size: 12px; color: #9CA3AF; }
+    .m-ver-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid #F3F4F6; border-bottom: 1px solid #F3F4F6; margin-bottom: 18px; }
+    .mvr-from, .mvr-to { display: flex; align-items: center; gap: 7px; }
+    .mvr-arrow { color: #D1D5DB; font-size: 20px; font-weight: 300; flex-shrink: 0; }
+    .mvr-to { font-weight: 600; }
+    .mf { margin-bottom: 16px; }
+    .mf:last-child { margin-bottom: 0; }
+    .mfl { display: block; font-size: 10.5px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .mfl .req { color: #CC0000; }
+    .m-err { font-size: 12px; color: #CC0000; margin-top: 5px; display: none; }
+    .m-err.show { display: block; }
+
+    /* ── COMPARE DRAWER ── */
+    .cmp-drawer { position: fixed; right: 0; top: 52px; bottom: 0; width: 52%; background: #fff; border-left: 1.5px solid #E5E7EB; box-shadow: -8px 0 28px rgba(0,0,0,.12); z-index: 450; transform: translateX(110%); transition: transform .25s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+    .cmp-drawer.open { transform: translateX(0); }
+    .cmp-hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #E5E7EB; background: #F9FAFB; flex-shrink: 0; }
+    .cmp-hdr-left h3 { font-size: 14px; font-weight: 700; }
+    .cmp-hdr-left p  { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+    .cmp-close { background: none; border: none; font-size: 22px; color: #9CA3AF; cursor: pointer; line-height: 1; }
+    .cmp-close:hover { color: #374151; }
+    .cmp-scroll { flex: 1; overflow-y: auto; }
+    .cmp-section-hdr { padding: 10px 20px; background: #F9FAFB; border-bottom: 1px solid #E5E7EB; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #6B7280; }
+    .cmp-cols { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #F3F4F6; }
+    .cmp-col { padding: 16px 18px; }
+    .cmp-col:first-child { border-right: 1px solid #E5E7EB; }
+    .cmp-col-hdr { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #9CA3AF; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .cmp-content { font-size: 13px; color: #374151; line-height: 1.65; }
+    .cmp-content p { margin-bottom: 8px; }
+    .cmp-content ul { padding-left: 18px; margin-bottom: 8px; }
+    .cmp-content li { margin-bottom: 4px; }
+    .diff-add { background: #FEF9C3; border-bottom: 2px solid #FDE047; padding: 0 1px; border-radius: 2px; }
+    .diff-del { text-decoration: line-through; color: #9CA3AF; }
+    .cmp-legend { padding: 10px 20px; border-top: 1px solid #E5E7EB; background: #F9FAFB; display: flex; gap: 18px; font-size: 11.5px; color: #6B7280; flex-shrink: 0; }
+    .cmp-legend-dot { width: 12px; height: 3px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: middle; }
+    .drawer-scrim { position: fixed; inset: 0; z-index: 449; display: none; }
+    .drawer-scrim.visible { display: block; }
+
+    /* ── MISC ── */
+    .divider { border: none; border-top: 1px solid #F3F4F6; margin: 14px 0; }
+    .empty-rel { font-size: 13px; color: #9CA3AF; font-style: italic; padding: 8px 0; }
+    .success-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #15803D; color: #fff; font-size: 13px; font-weight: 600; padding: 12px 22px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.2); z-index: 700; display: none; white-space: nowrap; }
+    .success-toast.show { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="nav-brand">UL Solutions</span>
+    <span class="nav-sep">|</span>
+    <span class="nav-section">GMA News</span>
+  </div>
+  <div class="nav-center">
+    <button class="nav-pill active">News</button>
+    <button class="nav-pill">Audit Log</button>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user">Reviewer</span>
+    <div class="nav-avatar">RC</div>
+  </div>
+</nav>
+
+<!-- ══ APP SHELL ══ -->
+<div class="app-shell">
+
+  <!-- ═══════════════════ VIEW: LIST ═══════════════════ -->
+  <div id="view-list" class="view active">
+    <div class="list-topbar">
+      <span class="list-topbar-title" id="listTitle">Manage news</span>
+      <div style="display:flex;gap:10px;">
+        <button class="btn">Export</button>
+        <button class="btn">Reset Filters</button>
+        <button class="btn btn-primary" onclick="alert('Opens new article form')">+ Add news</button>
+      </div>
+    </div>
+    <div class="list-tabs">
+      <div class="list-tab active" onclick="switchListTab(this,'all')">All <span class="tab-count" id="tc-all">6</span></div>
+      <div class="list-tab" onclick="switchListTab(this,'approved')">Approved <span class="tab-count" id="tc-approved">4</span></div>
+      <div class="list-tab" onclick="switchListTab(this,'review')">In Review <span class="tab-count" id="tc-review">1</span></div>
+      <div class="list-tab" onclick="switchListTab(this,'draft')">Draft <span class="tab-count" id="tc-draft">1</span></div>
+      <div class="list-tab" onclick="switchListTab(this,'mine')">My items <span class="tab-count" id="tc-mine">3</span></div>
+    </div>
+    <div class="list-toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="listSearch" placeholder="Search by title, ID, issuer…" oninput="renderList()" />
+      </div>
+      <span style="font-size:12px;color:#9CA3AF;" id="listCount"></span>
+    </div>
+    <div class="scroll-wrap">
+      <div class="tbl-outer">
+        <table class="news-tbl">
+          <thead>
+            <tr>
+              <th>News ID</th>
+              <th>Title</th>
+              <th>Version</th>
+              <th>State / Status</th>
+              <th>News Level</th>
+              <th>Markets</th>
+              <th>Issuer</th>
+              <th>Originator</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="newsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ VIEW: DETAIL ═══════════════════ -->
+  <div id="view-detail" class="view">
+    <div class="snapshot-banner" id="snapshotBanner">
+      <div class="sbn-text">
+        <span>📷</span>
+        <span id="snapshotBannerText"></span>
+      </div>
+      <button class="btn btn-sm" id="snapshotBackBtn">View current version →</button>
+    </div>
+    <div class="scroll-wrap">
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ VIEW: FORM (revise / edit) ═══════════════════ -->
+  <div id="view-form" class="view">
+    <div class="form-topbar" id="formTopbar"></div>
+    <div class="scroll-wrap">
+      <div class="form-body" id="formBody"></div>
+    </div>
+    <div class="form-footer">
+      <div class="form-footer-left" id="formFooterLeft"></div>
+      <div class="form-footer-right" id="formFooterRight"></div>
+    </div>
+  </div>
+
+</div><!-- /app-shell -->
+
+<!-- ══ MODAL: INITIATE REVISION ══ -->
+<div id="modalRevise" style="display:none">
+  <div class="modal-overlay" onclick="handleModalClick(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="mhdr">
+        <h3>Revise — create new version</h3>
+        <button class="mclose" onclick="closeModal()">×</button>
+      </div>
+      <div class="mbody">
+        <div class="m-source-card">
+          <div class="msc-lbl">Article being revised</div>
+          <div class="msc-title" id="mSourceTitle">—</div>
+          <div class="msc-meta" id="mSourceMeta">—</div>
+        </div>
+        <div class="m-ver-row">
+          <div class="mvr-from">
+            <span style="font-size:11px;color:#9CA3AF;">Current</span>
+            <span class="vbadge" id="mCurVer">v1</span>
+            <span class="chip" id="mCurStatus">Approved</span>
+          </div>
+          <div class="mvr-arrow">→</div>
+          <div class="mvr-to">
+            <span style="font-size:11px;color:#9CA3AF;">New</span>
+            <span class="vbadge vbadge-draft" id="mNewVer">v2</span>
+            <span class="chip chip-draft chip-noicon">Draft</span>
+            <span style="font-size:11.5px;color:#9CA3AF;">· authored by <strong style="color:#374151;">Riley Chen</strong></span>
+          </div>
+        </div>
+        <div class="mf">
+          <label class="mfl">Change type <span class="req">*</span></label>
+          <select class="fi fi-sel" id="mChangeType" style="height:40px;">
+            <option value="">Select change type</option>
+            <option value="Minor">Minor — small corrections, typos, date clarifications</option>
+            <option value="Substantive">Substantive — scope, requirements or deadline changes</option>
+          </select>
+          <div class="m-err" id="mChangeTypeErr">Please select a change type.</div>
+        </div>
+        <div class="mf">
+          <label class="mfl">Reason for change <span class="req">*</span></label>
+          <textarea class="fi fi-ta" id="mReason" placeholder="Describe what changed in this version (e.g. 'Government issued Amendment No. 2 expanding scope to include low-voltage devices')…" style="height:88px;"></textarea>
+          <div class="m-err" id="mReasonErr">Please enter a reason for the change.</div>
+        </div>
+      </div>
+      <div class="mftr">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-outline-purple" onclick="confirmRevise()">📋 Begin Revision</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPARISON DRAWER ══ -->
+<div class="cmp-drawer" id="cmpDrawer">
+  <div class="cmp-hdr">
+    <div class="cmp-hdr-left">
+      <h3>Version comparison</h3>
+      <p id="cmpSubtitle">v1 vs v2</p>
+    </div>
+    <button class="cmp-close" onclick="closeCompare()">×</button>
+  </div>
+  <div class="cmp-scroll" id="cmpBody"></div>
+  <div class="cmp-legend">
+    <span><span class="cmp-legend-dot" style="background:#FDE047;"></span>New / changed text</span>
+    <span><span class="cmp-legend-dot" style="background:#D1D5DB;"></span>Removed text</span>
+  </div>
+</div>
+<div class="drawer-scrim" id="drawerScrim" onclick="closeCompare()"></div>
+
+<!-- ══ TOAST ══ -->
+<div class="success-toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA MODEL
+// ═══════════════════════════════════════════════════════════
+
+const ARTICLES = [
+  {
+    id: 'NEWS-2025-0412',
+    scheme: 'SABS',
+    originator: 'Lopez, Maria',
+    sme: 'Chen, Riley',
+    relationships: [
+      { type: 'Supersedes', articleId: 'NEWS-2024-1188', ver: 1, whatChanged: 'Updates flame propagation thresholds and revises mandatory date.' }
+    ],
+    versions: [
+      {
+        ver: 1, changeType: 'Initial', approvalState: 'Approved', activityState: 'Inactive',
+        title: 'South Africa SABS Published Revised Standard SANS 60332-3-24',
+        issuer: 'SABS', markets: ['South Africa'],
+        productCategories: ['Wire & Cable'], regulatoryCategories: ['Safety'],
+        newsLevel: 'Finalized',
+        summary: 'SABS published a revised SANS 60332-3-24 standard with updated flame propagation requirements and revised effective dates.',
+        details: '<p>The South African Bureau of Standards (SABS) has published a revised edition of SANS 60332-3-24 (IEC 60332-3-24 Ed.2.0), covering test methods for vertical spread of flame on vertically-mounted bunched wires or cables. The revised standard introduces updated flame propagation thresholds and clarifies test specimen preparation requirements.</p><ul><li>Updated Category C flame propagation thresholds</li><li>Revised test specimen mounting requirements</li><li>Mandatory compliance date: 2027-01-01</li></ul>',
+        mandatoryDate: '2027-01-01', effectiveDate: '2026-07-01', publishedDate: '2026-01-08',
+        changeReason: 'Initial publication', fieldsChanged: [], createdBy: 'Lopez, Maria', createdAt: '2026-01-08',
+      },
+      {
+        ver: 2, changeType: 'Substantive', approvalState: 'Approved', activityState: 'Active',
+        title: 'South Africa SABS Published Revised Standard SANS 60332-3-24',
+        issuer: 'SABS', markets: ['South Africa'],
+        productCategories: ['Wire & Cable'], regulatoryCategories: ['Safety'],
+        newsLevel: 'Finalized',
+        summary: 'SABS published a revised SANS 60332-3-24 standard with updated flame propagation requirements and revised effective dates.',
+        details: '<p>The South African Bureau of Standards (SABS) has published a revised edition of SANS 60332-3-24 (IEC 60332-3-24 Ed.2.0), covering test methods for vertical spread of flame on vertically-mounted bunched wires or cables. The revised standard introduces updated flame propagation thresholds and clarifies test specimen preparation requirements.</p><ul><li>Updated Category C flame propagation thresholds</li><li>Revised test specimen mounting requirements</li><li>Mandatory compliance date: <strong>2027-04-01</strong> (revised from 2027-01-01 per SABS clarification)</li></ul>',
+        mandatoryDate: '2027-04-01', effectiveDate: '2026-07-01', publishedDate: '2026-01-08',
+        changeReason: 'Updated mandatory date from 2027-01-01 to 2027-04-01 per SABS clarification.', fieldsChanged: ['Mandatory Date'],
+        createdBy: 'Chen, Riley', createdAt: '2026-03-04',
+      },
+    ],
+  },
+  {
+    id: 'NEWS-2024-1188',
+    scheme: 'SABS',
+    originator: 'Lopez, Maria',
+    sme: 'Lopez, Maria',
+    relationships: [],
+    versions: [
+      {
+        ver: 1, changeType: 'Initial', approvalState: 'Approved', activityState: 'Inactive',
+        title: 'South Africa SABS Draft SANS 60332-3-24 Open for Comment',
+        issuer: 'SABS', markets: ['South Africa'],
+        productCategories: ['Wire & Cable'], regulatoryCategories: ['Safety'],
+        newsLevel: 'Draft',
+        summary: 'SABS opened draft SANS 60332-3-24 for public comment. Stakeholders invited to submit feedback by April 2025.',
+        details: '<p>SABS published a draft of the revised SANS 60332-3-24 for a 60-day public comment period. The draft proposes updated Category C thresholds aligned with IEC 60332-3-24 Ed.2.0.</p><ul><li>Public comment deadline: April 30, 2025</li><li>Proposed mandatory date: 2027-01-01</li></ul>',
+        mandatoryDate: '2027-01-01', effectiveDate: '', publishedDate: '2025-02-15',
+        changeReason: 'Initial publication', fieldsChanged: [], createdBy: 'Lopez, Maria', createdAt: '2025-02-15',
+      },
+    ],
+  },
+  {
+    id: 'NEWS-2026-0033',
+    scheme: 'EU RED',
+    originator: 'Branda, Benedict',
+    sme: 'Branda, Benedict',
+    relationships: [],
+    versions: [
+      {
+        ver: 1, changeType: 'Initial', approvalState: 'Approved', activityState: 'Active',
+        title: 'EU RED Directive – Cybersecurity Requirements for Wireless Devices',
+        issuer: 'European Commission', markets: ['European Union'],
+        productCategories: ['Wireless Devices', 'IoT Products'], regulatoryCategories: ['Safety', 'Cybersecurity'],
+        newsLevel: 'Finalized',
+        summary: 'European Commission activates mandatory cybersecurity requirements under Radio Equipment Directive Article 3.3(d)(e)(f). Compliance deadline August 2025.',
+        details: '<p>The European Commission has activated the delegated regulation under Article 3.3(d), (e), and (f) of the Radio Equipment Directive (RED), introducing mandatory cybersecurity requirements for internet-connected radio equipment, wearables, and devices processing personal data.</p><ul><li>Article 3.3(d): Network protection requirements</li><li>Article 3.3(e): Safeguards for personal data</li><li>Article 3.3(f): Protection against fraud</li><li>Compliance deadline: <strong>August 1, 2025</strong></li><li>Grace period for existing designs: 12 months post-sale</li></ul>',
+        mandatoryDate: '2025-08-01', effectiveDate: '2025-08-01', publishedDate: '2026-01-15',
+        changeReason: 'Initial publication', fieldsChanged: [], createdBy: 'Branda, Benedict', createdAt: '2026-01-15',
+      },
+    ],
+  },
+  {
+    id: 'NEWS-2026-0105',
+    scheme: 'GCC EMC',
+    originator: 'Warhade, Sonali',
+    sme: 'Kanth, Vellanki',
+    relationships: [],
+    versions: [
+      {
+        ver: 1, changeType: 'Initial', approvalState: 'Approved', activityState: 'Active',
+        title: 'GCC Electromagnetic Compatibility Framework GSO-EMC-2026',
+        issuer: 'GCC Standardization Organization', markets: ['Saudi Arabia', 'UAE', 'Kuwait', 'Qatar', 'Bahrain', 'Oman'],
+        productCategories: ['Circuit Protection', 'Industrial Equipment'], regulatoryCategories: ['EMC'],
+        newsLevel: 'Finalized',
+        summary: 'GSO publishes new EMC framework with mandatory Declaration of Conformity and updated CISPR-aligned test methods for all EEE sold within GCC states.',
+        details: '<p>The GCC Standardization Organization (GSO) has published the updated Electromagnetic Compatibility (EMC) framework GSO-EMC-2026, covering all electrical and electronic equipment (EEE) sold within GCC member states.</p><ul><li>New test methods fully aligned with IEC CISPR standards</li><li>Declaration of Conformity (DoC) mandatory for all EEE products</li><li>Third-party lab testing required for products above risk Category B</li><li>Mandatory compliance: <strong>June 1, 2026</strong></li></ul>',
+        mandatoryDate: '2026-06-01', effectiveDate: '2026-06-01', publishedDate: '2026-01-20',
+        changeReason: 'Initial publication', fieldsChanged: [], createdBy: 'Warhade, Sonali', createdAt: '2026-01-20',
+      },
+    ],
+  },
+  {
+    id: 'NEWS-2025-0234',
+    scheme: 'India BIS',
+    originator: 'Gopalakrishnan, Shre.',
+    sme: 'Gopalakrishnan, Shre.',
+    relationships: [],
+    versions: [
+      {
+        ver: 1, changeType: 'Initial', approvalState: 'Approved', activityState: 'Inactive',
+        title: 'India BIS Mandatory Certification – Electrical Safety Appliances Phase II',
+        issuer: 'Bureau of Indian Standards', markets: ['India'],
+        productCategories: ['Household Appliances', 'Lighting'], regulatoryCategories: ['Safety'],
+        newsLevel: 'Finalized',
+        summary: 'BIS expands mandatory certification under IS 302 to Phase II product categories including lighting products and small appliances.',
+        details: '<p>The Bureau of Indian Standards has expanded the mandatory BIS certification scope under IS 302 to include Phase II product categories. All covered products must bear the BIS Standard Mark before being placed on the Indian market.</p><ul><li>Phase II scope: LED drivers, luminaires, small household appliances</li><li>Mandatory date: <strong>January 1, 2025</strong></li></ul>',
+        mandatoryDate: '2025-01-01', effectiveDate: '2025-01-01', publishedDate: '2024-07-10',
+        changeReason: 'Initial publication', fieldsChanged: [], createdBy: 'Gopalakrishnan, Shre.', createdAt: '2024-07-10',
+      },
+      {
+        ver: 2, changeType: 'Minor', approvalState: 'Approved', activityState: 'Inactive',
+        title: 'India BIS Mandatory Certification – Electrical Safety Appliances Phase II',
+        issuer: 'Bureau of Indian Standards', markets: ['India'],
+        productCategories: ['Household Appliances', 'Lighting'], regulatoryCategories: ['Safety'],
+        newsLevel: 'Finalized',
+        summary: 'BIS expands mandatory certification under IS 302 to Phase II product categories. Mandatory date extended to March 2025 following industry request.',
+        details: '<p>The Bureau of Indian Standards has expanded the mandatory BIS certification scope under IS 302 to include Phase II product categories. All covered products must bear the BIS Standard Mark before being placed on the Indian market.</p><ul><li>Phase II scope: LED drivers, luminaires, small household appliances</li><li>Mandatory date extended to: <strong>March 31, 2025</strong> (previously January 1, 2025)</li></ul>',
+        mandatoryDate: '2025-03-31', effectiveDate: '2025-03-31', publishedDate: '2024-07-10',
+        changeReason: 'BIS issued an official circular extending the mandatory compliance date by 90 days following representations from industry associations.', fieldsChanged: ['Mandatory Date', 'Summary'],
+        createdBy: 'Gopalakrishnan, Shre.', createdAt: '2024-10-22',
+      },
+      {
+        ver: 3, changeType: 'Substantive', approvalState: 'Approved', activityState: 'Active',
+        title: 'India BIS Mandatory Certification – Electrical Safety Appliances Phase II (Expanded Scope)',
+        issuer: 'Bureau of Indian Standards', markets: ['India'],
+        productCategories: ['Household Appliances', 'Lighting', 'Power Tools'], regulatoryCategories: ['Safety'],
+        newsLevel: 'Finalized',
+        summary: 'BIS further expands Phase II scope to include power tools and updates testing laboratory accreditation requirements. All products must comply by June 2025.',
+        details: '<p>The Bureau of Indian Standards has published an amendment expanding the BIS certification scope to include power tools under IS 302 Phase II, and updating requirements for accredited testing laboratories.</p><ul><li>Expanded scope: now includes power tools (cordless and corded)</li><li>Updated lab accreditation: NABL accreditation mandatory for all test reports</li><li>New mandatory date: <strong>June 30, 2025</strong></li></ul>',
+        mandatoryDate: '2025-06-30', effectiveDate: '2025-06-30', publishedDate: '2024-07-10',
+        changeReason: 'BIS Amendment No. 1 expanded product scope to include power tools and introduced updated laboratory accreditation requirements. Title updated to reflect expanded scope.', fieldsChanged: ['Title', 'Mandatory Date', 'Product Categories', 'Summary', 'Details'],
+        createdBy: 'Gopalakrishnan, Shre.', createdAt: '2025-02-14',
+      },
+    ],
+  },
+  {
+    id: 'NEWS-2026-0201',
+    scheme: 'China CCC',
+    originator: 'Kanth, Vellanki',
+    sme: 'Kanth, Vellanki',
+    relationships: [],
+    versions: [
+      {
+        ver: 1, changeType: 'Initial', approvalState: 'Review', activityState: null,
+        title: 'China CCC – Energy Efficiency Tier Update Phase IV',
+        issuer: 'CNCA', markets: ['China'],
+        productCategories: ['E-Mobility', 'Consumer Electronics'], regulatoryCategories: ['Energy Efficiency'],
+        newsLevel: 'In Development',
+        summary: 'CNCA announces Phase IV CCC energy efficiency tier update. New MEPS increased by 15% for EV charging equipment and consumer electronics.',
+        details: '<p>China\'s Certification and Accreditation Administration (CNCA) has announced Phase IV of the Compulsory Certification (CCC) energy labelling requirements. New Minimum Energy Performance Standards (MEPS) will take effect from October 2026.</p><ul><li>MEPS increased by 15% across all covered categories</li><li>New EV star rating system introduced</li><li>Online reporting portal mandatory from Q4 2026</li></ul>',
+        mandatoryDate: '2026-10-01', effectiveDate: '2026-10-01', publishedDate: '',
+        changeReason: 'Initial publication', fieldsChanged: [], createdBy: 'Kanth, Vellanki', createdAt: '2026-04-10',
+      },
+    ],
+  },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+
+const S = {
+  view:         'list',   // list | detail | form
+  articleId:    null,
+  viewingVer:   null,     // null = latest; number = historical snapshot
+  formMode:     null,     // 'revise' | 'edit'
+  listFilter:   'all',
+  pendingRevise: null,    // { articleId, changeType, reason }
+};
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+
+function navigate(view, params = {}) {
+  Object.assign(S, params);
+  S.view = view;
+  document.getElementById('view-list').classList.toggle('active', view === 'list');
+  document.getElementById('view-detail').classList.toggle('active', view === 'detail');
+  document.getElementById('view-form').classList.toggle('active', view === 'form');
+
+  if (view === 'list')   { renderList(); }
+  if (view === 'detail') { renderDetail(); }
+  if (view === 'form')   { renderForm(); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function getArticle(id) { return ARTICLES.find(a => a.id === id); }
+
+function getLatestVer(article) { return article.versions[article.versions.length - 1]; }
+
+function getVer(article, num) { return article.versions.find(v => v.ver === num); }
+
+function chipState(approvalState, activityState) {
+  if (approvalState === 'Draft')   return `<span class="chip chip-draft">Draft</span>`;
+  if (approvalState === 'Review')  return `<span class="chip chip-review">In Review</span>`;
+  if (activityState === 'Active')  return `<span class="chip chip-approved">Approved</span><span class="chip chip-active chip-noicon" style="margin-left:5px;">Active</span>`;
+  if (activityState === 'Inactive') return `<span class="chip chip-approved">Approved</span><span class="chip chip-inactive chip-noicon" style="margin-left:5px;">Inactive</span>`;
+  return `<span class="chip chip-approved">Approved</span>`;
+}
+
+function ctTag(ct) {
+  const map = { Initial: 'ct-initial', Minor: 'ct-minor', Substantive: 'ct-substantive' };
+  return `<span class="ct-tag ${map[ct] || 'ct-initial'}">${ct}</span>`;
+}
+
+function nlTag(nl) {
+  const cls = nl === 'Finalized' ? 'nl-finalized' : nl === 'In Development' ? 'nl-development' : 'nl-draft';
+  return `<span class="nl-tag ${cls}">${nl}</span>`;
+}
+
+function rtTag(type) {
+  const map = { Supersedes: 'rt-supersedes', 'Related coverage': 'rt-related', Amends: 'rt-amends' };
+  return `<span class="rt-tag ${map[type] || 'rt-related'}">${type}</span>`;
+}
+
+function vBadge(ver, approvalState, size) {
+  const cls = approvalState === 'Approved' ? 'vbadge-approved' : approvalState === 'Draft' ? 'vbadge-draft' : '';
+  const sz  = size === 'sm' ? 'vbadge-sm' : '';
+  return `<span class="vbadge ${cls} ${sz}">v${ver}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const parts = d.split('-');
+  return `${parts[0]}-${parts[1]}-${parts[2]}`;
+}
+
+function showToast(msg, duration = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LIST VIEW
+// ═══════════════════════════════════════════════════════════
+
+function switchListTab(el, filter) {
+  document.querySelectorAll('.list-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  S.listFilter = filter;
+  renderList();
+}
+
+function renderList() {
+  const q = (document.getElementById('listSearch').value || '').toLowerCase().trim();
+  const filter = S.listFilter;
+
+  let rows = ARTICLES.filter(a => {
+    const v = getLatestVer(a);
+    if (q) {
+      if (!v.title.toLowerCase().includes(q) && !a.id.toLowerCase().includes(q) && !v.issuer.toLowerCase().includes(q) && !a.originator.toLowerCase().includes(q)) return false;
+    }
+    if (filter === 'approved') return v.approvalState === 'Approved';
+    if (filter === 'review')   return v.approvalState === 'Review';
+    if (filter === 'draft')    return v.approvalState === 'Draft';
+    if (filter === 'mine')     return ['Lopez, Maria', 'Kanth, Vellanki'].includes(a.originator);
+    return true;
+  });
+
+  document.getElementById('listTitle').textContent = `Manage news (${rows.length})`;
+  document.getElementById('listCount').textContent = rows.length === ARTICLES.length ? '' : `Showing ${rows.length} of ${ARTICLES.length}`;
+
+  const tbody = document.getElementById('newsTbody');
+  tbody.innerHTML = '';
+
+  rows.forEach(article => {
+    const lv = getLatestVer(article);
+    const isPublished = lv.approvalState === 'Approved';
+    const nVers = article.versions.length;
+
+    // Version popover rows (reverse order)
+    const popRows = [...article.versions].reverse().map((ver, idx) => {
+      const isCur = idx === 0;
+      const vbc = ver.approvalState === 'Approved' ? 'vbadge-approved' : ver.approvalState === 'Draft' ? 'vbadge-draft' : '';
+      const linePart = idx < article.versions.length - 1 ? '<div class="vp-line"></div>' : '';
+      const reason = ver.changeReason ? `<div class="vp-reason">${ver.changeReason}</div>` : '';
+      const curTag = isCur ? `<span style="font-size:9px;font-weight:700;background:#DBEAFE;color:#1E40AF;border-radius:3px;padding:1px 5px;margin-left:2px;">CURRENT</span>` : '';
+      return `<div class="vp-row${isCur ? ' vp-cur' : ''}">
+        <div class="vp-spine"><div class="vp-dot${isCur ? ' cur' : ''}"></div>${linePart}</div>
+        <div class="vp-info">
+          <div class="vp-top"><span class="vbadge ${vbc} vbadge-sm">v${ver.ver}</span>${ctTag(ver.changeType)}${chipState(ver.approvalState, ver.activityState)}${curTag}</div>
+          <div class="vp-meta">By ${ver.createdBy} · ${ver.createdAt}</div>
+          ${reason}
+        </div>
+      </div>`;
+    }).join('');
+
+    const popId  = `vp-${article.id.replace(/[^a-z0-9]/gi, '')}`;
+    const cellId = `vc-${article.id.replace(/[^a-z0-9]/gi, '')}`;
+
+    const verCellInner = `<div class="ver-col-inner">
+        ${vBadge(lv.ver, lv.approvalState)}
+        ${nVers > 1
+          ? `<button class="ver-hist-btn" onclick="toggleVerPop(event,'${popId}')" title="Show version history">🕓 ${nVers} versions</button>`
+          : `<span style="font-size:11px;color:#D1D5DB;">1 version</span>`}
+      </div>
+      <div class="ver-pop" id="${popId}" onclick="event.stopPropagation()">
+        <div class="vp-hdr"><span class="vp-hdr-title">Version history · ${article.id}</span><button class="vp-close" onclick="closeVerPop('${popId}')">×</button></div>
+        <div>${popRows}</div>
+        <div class="vp-footer"><button class="vp-footer-btn" onclick="navigate('detail',{articleId:'${article.id}',viewingVer:null}); closeVerPop('${popId}');">View full history →</button></div>
+      </div>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><button class="col-id" onclick="navigate('detail',{articleId:'${article.id}',viewingVer:null})">${article.id}</button></td>
+      <td style="max-width:280px;"><span class="col-title-cell" onclick="navigate('detail',{articleId:'${article.id}',viewingVer:null})" title="${lv.title}">${lv.title}</span></td>
+      <td class="ver-col" id="${cellId}">${verCellInner}</td>
+      <td>${chipState(lv.approvalState, lv.activityState)}</td>
+      <td>${nlTag(lv.newsLevel)}</td>
+      <td style="font-size:12.5px;color:#6B7280;">${lv.markets.slice(0,2).join(', ')}${lv.markets.length > 2 ? ` +${lv.markets.length-2}` : ''}</td>
+      <td style="font-size:12.5px;color:#374151;">${lv.issuer}</td>
+      <td style="font-size:12.5px;color:#374151;">${article.originator}</td>
+      <td class="actions-cell">
+        <button class="kebab-btn" onclick="toggleKebab(event,'km-${article.id.replace(/[^a-z0-9]/gi,'')}')">⋮</button>
+        <div class="kebab-menu" id="km-${article.id.replace(/[^a-z0-9]/gi,'')}">
+          <div class="km-item" onclick="navigate('detail',{articleId:'${article.id}',viewingVer:null}); closeAllMenus();">👁 View</div>
+          ${lv.approvalState !== 'Approved'
+            ? `<div class="km-item" onclick="navigate('form',{articleId:'${article.id}',formMode:'edit'}); closeAllMenus();">✏️ Edit</div>`
+            : `<div class="km-item km-disabled">✏️ Edit</div>`}
+          <div class="km-sep"></div>
+          ${isPublished
+            ? `<div class="km-item km-revise" onclick="openReviseModal('${article.id}'); closeAllMenus();">📋 Revise (new version)</div>`
+            : `<div class="km-item km-disabled">📋 Revise (published only)</div>`}
+          <div class="km-sep"></div>
+          <div class="km-item km-archive" onclick="closeAllMenus();alert('Archive action would require confirmation.')">🗄 Archive</div>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DETAIL VIEW
+// ═══════════════════════════════════════════════════════════
+
+function renderDetail() {
+  const article = getArticle(S.articleId);
+  if (!article) return;
+
+  const ver = S.viewingVer ? getVer(article, S.viewingVer) : getLatestVer(article);
+  if (!ver) return;
+  const isLatest = ver.ver === getLatestVer(article).ver;
+
+  // Snapshot banner
+  const sb = document.getElementById('snapshotBanner');
+  if (!isLatest) {
+    sb.classList.add('visible');
+    document.getElementById('snapshotBannerText').textContent =
+      `Viewing v${ver.ver} (${ver.activityState || ver.approvalState}) — snapshot from ${ver.createdAt}. Content is read-only.`;
+    document.getElementById('snapshotBackBtn').onclick = () => navigate('detail', { articleId: S.articleId, viewingVer: null });
+  } else {
+    sb.classList.remove('visible');
+  }
+
+  const isApproved = ver.approvalState === 'Approved';
+  const isReview   = ver.approvalState === 'Review';
+  const isDraft    = ver.approvalState === 'Draft';
+  const latestVer  = getLatestVer(article);
+
+  // Build inbound relationships (auto-generated)
+  const inbound = ARTICLES.filter(a => a.id !== article.id).flatMap(a =>
+    (a.relationships || []).filter(r => r.articleId === article.id).map(r => ({
+      type: 'Related coverage', fromId: a.id, fromVer: r.ver, fromTitle: getLatestVer(a).title
+    }))
+  );
+
+  const relHTML = () => {
+    const rels = (article.relationships || []);
+    if (!rels.length && !inbound.length) return '<p class="empty-rel">No relationships defined.</p>';
+
+    let html = '';
+    if (rels.length) {
+      rels.forEach(r => {
+        const target = getArticle(r.articleId);
+        const tv = target ? getVer(target, r.ver) : null;
+        html += `<div class="rel-row">
+          ${rtTag(r.type)}
+          <div class="rel-info">
+            <button class="rel-title-link" onclick="navigate('detail',{articleId:'${r.articleId}',viewingVer:null})">${tv ? tv.title : r.articleId}</button>
+            <div class="rel-meta-row">
+              <span>${r.articleId}</span><span class="rel-dot-sep">·</span>
+              ${vBadge(r.ver, tv ? getVer(getArticle(r.articleId), r.ver).approvalState : 'Approved', 'sm')}
+              <span class="rel-dot-sep">·</span>
+              <span>${tv ? tv.activityState || tv.approvalState : '—'}</span>
+            </div>
+            ${r.whatChanged ? `<div class="rel-what"><strong>What changed:</strong> ${r.whatChanged}</div>` : ''}
+          </div>
+        </div>`;
+      });
+    }
+    if (inbound.length) {
+      html += `<div class="rel-sub-hdr">Inbound (auto-generated)</div>`;
+      inbound.forEach(r => {
+        html += `<div class="rel-row">
+          ${rtTag(r.type)}
+          <div class="rel-info">
+            <button class="rel-title-link" onclick="navigate('detail',{articleId:'${r.fromId}',viewingVer:null})">${r.fromTitle}</button>
+            <div class="rel-meta-row"><span>${r.fromId}</span><span class="rel-dot-sep">·</span>${vBadge(r.fromVer, 'Approved', 'sm')}</div>
+          </div>
+        </div>`;
+      });
+    }
+    return html;
+  };
+
+  // Version timeline
+  const vhHTML = () => {
+    return [...article.versions].reverse().map((v, idx) => {
+      const isCur = idx === 0;
+      const isViewing = v.ver === ver.ver;
+      const hasMore = idx < article.versions.length - 1;
+      return `<div class="vh-row">
+        <div class="vh-spine">
+          <div class="vh-dot${isCur ? ' cur' : ''}"></div>
+          ${hasMore ? '<div class="vh-line"></div>' : ''}
+        </div>
+        <div class="vh-content${isViewing && !isLatest ? '" style="background:#FFFBEB;border-radius:6px;padding:8px 10px;margin-left:-4px;' : ''}">
+          <div class="vh-hdr">
+            <span class="vh-ver">v${v.ver}</span>
+            ${ctTag(v.changeType)}
+            ${chipState(v.approvalState, v.activityState)}
+            ${isCur ? `<span style="font-size:10px;font-weight:700;background:#DBEAFE;color:#1E40AF;border-radius:3px;padding:1px 6px;">CURRENT</span>` : ''}
+            <span class="vh-right">
+              ${v.createdBy} · ${v.createdAt}
+            </span>
+          </div>
+          <div class="vh-change-text">${v.changeReason || '—'}</div>
+          ${v.fieldsChanged && v.fieldsChanged.length ? `<div class="vh-fields">Fields changed: ${v.fieldsChanged.join(', ')}</div>` : ''}
+          <div class="vh-actions">
+            ${v.ver !== ver.ver
+              ? `<button class="btn btn-sm" onclick="navigate('detail',{articleId:'${article.id}',viewingVer:${v.ver}})">View v${v.ver}</button>`
+              : `<button class="btn btn-sm btn-ghost" disabled style="cursor:default;color:#9CA3AF;">Viewing this version</button>`}
+            ${idx > 0
+              ? `<button class="btn btn-sm" onclick="openCompare('${article.id}', ${v.ver}, ${article.versions[article.versions.length - 1].ver})">⇔ Compare with current</button>`
+              : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  };
+
+  // Action buttons
+  const actionBtns = () => {
+    let btns = '';
+    if (isLatest && isApproved) {
+      btns += `<button class="btn btn-outline-purple" onclick="openReviseModal('${article.id}')">📋 Revise (new version)</button>`;
+    }
+    if (isLatest && isDraft) {
+      btns += `<button class="btn" onclick="navigate('form',{articleId:'${article.id}',formMode:'edit'})">✏️ Edit Draft</button>`;
+    }
+    if (isLatest && isReview) {
+      btns += `<button class="btn" onclick="navigate('form',{articleId:'${article.id}',formMode:'edit'})">✏️ Edit</button>`;
+      btns += `<button class="btn btn-success" onclick="publishArticle('${article.id}')">✓ Approve &amp; Publish</button>`;
+    }
+    btns += `<button class="btn btn-primary">Manage Relationships</button>`;
+    return btns;
+  };
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-topbar">
+      <button class="back-link" onclick="navigate('list')">← Back to News</button>
+      <div class="detail-title-row">
+        <div>
+          <div class="detail-h1">${ver.title}</div>
+          <div class="detail-subid">${article.id} · ${article.scheme}</div>
+        </div>
+        <div class="detail-btns">${actionBtns()}</div>
+      </div>
+      <div class="meta-bar">
+        <div class="meta-item"><div class="meta-lbl">News ID</div><div class="meta-val">${article.id}</div></div>
+        <div class="meta-item"><div class="meta-lbl">Issuer</div><div class="meta-val">${ver.issuer}</div></div>
+        <div class="meta-item"><div class="meta-lbl">Markets</div><div class="meta-val">${ver.markets.join(', ')}</div></div>
+        <div class="meta-item"><div class="meta-lbl">Product Categories</div><div class="meta-val">${ver.productCategories.join(', ')}</div></div>
+        <div class="meta-item"><div class="meta-lbl">Regulatory Categories</div><div class="meta-val">${ver.regulatoryCategories.join(', ')}</div></div>
+        <div class="meta-item"><div class="meta-lbl">News Level</div><div class="meta-val">${nlTag(ver.newsLevel)}</div></div>
+        <div class="meta-item"><div class="meta-lbl">State / Status</div><div class="meta-val">${chipState(ver.approvalState, ver.activityState)}</div></div>
+        <div class="meta-item"><div class="meta-lbl">Current Version</div><div class="meta-val">${vBadge(latestVer.ver, latestVer.approvalState)}</div></div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="det-card">
+        <div class="det-card-title">Summary</div>
+        <div class="det-text">${ver.summary}</div>
+      </div>
+      <div class="det-card">
+        <div class="det-card-title">Details</div>
+        <div class="det-text">${ver.details}</div>
+      </div>
+      <div class="det-card">
+        <div class="det-card-title">Key Dates</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #F3F4F6;border-radius:6px;overflow:hidden;">
+          ${[['Published','publishedDate'],['Effective','effectiveDate'],['Mandatory','mandatoryDate']].map(([lbl,key]) => `
+            <div style="padding:12px 14px;border-right:1px solid #F3F4F6;">
+              <div class="meta-lbl">${lbl} Date</div>
+              <div class="meta-val" style="font-size:13px;">${fmtDate(ver[key])}</div>
+            </div>`).join('')}
+          <div style="padding:12px 14px;">
+            <div class="meta-lbl">SME</div>
+            <div class="meta-val" style="font-size:13px;">${article.sme}</div>
+          </div>
+        </div>
+      </div>
+      <div class="det-card">
+        <div class="det-card-title">Relationships</div>
+        ${relHTML()}
+      </div>
+      <div class="det-card">
+        <div class="det-card-title">Version History</div>
+        ${vhHTML()}
+      </div>
+    </div>`;
+}
+
+function publishArticle(articleId) {
+  const article = getArticle(articleId);
+  const lv = getLatestVer(article);
+  // Mark previous version inactive
+  article.versions.forEach((v, i) => {
+    if (i < article.versions.length - 1 && v.activityState === 'Active') v.activityState = 'Inactive';
+  });
+  lv.approvalState = 'Approved';
+  lv.activityState = 'Active';
+  showToast(`✓ v${lv.ver} of ${articleId} approved and published`);
+  navigate('detail', { articleId, viewingVer: null });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FORM VIEW (revise / edit)
+// ═══════════════════════════════════════════════════════════
+
+function renderForm() {
+  const article = getArticle(S.articleId);
+  if (!article) return;
+  const isRevise = S.formMode === 'revise';
+  const sourceVer = getLatestVer(article);
+
+  // Build the working version data (either the draft pending revision, or latest for edit)
+  const wv = isRevise
+    ? { ...sourceVer, ver: sourceVer.ver + 1, approvalState: 'Draft', activityState: null, changeType: S.pendingRevise.changeType, changeReason: S.pendingRevise.reason, fieldsChanged: [] }
+    : sourceVer;
+
+  const newVerNum = sourceVer.ver + 1;
+
+  // Top bar
+  document.getElementById('formTopbar').innerHTML = `
+    <div class="form-tb-left">
+      <div class="form-tb-title">
+        ${isRevise ? `Creating new version — ` : 'Editing — '}
+        <span style="font-weight:400;font-size:14px;color:#6B7280;">${article.id}</span>
+        ${isRevise ? vBadge(newVerNum, 'Draft') : vBadge(sourceVer.ver, sourceVer.approvalState)}
+      </div>
+      <div class="form-tb-meta">
+        ${isRevise
+          ? `Versioning from v${sourceVer.ver} (${sourceVer.activityState || sourceVer.approvalState}) · ${sourceVer.createdAt} · Change type: <strong>${S.pendingRevise.changeType}</strong>`
+          : `Last saved: ${sourceVer.createdAt} · Authored by ${article.originator}`}
+      </div>
+    </div>`;
+
+  // Footer
+  document.getElementById('formFooterLeft').innerHTML = `<span>⚠</span> Changes are saved as a draft until submitted for review.`;
+  document.getElementById('formFooterRight').innerHTML = `
+    <button class="btn btn-ghost" onclick="navigate('detail',{articleId:'${article.id}',viewingVer:null})">Cancel</button>
+    <button class="btn" onclick="saveDraft('${article.id}')">Save Draft</button>
+    <button class="btn btn-primary" onclick="submitForReview('${article.id}')">Submit for Review →</button>`;
+
+  // Form body
+  const locked = (label, value) => `
+    <div style="font-size:13px;padding:8px 12px;border:1.5px solid #E5E7EB;border-radius:5px;background:#F9FAFB;color:#6B7280;">${value || '—'}</div>
+    ${isRevise ? `<div class="locked-hint">🔒 Locked from v${sourceVer.ver}</div>` : ''}`;
+
+  const lockedChips = (label, arr) => `
+    <div class="locked-chips">${arr.map(v => `<span class="locked-chip">${v}</span>`).join('')}</div>
+    ${isRevise ? `<div class="locked-hint">🔒 Locked from v${sourceVer.ver}</div>` : ''}`;
+
+  const editField = (id, value, type = 'text', extraClass = '') => `
+    <input class="fi ${extraClass}" id="fld-${id}" type="${type}" value="${value || ''}" />
+    ${isRevise ? `<div class="edit-hint">✏ Editable in this version</div>` : ''}`;
+
+  const editRTE = (id, content, locked = false) => `
+    <div class="rte-wrap${locked ? ' rte-locked' : ''}" id="rte-wrap-${id}">
+      <div class="rte-toolbar">
+        <select class="fi fi-sel" style="width:auto;height:28px;font-size:12px;padding:2px 8px;border:1px solid #E5E7EB;"><option>Paragraph</option><option>Heading 1</option><option>Heading 2</option></select>
+        <span class="rte-sep"></span>
+        <button class="rtb" onclick="rteCmd('${id}','bold')"><b>B</b></button>
+        <button class="rtb" onclick="rteCmd('${id}','italic')"><i>I</i></button>
+        <button class="rtb" onclick="rteCmd('${id}','underline')"><u>U</u></button>
+        <span class="rte-sep"></span>
+        <button class="rtb" onclick="rteCmd('${id}','insertUnorderedList')">• —</button>
+        <button class="rtb" onclick="rteCmd('${id}','insertOrderedList')">1 —</button>
+      </div>
+      <div class="rte-body${locked ? ' locked' : ''}" id="rte-${id}" contenteditable="${!locked}">${content}</div>
+    </div>
+    ${isRevise && !locked ? `<div class="edit-hint">✏ Editable in this version</div>` : ''}
+    ${isRevise && locked ? `<div class="locked-hint">🔒 Locked from v${sourceVer.ver}</div>` : ''}`;
+
+  document.getElementById('formBody').innerHTML = `
+    ${isRevise ? `<div class="revision-banner">
+      <span class="rb-icon">📋</span>
+      <div class="rb-text"><strong>You are creating v${newVerNum} of this article.</strong> Fields marked <span style="background:#2563EB;color:#fff;font-size:9px;font-weight:700;border-radius:3px;padding:1px 5px;vertical-align:middle;">EDITABLE</span> can be updated. All other fields are locked from v${sourceVer.ver} to preserve traceability.</div>
+    </div>` : ''}
+
+    <div class="form-card">
+      <div class="fc-title">Change information</div>
+      <div class="fg-row">
+        <div class="fg ${isRevise ? 'editable-fg' : ''}">
+          <label class="fl">Change type <span class="req">*</span></label>
+          ${isRevise
+            ? `<select class="fi fi-sel" id="fld-changeType">
+                <option value="Minor" ${wv.changeType === 'Minor' ? 'selected' : ''}>Minor</option>
+                <option value="Substantive" ${wv.changeType === 'Substantive' ? 'selected' : ''}>Substantive</option>
+               </select>
+               <div class="edit-hint">✏ Editable in this version</div>`
+            : locked('Change type', ctTag(wv.changeType))}
+        </div>
+        <div class="fg">
+          <label class="fl">Version</label>
+          <div style="padding:9px 12px;border:1.5px solid #E5E7EB;border-radius:5px;background:#F9FAFB;font-size:13.5px;height:40px;display:flex;align-items:center;gap:8px;">
+            ${vBadge(wv.ver, wv.approvalState)} <span style="color:#9CA3AF;">·</span>
+            ${chipState(wv.approvalState, wv.activityState)}
+          </div>
+        </div>
+      </div>
+      <div class="fg ${isRevise ? 'editable-fg' : ''}">
+        <label class="fl">Change summary / reason for change <span class="req">*</span></label>
+        <textarea class="fi fi-ta" id="fld-changeReason" style="height:72px;">${wv.changeReason || ''}</textarea>
+        ${isRevise ? `<div class="edit-hint">✏ Describe what changed in this version</div>` : ''}
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="fc-title">Article identification</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fl">News ID</label>
+          ${locked('News ID', article.id)}
+        </div>
+        <div class="fg">
+          <label class="fl">Scheme</label>
+          ${locked('Scheme', article.scheme)}
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Title <span class="req">*</span></label>
+        ${isRevise ? locked('Title', wv.title) : editField('title', wv.title)}
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fl">Issuer <span class="req">*</span></label>
+          ${isRevise ? locked('Issuer', wv.issuer) : editField('issuer', wv.issuer)}
+        </div>
+        <div class="fg">
+          <label class="fl">News Level <span class="req">*</span></label>
+          ${isRevise ? locked('News Level', nlTag(wv.newsLevel)) : `<select class="fi fi-sel" id="fld-newsLevel"><option ${wv.newsLevel==='Finalized'?'selected':''}>Finalized</option><option ${wv.newsLevel==='In Development'?'selected':''}>In Development</option><option ${wv.newsLevel==='Draft'?'selected':''}>Draft</option></select>`}
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fl">Markets</label>
+          ${lockedChips('Markets', wv.markets)}
+        </div>
+        <div class="fg">
+          <label class="fl">Product Categories</label>
+          ${lockedChips('Product Categories', wv.productCategories)}
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Regulatory Categories</label>
+        ${lockedChips('Regulatory Categories', wv.regulatoryCategories)}
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="fc-title">Key dates</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fl">Scanned Date</label>
+          ${editField('scannedDate', new Date().toISOString().slice(0,10), 'date', 'fi-date')}
+        </div>
+        <div class="fg">
+          <label class="fl">Published Date</label>
+          ${isRevise ? locked('Published Date', wv.publishedDate) : editField('publishedDate', wv.publishedDate, 'date', 'fi-date')}
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg ${isRevise ? 'editable-fg' : ''}">
+          <label class="fl">Effective Date</label>
+          ${editField('effectiveDate', wv.effectiveDate, 'date', 'fi-date')}
+        </div>
+        <div class="fg ${isRevise ? 'editable-fg' : ''}">
+          <label class="fl">Mandatory Date</label>
+          ${editField('mandatoryDate', wv.mandatoryDate, 'date', 'fi-date')}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="fc-title">Content</div>
+      <div class="fg ${isRevise ? 'editable-fg' : ''}">
+        <label class="fl">Summary <span class="req">*</span></label>
+        ${editRTE('summary', wv.summary, false)}
+      </div>
+      <div class="fg ${isRevise ? 'editable-fg' : ''}" style="margin-top:16px;">
+        <label class="fl">Details / Full Description</label>
+        ${editRTE('details', wv.details, false)}
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="fc-title">SME information</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fl">Originator</label>
+          ${locked('Originator', article.originator)}
+        </div>
+        <div class="fg">
+          <label class="fl">SME</label>
+          ${locked('SME', article.sme)}
+        </div>
+      </div>
+    </div>`;
+}
+
+function rteCmd(id, cmd) {
+  document.getElementById(`rte-${id}`).focus();
+  document.execCommand(cmd, false, null);
+}
+
+function saveDraft(articleId) {
+  const article = getArticle(articleId);
+  const lv = getLatestVer(article);
+  const isRevise = S.formMode === 'revise';
+
+  if (isRevise) {
+    // Collect form values
+    const changeType   = document.getElementById('fld-changeType')?.value || S.pendingRevise.changeType;
+    const changeReason = document.getElementById('fld-changeReason')?.value || S.pendingRevise.reason;
+    const mandatoryDate = document.getElementById('fld-mandatoryDate')?.value || lv.mandatoryDate;
+    const effectiveDate = document.getElementById('fld-effectiveDate')?.value || lv.effectiveDate;
+    const summary = document.getElementById('rte-summary')?.innerHTML || lv.summary;
+    const details = document.getElementById('rte-details')?.innerHTML || lv.details;
+
+    // Detect changed fields
+    const changed = [];
+    if (mandatoryDate !== lv.mandatoryDate) changed.push('Mandatory Date');
+    if (effectiveDate !== lv.effectiveDate) changed.push('Effective Date');
+    if (summary !== lv.summary) changed.push('Summary');
+    if (details !== lv.details) changed.push('Details');
+
+    const newVer = {
+      ...lv,
+      ver: lv.ver + 1,
+      changeType, changeReason,
+      approvalState: 'Draft', activityState: null,
+      mandatoryDate, effectiveDate, summary, details,
+      fieldsChanged: changed,
+      createdBy: 'Chen, Riley', createdAt: new Date().toISOString().slice(0,10),
+    };
+
+    // Remove existing draft if already pushed (idempotent)
+    const existingDraftIdx = article.versions.findIndex(v => v.approvalState === 'Draft');
+    if (existingDraftIdx >= 0) article.versions.splice(existingDraftIdx, 1);
+    article.versions.push(newVer);
+  }
+
+  showToast(`✓ Draft saved — ${articleId} v${getLatestVer(article).ver}`);
+  navigate('detail', { articleId, viewingVer: null });
+}
+
+function submitForReview(articleId) {
+  saveDraft(articleId);
+  const article = getArticle(articleId);
+  const lv = getLatestVer(article);
+  if (lv.approvalState === 'Draft') {
+    lv.approvalState = 'Review';
+    showToast(`✓ Submitted for review — ${articleId} v${lv.ver}`);
+    navigate('detail', { articleId, viewingVer: null });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  REVISE MODAL
+// ═══════════════════════════════════════════════════════════
+
+function openReviseModal(articleId) {
+  closeAllMenus();
+  const article = getArticle(articleId);
+  const lv = getLatestVer(article);
+
+  document.getElementById('mSourceTitle').textContent = lv.title;
+  document.getElementById('mSourceMeta').textContent = `${articleId} · ${article.scheme} · ${lv.markets.join(', ')}`;
+  document.getElementById('mCurVer').textContent = `v${lv.ver}`;
+  document.getElementById('mCurStatus').className = `chip ${lv.approvalState === 'Approved' ? 'chip-approved' : 'chip-review'} chip-noicon`;
+  document.getElementById('mCurStatus').textContent = lv.approvalState;
+  document.getElementById('mNewVer').textContent = `v${lv.ver + 1}`;
+
+  // Reset
+  document.getElementById('mChangeType').value = '';
+  document.getElementById('mReason').value = '';
+  document.getElementById('mChangeTypeErr').classList.remove('show');
+  document.getElementById('mReasonErr').classList.remove('show');
+
+  S.pendingRevise = { articleId };
+  document.getElementById('modalRevise').style.display = '';
+  setTimeout(() => document.getElementById('mChangeType').focus(), 80);
+}
+
+function closeModal() { document.getElementById('modalRevise').style.display = 'none'; }
+
+function handleModalClick(e) { if (e.target.classList.contains('modal-overlay')) closeModal(); }
+
+function confirmRevise() {
+  const changeType = document.getElementById('mChangeType').value;
+  const reason     = document.getElementById('mReason').value.trim();
+  let ok = true;
+
+  if (!changeType) { document.getElementById('mChangeTypeErr').classList.add('show'); ok = false; }
+  else { document.getElementById('mChangeTypeErr').classList.remove('show'); }
+
+  if (!reason) { document.getElementById('mReasonErr').classList.add('show'); ok = false; }
+  else { document.getElementById('mReasonErr').classList.remove('show'); }
+
+  if (!ok) return;
+
+  S.pendingRevise = { ...S.pendingRevise, changeType, reason };
+  closeModal();
+  navigate('form', { articleId: S.pendingRevise.articleId, formMode: 'revise' });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMPARISON DRAWER
+// ═══════════════════════════════════════════════════════════
+
+function openCompare(articleId, verA, verB) {
+  const article = getArticle(articleId);
+  const a = getVer(article, verA);
+  const b = getVer(article, verB);
+  if (!a || !b) return;
+
+  document.getElementById('cmpSubtitle').textContent =
+    `v${verA} (${a.changeType} · ${a.activityState || a.approvalState}) vs v${verB} (${b.changeType} · ${b.activityState || b.approvalState})`;
+
+  const body = document.getElementById('cmpBody');
+  body.innerHTML = '';
+
+  const section = (label, aHTML, bHTML) => `
+    <div class="cmp-section-hdr">${label}</div>
+    <div class="cmp-cols">
+      <div class="cmp-col">
+        <div class="cmp-col-hdr">${vBadge(verA, a.approvalState, 'sm')} ${a.approvalState}</div>
+        <div class="cmp-content">${aHTML || '<em style="color:#9CA3AF;">—</em>'}</div>
+      </div>
+      <div class="cmp-col">
+        <div class="cmp-col-hdr">${vBadge(verB, b.approvalState, 'sm')} ${b.approvalState}</div>
+        <div class="cmp-content">${highlightDiff(aHTML, bHTML)}</div>
+      </div>
+    </div>`;
+
+  body.innerHTML +=  section('Summary', a.summary, b.summary);
+  body.innerHTML +=  section('Details', a.details, b.details);
+
+  // Metadata diff
+  const metaDiffs = [];
+  if (a.mandatoryDate !== b.mandatoryDate) metaDiffs.push(['Mandatory Date', a.mandatoryDate, b.mandatoryDate]);
+  if (a.effectiveDate !== b.effectiveDate) metaDiffs.push(['Effective Date',  a.effectiveDate,  b.effectiveDate]);
+  if (a.title !== b.title) metaDiffs.push(['Title', a.title, b.title]);
+
+  if (metaDiffs.length) {
+    const aRows = metaDiffs.map(([k, av]) => `<p><strong>${k}:</strong> ${av || '—'}</p>`).join('');
+    const bRows = metaDiffs.map(([k, , bv]) => `<p><strong>${k}:</strong> <span class="diff-add">${bv || '—'}</span></p>`).join('');
+    body.innerHTML += section('Metadata changes', aRows, bRows);
+  }
+
+  document.getElementById('cmpDrawer').classList.add('open');
+  document.getElementById('drawerScrim').classList.add('visible');
+}
+
+function closeCompare() {
+  document.getElementById('cmpDrawer').classList.remove('open');
+  document.getElementById('drawerScrim').classList.remove('visible');
+}
+
+function highlightDiff(oldHTML, newHTML) {
+  if (!oldHTML || !newHTML) return newHTML || '';
+  const stripTags = s => s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').toLowerCase().trim();
+  const oldText = stripTags(oldHTML);
+
+  // Highlight <strong> content that is new
+  let result = newHTML.replace(/<strong>(.*?)<\/strong>/g, (m, inner) => {
+    return oldText.includes(inner.toLowerCase()) ? m : `<strong><span class="diff-add">${inner}</span></strong>`;
+  });
+  // Highlight new <li> items
+  result = result.replace(/<li>(.*?)<\/li>/g, (m, inner) => {
+    const plain = stripTags(inner);
+    return oldText.includes(plain.slice(0, 18)) ? m : `<li><span class="diff-add">${inner}</span></li>`;
+  });
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MENU MANAGEMENT
+// ═══════════════════════════════════════════════════════════
+
+function toggleKebab(e, id) {
+  e.stopPropagation();
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  closeAllMenus();
+  if (!isOpen) el.classList.add('open');
+}
+
+function toggleVerPop(e, id) {
+  e.stopPropagation();
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  closeAllMenus();
+  if (!isOpen) el.classList.add('open');
+}
+
+function closeVerPop(id) { document.getElementById(id)?.classList.remove('open'); }
+
+function closeAllMenus() {
+  document.querySelectorAll('.kebab-menu.open, .ver-pop.open').forEach(m => m.classList.remove('open'));
+}
+
+document.addEventListener('click', closeAllMenus);
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+
+renderList();
+</script>
+</body>
+</html>
