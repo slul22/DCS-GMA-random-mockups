@@ -1,0 +1,746 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Products &amp; Certificates – myUL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans','Segoe UI',Arial,sans-serif; font-size: 14px; background: #f4f6f8; color: #222; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    /* ── RED HEADER ── */
+    .navbar { display:flex; align-items:center; justify-content:space-between; background:#C02032; height:80px; flex-shrink:0; z-index:200; padding:0; }
+    .navbar-left { display:flex; align-items:center; height:100%; }
+    .nav-hamburger { width:80px; height:80px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; border:none; background:none; }
+    .nav-hamburger:hover { background:rgba(255,255,255,.1); }
+    .nav-hamburger svg rect { fill:#FFFFFE; }
+    .nav-divider { width:1px; height:80px; background:#D3D3D3; flex-shrink:0; }
+    .logo-wrap { display:flex; align-items:center; padding:0 24px; height:80px; }
+    .logo-ul { display:flex; align-items:center; gap:0; }
+    .logo-ul-mark { font-weight:700; font-size:26px; color:#fff; letter-spacing:-1px; line-height:1; }
+    .logo-ul-text { font-size:13px; font-weight:600; color:#fff; padding-left:8px; border-left:1px solid rgba(255,255,255,.4); margin-left:8px; line-height:1.3; white-space:nowrap; }
+    .logo-ul-text small { display:block; font-weight:400; font-size:11px; opacity:.8; }
+    .nav-links { display:flex; align-items:center; height:100%; padding-left:8px; }
+    .nav-link { padding:0 18px; height:80px; display:flex; align-items:center; font-size:14px; font-weight:600; color:#FFFFFE; cursor:pointer; border-bottom:3px solid transparent; gap:4px; user-select:none; white-space:nowrap; }
+    .nav-link:hover { background:rgba(255,255,255,.1); }
+    .navbar-right { display:flex; align-items:center; height:100%; padding-right:0; }
+    .nav-util-group { display:flex; align-items:center; height:80px; padding:0 8px 0 0; gap:0; }
+    .nav-util { height:56px; margin-top:12px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:0 10px; white-space:nowrap; }
+    .nav-util:hover { background:rgba(255,255,255,.1); border-radius:4px; }
+    .nav-util svg { flex-shrink:0; }
+    .nav-util-label { font-size:14px; font-weight:600; color:#FFFFFE; line-height:20px; }
+    .nav-avatar-wrap { display:flex; align-items:center; gap:0; padding:0 18px; height:80px; border-left:1px solid #D3D3D3; position:relative; cursor:pointer; }
+    .nav-avatar-wrap:hover { background:rgba(255,255,255,.08); }
+    .avatar { width:40px; height:40px; background:#F5F5F5; color:#3E3E3E; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:18px; cursor:pointer; flex-shrink:0; }
+    .avatar-caret { margin-left:4px; display:flex; align-items:center; }
+    .avatar-caret svg polygon { fill:#FFFFFE; }
+    .notif-badge { position:absolute; top:16px; right:14px; width:18px; height:16px; background:#FFA700; border-radius:50px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#303741; line-height:1; }
+    .breadcrumb { padding:8px 28px; font-size:12px; color:#888; background:#fff; border-bottom:1px solid #eef0f3; flex-shrink:0; }
+    .breadcrumb a { color:#01518A; text-decoration:none; cursor:pointer; }
+    .breadcrumb a:hover { text-decoration:underline; }
+    .breadcrumb span { margin:0 6px; }
+    .page-shell { display:flex; flex:1; overflow:hidden; }
+    .left-nav { width:220px; flex-shrink:0; background:#fff; border-right:1px solid #dce1e7; overflow-y:auto; overflow-x:hidden; padding:16px 0; transition:width .22s ease; position:relative; }
+    .left-nav.lnav-collapsed { width:0; padding:0; }
+    .lnav-sub { padding:6px 20px 4px; font-size:11px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+    .lnav-note { padding:4px 20px 10px; font-size:11px; color:#aaa; line-height:1.5; white-space:nowrap; }
+    .lnav-item { padding:8px 20px 8px 30px; font-size:13px; color:#555; cursor:pointer; border-left:3px solid transparent; white-space:nowrap; }
+    .lnav-item:hover { background:#f0f6ff; color:#01518A; }
+    .lnav-item.active { color:#01518A; background:#e8f2fb; border-left-color:#01518A; font-weight:600; }
+    .main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; padding:18px 28px 14px; background:#fff; border-bottom:1px solid #dce1e7; flex-shrink:0; }
+    .page-title { font-size:22px; font-weight:700; color:#000; }
+    .page-header-right { display:flex; gap:10px; }
+    .btn { padding:8px 18px; border-radius:2px; font-size:13px; font-family:inherit; cursor:pointer; border:1px solid #ccc; background:#fff; color:#333; white-space:nowrap; transition:background .12s; }
+    .btn:hover { background:#f0f2f5; }
+    .btn-primary { background:#01518A; color:#fff; border-color:#01518A; font-weight:600; }
+    .btn-primary:hover { background:#013f6e; }
+    .btn-ghost { background:none; border:1px solid #BBC1C8; color:#444; }
+    .btn-export { display:inline-flex; flex-direction:row; justify-content:center; align-items:center; gap:10px; padding:9px 10px; width:140px; height:39px; border:1px solid #000; border-radius:4px; background:#fff; color:#000; font-family:'Poppins',sans-serif; font-weight:500; font-size:14px; cursor:pointer; white-space:nowrap; transition:background .12s; }
+    .btn-export:hover { background:#f5f5f5; }
+    .toolbar-bar { display:flex; align-items:center; justify-content:space-between; padding:10px 28px; background:#fff; border-bottom:1px solid #dce1e7; flex-shrink:0; gap:12px; flex-wrap:wrap; }
+    .toolbar-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .toolbar-right { display:flex; align-items:center; gap:8px; }
+    .search-box { display:flex; align-items:center; border:1px solid #BBC1C8; border-radius:2px; padding:6px 10px; gap:7px; background:#fff; width:230px; }
+    .search-box input { border:none; outline:none; font-size:13px; width:100%; background:transparent; font-family:inherit; }
+    .view-toggle { display:flex; border:1px solid #BBC1C8; border-radius:2px; overflow:hidden; }
+    .view-btn { padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; background:#fff; color:#555; border:none; border-right:1px solid #BBC1C8; font-family:inherit; white-space:nowrap; transition:background .12s; }
+    .view-btn:last-child { border-right:none; }
+    .view-btn.active { background:#01518A; color:#fff; }
+    .view-btn:hover:not(.active) { background:#f0f2f5; }
+    .tbtn { font-size:12px; color:#01518A; background:none; border:none; cursor:pointer; font-family:inherit; padding:4px 6px; }
+    .tbtn:hover { text-decoration:underline; }
+    .body-split { display:flex; flex:1; overflow:hidden; }
+    .filter-panel { width:210px; flex-shrink:0; background:#fff; border-right:1px solid #dce1e7; overflow-y:auto; padding-bottom:24px; position:relative; transition:width .2s; }
+    .filter-panel.collapsed { width:0; overflow:hidden; padding:0; }
+    .ftoggle-btn { position:absolute; right:-14px; top:16px; width:28px; height:28px; background:#fff; border:1px solid #dce1e7; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; color:#666; z-index:10; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+    .ftoggle-btn:hover { background:#f0f2f5; }
+    .fsec { border-bottom:1px solid #eef0f3; padding:10px 14px; }
+    .fsec-hdr { display:flex; align-items:center; justify-content:space-between; font-size:12px; font-weight:700; color:#333; cursor:pointer; padding:2px 0 6px; user-select:none; }
+    .fsec-hdr .fc { font-size:10px; color:#888; transition:transform .15s; }
+    .fsec-hdr.open .fc { transform:rotate(180deg); }
+    .fsec-body { display:none; }
+    .fsec-hdr.open + .fsec-body { display:block; }
+    .fsearch { width:100%; padding:4px 7px; border:1px solid #BBC1C8; border-radius:2px; font-size:11px; font-family:inherit; margin-bottom:6px; outline:none; }
+    .fsearch:focus { border-color:#01518A; }
+    .fopt { display:flex; align-items:center; gap:6px; padding:2px 0; font-size:12px; color:#444; cursor:pointer; }
+    .fopt input[type=checkbox] { cursor:pointer; width:13px; height:13px; flex-shrink:0; accent-color:#01518A; }
+    .fopt.fall label { font-weight:600; }
+    .table-area { flex:1; overflow:auto; background:#FAFAF9; display:flex; flex-direction:column; }
+    .drag-row { padding:6px 16px; font-size:11px; color:#aaa; background:#fff; border-bottom:1px solid #eef0f3; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    .grid-wrap { flex:1; overflow:auto; }
+    table.grid { width:100%; border-collapse:collapse; min-width:860px; }
+    table.grid thead th { background:#fff; text-align:left; padding:9px 12px; font-size:12px; font-weight:600; color:#555; border-bottom:2px solid #dce1e7; white-space:nowrap; position:sticky; top:0; z-index:5; user-select:none; }
+    table.grid thead th .cs { color:#aaa; font-size:10px; margin-left:3px; }
+    table.grid thead th .cf { color:#aaa; font-size:10px; }
+    table.grid thead .frow th { padding:3px 12px; background:#fafbfc; border-bottom:1px solid #eef0f3; top:37px; }
+    table.grid thead .frow th input { width:100%; padding:3px 5px; border:1px solid #dce1e7; border-radius:2px; font-size:11px; font-family:inherit; outline:none; }
+    table.grid thead .frow th input:focus { border-color:#01518A; }
+    tr.prow { cursor:pointer; border-bottom:1px solid #eef0f3; transition:background .1s; }
+    tr.prow:hover td { background:#f3f7fb; }
+    tr.prow.expanded td { background:#eaf2fb; }
+    tr.prow td { padding:10px 12px; font-size:13px; color:#333; vertical-align:middle; background:#fff; }
+    .xbtn { background:none; border:1px solid #BBC1C8; border-radius:2px; width:22px; height:22px; cursor:pointer; font-size:12px; color:#555; display:inline-flex; align-items:center; justify-content:center; margin-right:6px; flex-shrink:0; transition:all .1s; font-family:monospace; }
+    .xbtn:hover { background:#e8f0fb; border-color:#01518A; color:#01518A; }
+    tr.prow.expanded .xbtn { background:#01518A; border-color:#01518A; color:#fff; }
+    .pnum-link { color:#01518A; font-weight:600; }
+    .cert-badge { display:inline-flex; align-items:center; gap:3px; background:#e3f0fa; color:#01518A; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+    .pill { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 9px; border-radius:2px; white-space:nowrap; }
+    .pill::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+    .pill-a { color:#1d7a34; background:#e8f5e9; } .pill-a::before { background:#1d7a34; }
+    .pill-e { color:#856404; background:#fff3cd; } .pill-e::before { background:#856404; }
+    .pill-w { color:#842029; background:#f8d7da; } .pill-w::before { background:#842029; }
+    .act-btn { background:none; border:none; cursor:pointer; padding:4px 7px; font-size:16px; color:#888; border-radius:3px; }
+    .act-btn:hover { background:#f0f2f5; }
+    /* EXPANSION ROW */
+    tr.exprow { display:none; }
+    tr.exprow.open { display:table-row; }
+    tr.exprow > td { padding:0; border-bottom:2px solid #01518A; background:#f0f6ff; }
+    .exp-inner { display:flex; min-height:260px; max-height:400px; }
+    /* LEFT DETAIL */
+    .exp-left { width:290px; flex-shrink:0; padding:20px 20px; border-right:1px solid #c8dcee; background:#fff; overflow-y:auto; }
+    .exp-left-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; }
+    .exp-left-id { font-size:15px; font-weight:700; color:#000; margin-top:6px; line-height:1.3; }
+    .exp-open-link { font-size:11px; color:#01518A; cursor:pointer; white-space:nowrap; text-decoration:none; }
+    .exp-open-link:hover { text-decoration:underline; }
+    .exp-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; margin-top:12px; }
+    .exp-field { display:flex; flex-direction:column; gap:2px; }
+    .exp-label { font-size:10px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.4px; }
+    .exp-value { font-size:12px; color:#222; word-break:break-word; }
+    /* RIGHT CERT TABLE */
+    .exp-right { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+    .exp-right-toolbar { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:#f7fafd; border-bottom:1px solid #dce1e7; flex-shrink:0; gap:8px; flex-wrap:wrap; }
+    .exp-right-toolbar-left { display:flex; align-items:center; gap:10px; }
+    .exp-title { font-size:13px; font-weight:700; color:#01518A; display:flex; align-items:center; gap:8px; }
+    .exp-cert-count { background:#01518A; color:#fff; font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; }
+    .exp-search { display:flex; align-items:center; border:1px solid #BBC1C8; border-radius:2px; padding:4px 8px; gap:5px; background:#fff; }
+    .exp-search input { border:none; outline:none; font-size:12px; font-family:inherit; width:150px; background:transparent; }
+    .cert-table-wrap { flex:1; overflow:auto; }
+    table.ctable { width:100%; border-collapse:collapse; }
+    table.ctable thead th { background:#f0f5fa; text-align:left; padding:8px 12px; font-size:11px; font-weight:700; color:#555; border-bottom:1px solid #dce1e7; white-space:nowrap; position:sticky; top:0; user-select:none; cursor:pointer; }
+    table.ctable thead th:hover { background:#e8f0fb; }
+    table.ctable tbody tr { border-bottom:1px solid #eef0f3; cursor:pointer; transition:background .1s; }
+    table.ctable tbody tr:hover td { background:#f0f8ff; }
+    table.ctable tbody td { padding:8px 12px; font-size:12px; color:#333; vertical-align:middle; background:#fff; }
+    .cert-num-link { color:#01518A; font-weight:600; font-size:12px; }
+    .cert-num-link:hover { text-decoration:underline; }
+    .exp-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#aaa; gap:8px; padding:32px; text-align:center; }
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; width:600px; max-width:96vw; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,.2); animation:mIn .18s ease; border-radius:2px; }
+    @keyframes mIn { from { transform:translateY(-16px); opacity:0; } to { transform:none; opacity:1; } }
+    .modal-hdr { display:flex; align-items:flex-start; justify-content:space-between; padding:20px 24px 14px; border-bottom:1px solid #eef0f3; gap:12px; flex-shrink:0; }
+    .modal-hdr-left { display:flex; flex-direction:column; gap:6px; }
+    .modal-status-row { display:flex; align-items:center; gap:8px; }
+    .modal-id { font-size:15px; font-weight:700; color:#000; word-break:break-all; }
+    .modal-close { background:none; border:none; font-size:20px; color:#888; cursor:pointer; padding:2px 7px; border-radius:3px; flex-shrink:0; }
+    .modal-close:hover { background:#f0f2f5; color:#333; }
+    .modal-copy { background:none; border:1px solid #BBC1C8; border-radius:2px; font-size:11px; padding:3px 10px; cursor:pointer; color:#555; font-family:inherit; }
+    .modal-copy:hover { background:#f0f2f5; }
+    .modal-tabs { display:flex; border-bottom:2px solid #eef0f3; padding:0 24px; flex-shrink:0; }
+    .modal-tab { padding:10px 14px; font-size:13px; color:#666; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; white-space:nowrap; }
+    .modal-tab.active { color:#01518A; border-bottom-color:#01518A; font-weight:600; }
+    .modal-tab:hover:not(.active) { color:#333; }
+    .modal-body { overflow-y:auto; padding:20px 24px; flex:1; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:14px 24px; border-top:1px solid #eef0f3; flex-shrink:0; }
+    .pp-card { background:#f0f6ff; border:1px solid #b8d4f0; border-radius:2px; padding:12px 16px; margin-bottom:16px; cursor:pointer; transition:border-color .12s; }
+    .pp-card:hover { border-color:#01518A; }
+    .pp-card-label { font-size:10px; font-weight:700; text-transform:uppercase; color:#01518A; letter-spacing:.5px; margin-bottom:5px; }
+    .pp-card-id { font-size:14px; font-weight:700; color:#000; margin-bottom:4px; }
+    .pp-card-meta { display:flex; gap:18px; font-size:12px; color:#555; flex-wrap:wrap; }
+    .pp-card-meta span { display:flex; flex-direction:column; gap:1px; }
+    .pp-card-meta .ppl { font-size:10px; text-transform:uppercase; color:#aaa; letter-spacing:.3px; }
+    .mfield-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; }
+    .mfield { display:flex; flex-direction:column; gap:3px; }
+    .mfield-label { font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.4px; }
+    .mfield-value { font-size:13px; color:#222; }
+    .mfield.span2 { grid-column:1/-1; }
+    .msec-title { font-size:11px; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:.5px; padding-bottom:8px; border-bottom:1px solid #eef0f3; margin:16px 0 12px; }
+    .msec-title:first-child { margin-top:0; }
+    .pagination-bar { display:flex; align-items:center; justify-content:space-between; padding:9px 20px; background:#fff; border-top:1px solid #dce1e7; flex-shrink:0; font-size:12px; color:#555; }
+    .pag-controls { display:flex; align-items:center; gap:6px; }
+    .pag-btn { width:28px; height:28px; border:1px solid #dce1e7; background:#fff; border-radius:2px; cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center; color:#555; }
+    .pag-btn:hover:not(:disabled) { background:#f0f2f5; }
+    .pag-btn:disabled { opacity:.3; cursor:default; }
+    .pag-btn.active { background:#01518A; color:#fff; border-color:#01518A; }
+    .ipp select { padding:3px 6px; border:1px solid #dce1e7; border-radius:2px; font-size:12px; font-family:inherit; outline:none; }
+    #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:#146615; color:#fff; padding:10px 24px; border-radius:3px; font-size:13px; z-index:9999; box-shadow:0 4px 16px rgba(0,0,0,.2); opacity:0; transition:opacity .3s; pointer-events:none; }
+    #toast.show { opacity:1; }
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
+    @media (max-width:900px) { .left-nav { width:0 !important; padding:0 !important; } }
+    @media (max-width:660px) { .exp-left { display:none; } }
+  </style>
+</head>
+<body>
+<nav class="navbar" role="banner">
+  <div class="navbar-left">
+    <!-- Hamburger – also toggles left-nav -->
+    <button class="nav-hamburger" id="lnavToggle" aria-label="Toggle navigation" aria-expanded="true">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="4" y="9" width="24" height="2.5" rx="1.25"/>
+        <rect x="4" y="14.75" width="24" height="2.5" rx="1.25"/>
+        <rect x="4" y="20.5" width="24" height="2.5" rx="1.25"/>
+      </svg>
+    </button>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <div class="logo-wrap">
+      <div class="logo-ul">
+        <span class="logo-ul-mark">UL</span>
+        <span class="logo-ul-text">Solutions<small>myUL</small></span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link" role="menuitem">Home</div>
+      <div class="nav-link" role="menuitem">Training Offerings</div>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="nav-util-group">
+      <!-- Language -->
+      <div class="nav-util" title="Change language">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5"/><path d="M12 3c-2.5 3-4 5.5-4 9s1.5 6 4 9" stroke="#fff" stroke-width="1.5"/><path d="M12 3c2.5 3 4 5.5 4 9s-1.5 6-4 9" stroke="#fff" stroke-width="1.5"/><path d="M3 12h18" stroke="#fff" stroke-width="1.5"/></svg>
+        <span class="nav-util-label">English [US] ▾</span>
+      </div>
+      <!-- Saved Searches -->
+      <div class="nav-util" title="Saved Searches">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5 3h14a1 1 0 011 1v16.5l-7-3-7 3V4a1 1 0 011-1z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <span class="nav-util-label">Saved Searches</span>
+      </div>
+      <!-- Help -->
+      <div class="nav-util" title="Help">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5"/><path d="M9.5 9.5a2.5 2.5 0 015 .5c0 2-2.5 2.5-2.5 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r=".75" fill="#fff"/></svg>
+        <span class="nav-util-label">Help</span>
+      </div>
+      <!-- Alerts -->
+      <div class="nav-util" title="Alerts">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3a7 7 0 017 7v4l1.5 2.5H3.5L5 14v-4a7 7 0 017-7z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 19a2 2 0 004 0" stroke="#fff" stroke-width="1.5"/></svg>
+        <span class="nav-util-label">Alerts</span>
+      </div>
+    </div>
+    <!-- Avatar -->
+    <div class="nav-avatar-wrap" title="Sharvanika – PSN 23778">
+      <div class="avatar">SL</div>
+      <div class="avatar-caret">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><polygon points="4,6 12,6 8,11" fill="#FFFFFE"/></svg>
+      </div>
+      <div class="notif-badge" aria-label="1 notification">1</div>
+    </div>
+  </div>
+</nav>
+<div class="breadcrumb">
+  <a>Home</a><span>›</span>
+  <a>Global Compliance Management</a><span>›</span>
+  <a>Active Issues</a><span>›</span>
+  <strong>Products &amp; Certificates</strong>
+</div>
+<div class="page-shell">
+  <aside class="left-nav">
+    <div class="lnav-sub">Favorite Applications</div>
+    <div class="lnav-note">Click ☆ to add favorites.</div>
+    <div class="lnav-sub">All Applications</div>
+    <div class="lnav-item">Dashboard</div>
+    <div class="lnav-item">Documents</div>
+    <div style="padding:10px 20px;font-size:13px;font-weight:700;color:#333;">Global Compliance Management</div>
+    <div class="lnav-item" style="padding-left:38px;font-size:12px;color:#aaa;">Active Issues</div>
+    <div class="lnav-item active" style="padding-left:46px;">Products &amp; Certificates</div>
+    <div class="lnav-item" style="padding-left:38px;">Quotes</div>
+    <div class="lnav-item" style="padding-left:38px;">Orders</div>
+    <div class="lnav-item" style="padding-left:38px;">Multiple Listing Request</div>
+    <div class="lnav-item" style="padding-left:38px;">Samples</div>
+    <div class="lnav-item" style="padding-left:38px;">Payments</div>
+    <div class="lnav-item" style="padding-left:38px;">Billing Estimates</div>
+    <div class="lnav-item" style="padding-left:38px;">Locations</div>
+    <div class="lnav-item" style="padding-left:38px;">Field Services</div>
+    <div class="lnav-item" style="padding-left:38px;">Marketplace</div>
+    <div class="lnav-item" style="padding-left:38px;">Marks and Labels</div>
+  </aside>
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Products &amp; Certificates</h1>
+      <div class="page-header-right">
+        <button class="btn-export" onclick="showToast('Exporting data…')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M8 1v9M8 10l-3-3M8 10l3-3" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12h12" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M2 12v2h12v-2" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          EXPORT DATA
+        </button>
+        <button class="btn btn-ghost" onclick="showToast('Search saved')">🔖 Save Search</button>
+        <button class="btn btn-primary" onclick="showToast('Add Product — coming soon')">+ Add Product</button>
+      </div>
+    </div>
+    <div class="toolbar-bar">
+      <div class="toolbar-left">
+        <button class="btn btn-ghost" onclick="resetAll()">Reset Filters</button>
+        <div class="search-box">
+          <span style="color:#888;font-size:13px;">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search products or certificates"/>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="both">Products + Certs</button>
+          <button class="view-btn" data-view="products">Products Only</button>
+          <button class="view-btn" data-view="certs">Certificates Only</button>
+        </div>
+      </div>
+      <div class="toolbar-right" id="expandControls">
+        <button class="tbtn" id="expandAllBtn">Expand All</button>
+        <span style="color:#dce1e7;">|</span>
+        <button class="tbtn" id="collapseAllBtn">Collapse All</button>
+      </div>
+    </div>
+    <div class="body-split">
+      <div class="filter-panel" id="filterPanel">
+        <div style="position:relative;"><button class="ftoggle-btn" id="ftoggle" title="Hide filters">‹</button></div>
+        <div class="fsec">
+          <div class="fsec-hdr open" data-t="fs1">Status <span class="fc">▾</span></div>
+          <div class="fsec-body" id="fs1" style="display:block;">
+            <input class="fsearch" placeholder="Search status…"/>
+            <label class="fopt fall"><input type="checkbox" checked/> <label>(Select All)</label></label>
+            <label class="fopt"><input type="checkbox" class="fcb" value="Active" checked/> <label>Active</label></label>
+            <label class="fopt"><input type="checkbox" class="fcb" value="Expired"/><label>Expired</label></label>
+            <label class="fopt"><input type="checkbox" class="fcb" value="Withdrawn"/><label>Withdrawn</label></label>
+          </div>
+        </div>
+        <div class="fsec">
+          <div class="fsec-hdr open" data-t="fs2">Scheme <span class="fc">▾</span></div>
+          <div class="fsec-body" id="fs2" style="display:block;">
+            <input class="fsearch" placeholder="Search scheme…"/>
+            <label class="fopt fall"><input type="checkbox" checked/><label>(Select All)</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>Canada Safety Scheme</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>D-Mark Scheme</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>IECEE CB Scheme</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>ULAR-S</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>US Safety Scheme</label></label>
+          </div>
+        </div>
+        <div class="fsec">
+          <div class="fsec-hdr" data-t="fs3">Certification Mark <span class="fc">▾</span></div>
+          <div class="fsec-body" id="fs3">
+            <input class="fsearch" placeholder="Search mark…"/>
+            <label class="fopt fall"><input type="checkbox" checked/><label>(Select All)</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>Recognized</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>Listed</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>D-Mark</label></label>
+          </div>
+        </div>
+        <div class="fsec">
+          <div class="fsec-hdr" data-t="fs4">Owner PSN <span class="fc">▾</span></div>
+          <div class="fsec-body" id="fs4">
+            <input class="fsearch" placeholder="Search PSN…"/>
+            <label class="fopt fall"><input type="checkbox" checked/><label>(Select All)</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>547079</label></label>
+          </div>
+        </div>
+        <div class="fsec">
+          <div class="fsec-hdr" data-t="fs5">Owner Name <span class="fc">▾</span></div>
+          <div class="fsec-body" id="fs5">
+            <input class="fsearch" placeholder="Search owner…"/>
+            <label class="fopt fall"><input type="checkbox" checked/><label>(Select All)</label></label>
+            <label class="fopt"><input type="checkbox" checked/><label>BLUTEK POWER INC - 547079</label></label>
+          </div>
+        </div>
+        <div class="fsec">
+          <div class="fsec-hdr" data-t="fs6">Issued Date <span class="fc">▾</span></div>
+          <div class="fsec-body" id="fs6">
+            <div style="font-size:10px;color:#aaa;margin-bottom:3px;">From</div><input type="date" class="fsearch" style="margin-bottom:8px;"/>
+            <div style="font-size:10px;color:#aaa;margin-bottom:3px;">To</div><input type="date" class="fsearch"/>
+          </div>
+        </div>
+        <div class="fsec">
+          <div class="fsec-hdr" data-t="fs7">Expiration Date <span class="fc">▾</span></div>
+          <div class="fsec-body" id="fs7">
+            <div style="font-size:10px;color:#aaa;margin-bottom:3px;">From</div><input type="date" class="fsearch" style="margin-bottom:8px;"/>
+            <div style="font-size:10px;color:#aaa;margin-bottom:3px;">To</div><input type="date" class="fsearch"/>
+          </div>
+        </div>
+      </div>
+      <div class="table-area">
+        <div class="drag-row">
+          <svg width="14" height="10" viewBox="0 0 14 10"><rect y="0" width="14" height="1.5" rx=".75" fill="#bbb"/><rect y="4" width="14" height="1.5" rx=".75" fill="#bbb"/><rect y="8" width="14" height="1.5" rx=".75" fill="#bbb"/></svg>
+          Drag here to set row groups
+        </div>
+        <div class="grid-wrap">
+          <table class="grid" id="mainGrid">
+            <thead>
+              <tr>
+                <th style="width:36px;"></th>
+                <th>Status <span class="cs">↑</span><span class="cf">▽</span></th>
+                <th>Product <span class="cs">↑</span></th>
+                <th>Family/Series</th>
+                <th>Owner</th>
+                <th>Product Type</th>
+                <th>File No.</th>
+                <th>Managed By</th>
+                <th style="width:80px;text-align:center;">Certs</th>
+                <th style="width:48px;"></th>
+              </tr>
+              <tr class="frow">
+                <th></th><th><input placeholder="Filter…"/></th><th><input placeholder="Filter…"/></th>
+                <th><input placeholder="Filter…"/></th><th><input placeholder="Filter…"/></th>
+                <th><input placeholder="Filter…"/></th>
+                <th><input placeholder="Filter…"/></th><th><input placeholder="Filter…"/></th>
+                <th></th><th></th>
+              </tr>
+            </thead>
+            <tbody id="gridBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar">
+          <div class="ipp">Items per page: <select><option>25</option><option>50</option><option>100</option></select></div>
+          <span id="pageInfo"></span>
+          <div class="pag-controls">
+            <button class="pag-btn" disabled>«</button>
+            <button class="pag-btn" disabled>‹</button>
+            <button class="pag-btn active">1</button>
+            <button class="pag-btn" disabled>›</button>
+            <button class="pag-btn" disabled>»</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="modal-overlay" id="certModal" role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
+  <div class="modal" id="certModalInner"></div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+const PRODUCTS = [
+  { id:'P1', num:'11098-392', file:'E232124', status:'Active', type:'Power Supplies for AV, ITE, and AVICT Equipment', family:'---', psn:'547079', owner:'BLUTEK POWER INC - 547079', address:'SUITE B2, 300-1 RTE 17S', by:'UL',
+    certs:[
+      { id:'C1',  num:'UL-CA-L232124-1400-81305001', scheme:'Canada Safety Scheme', mark:'Listed',     issued:'2005-03-17', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+      { id:'C2',  num:'UL-US-L232124-1400-81305002', scheme:'US Safety Scheme',     mark:'Recognized', issued:'2005-03-18', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+      { id:'C3',  num:'UL-CA-L232124-1400-81305003', scheme:'Canada Safety Scheme', mark:'Listed',     issued:'2005-09-15', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+    ]},
+  { id:'P2', num:'11098-404', file:'E232124', status:'Active', type:'Power Supplies for AV, ITE, and AVICT Equipment', family:'---', psn:'547079', owner:'BLUTEK POWER INC - 547079', address:'SUITE B2, 300-1 RTE 17S', by:'UL',
+    certs:[
+      { id:'C4',  num:'UL-US-L232124-1400-81304001', scheme:'US Safety Scheme',     mark:'Recognized', issued:'2005-12-20', expires:'---',       status:'Active',    body:'UL LLC', rev:'2023-05-07', withdrawn:'---' },
+      { id:'C5',  num:'UL-CA-L232124-1400-81304002', scheme:'Canada Safety Scheme', mark:'Listed',     issued:'2005-12-20', expires:'---',       status:'Expired',   body:'UL LLC', rev:'---',        withdrawn:'---' },
+    ]},
+  { id:'P3', num:'BPA-100 Series', file:'E232124', status:'Active', type:'Power Supplies for AV, ITE, and AVICT Equipment', family:'BPA-X250-XXX-XXXX', psn:'547079', owner:'BLUTEK POWER INC - 547079', address:'SUITE B2, 300-1 RTE 17S', by:'UL',
+    certs:[
+      { id:'C6',  num:'UL-US-L232124-1400-BPA001',   scheme:'US Safety Scheme',     mark:'Recognized', issued:'2006-06-29', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+      { id:'C7',  num:'UL-CA-L232124-1400-BPA002',   scheme:'Canada Safety Scheme', mark:'Listed',     issued:'2006-06-29', expires:'2024-06-29',status:'Expired',   body:'UL LLC', rev:'---',        withdrawn:'---' },
+      { id:'C8',  num:'UL-US-L232124-1400-BPA003',   scheme:'US Safety Scheme',     mark:'Recognized', issued:'2007-06-05', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+      { id:'C9',  num:'UL-CB-L232124-1400-BPA004',   scheme:'IECEE CB Scheme',      mark:'D-Mark',     issued:'2007-11-12', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+    ]},
+  { id:'P4', num:'BEMG36-XXX-XXXX', file:'E232124', status:'Active', type:'Power Supplies for AV, ITE, and AVICT Equipment', family:'---', psn:'547079', owner:'BLUTEK POWER INC - 547079', address:'SUITE B2, 300-1 RTE 17S', by:'UL',
+    certs:[
+      { id:'C10', num:'UL-US-L232124-1400-BEM001',   scheme:'US Safety Scheme',     mark:'Listed',     issued:'2008-03-14', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+    ]},
+  { id:'P5', num:'BESG100P-XX-XXXX', file:'E232124', status:'Active', type:'Power Supplies for AV, ITE, and AVICT Equipment', family:'---', psn:'547079', owner:'BLUTEK POWER INC - 547079', address:'SUITE B2, 300-1 RTE 17S', by:'UL',
+    certs:[
+      { id:'C11', num:'UL-CA-L232124-1400-BES001',   scheme:'Canada Safety Scheme', mark:'Listed',     issued:'2009-01-20', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+      { id:'C12', num:'UL-US-L232124-1400-BES002',   scheme:'US Safety Scheme',     mark:'Recognized', issued:'2009-01-20', expires:'2025-01-20',status:'Withdrawn', body:'UL LLC', rev:'---',        withdrawn:'2025-01-20' },
+    ]},
+  { id:'P6', num:'BMGR36-XXX-XXXX', file:'E232124', status:'Active', type:'Power Supplies for AV, ITE, and AVICT Equipment', family:'---', psn:'547079', owner:'BLUTEK POWER INC - 547079', address:'SUITE B2, 300-1 RTE 17S', by:'UL',
+    certs:[
+      { id:'C13', num:'UL-US-L232124-1400-BMG001',   scheme:'US Safety Scheme',     mark:'Recognized', issued:'2010-05-10', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+      { id:'C14', num:'UL-CA-L232124-1400-BMG002',   scheme:'Canada Safety Scheme', mark:'Listed',     issued:'2010-05-10', expires:'---',       status:'Active',    body:'UL LLC', rev:'---',        withdrawn:'---' },
+    ]},
+];
+
+let expandedIds = new Set();
+let expandAll = false;
+let currentView = 'both';
+let searchTerm = '';
+let filterOpen = true;
+
+const pill = s => `<span class="pill ${s==='Active'?'pill-a':s==='Expired'?'pill-e':'pill-w'}">${s}</span>`;
+const trunc = (s,n=26) => s&&s.length>n ? s.slice(0,n)+'…' : (s||'---');
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'),2600);
+}
+function copyText(t) {
+  if(navigator.clipboard) navigator.clipboard.writeText(t).then(()=>showToast('Copied: '+t));
+  else showToast('Copied: '+t);
+}
+
+function buildExpRow(p) {
+  const certRows = p.certs.map(c=>`
+    <tr class="cert-tr" data-cid="${c.id}" data-pid="${p.id}">
+      <td>${pill(c.status)}</td>
+      <td><span class="cert-num-link">${c.num}</span></td>
+      <td>${trunc(c.scheme,24)}</td>
+      <td>${c.mark}</td>
+      <td>${c.issued}</td>
+      <td>${c.expires}</td>
+      <td>${c.body}</td>
+      <td>${c.rev}</td>
+      <td><button class="act-btn" style="font-size:13px;">⋮</button></td>
+    </tr>`).join('');
+
+  return `<div class="exp-inner">
+    <div class="exp-left">
+      <div class="exp-left-header">
+        <div>${pill(p.status)}<div class="exp-left-id">${p.num}</div></div>
+        <a class="exp-open-link" href="#" onclick="return false;">↗ Full Page</a>
+      </div>
+      <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;margin-bottom:14px;" onclick="copyText('${p.num}')">📋 Copy URL</button>
+      <div class="exp-fields">
+        <div class="exp-field"><span class="exp-label">Product Type</span><span class="exp-value">${trunc(p.type,22)}</span></div>
+        <div class="exp-field"><span class="exp-label">File No.</span><span class="exp-value">${p.file}</span></div>
+        <div class="exp-field"><span class="exp-label">Owner PSN</span><span class="exp-value">${p.psn}</span></div>
+        <div class="exp-field"><span class="exp-label">Family/Series</span><span class="exp-value">${p.family}</span></div>
+        <div class="exp-field" style="grid-column:1/-1"><span class="exp-label">Owner Name</span><span class="exp-value">${p.owner}</span></div>
+        <div class="exp-field" style="grid-column:1/-1"><span class="exp-label">Owner Address</span><span class="exp-value">${p.address}</span></div>
+        <div class="exp-field"><span class="exp-label">Managed By</span><span class="exp-value">${p.by}</span></div>
+      </div>
+    </div>
+    <div class="exp-right">
+      <div class="exp-right-toolbar">
+        <div class="exp-right-toolbar-left">
+          <div class="exp-title">Certificates <span class="exp-cert-count">${p.certs.length}</span></div>
+          <div class="exp-search"><span style="color:#888;font-size:12px;">🔍</span>
+            <input type="text" placeholder="Search certificates…" class="cert-search-input" data-pid="${p.id}"/>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 12px;" onclick="showToast('Add Certificate — coming soon')">+ Add Certificate</button>
+      </div>
+      <div class="cert-table-wrap">
+        ${p.certs.length===0 ? `<div class="exp-empty"><div style="font-size:32px;opacity:.3">📄</div><p>No certificates linked.</p>
+          <button class="btn btn-primary" style="margin-top:8px;font-size:12px;" onclick="showToast('Add Certificate — coming soon')">+ Add Certificate</button></div>`
+        : `<table class="ctable"><thead><tr>
+            <th>Status</th><th>Certificate Number</th><th>Scheme</th><th>Mark</th>
+            <th>Issued Date</th><th>Expiration Date</th><th>Cert Body</th><th>Revision Date</th><th style="width:40px"></th>
+          </tr></thead><tbody id="ctbody-${p.id}">${certRows}</tbody></table>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const tbody = document.getElementById('gridBody');
+  tbody.innerHTML = '';
+  const q = searchTerm.toLowerCase();
+  document.getElementById('expandControls').style.visibility = currentView==='certs' ? 'hidden' : 'visible';
+
+  if (currentView === 'certs') {
+    let n=0;
+    PRODUCTS.forEach(p => p.certs.forEach(c => {
+      if(q && !c.num.toLowerCase().includes(q) && !c.scheme.toLowerCase().includes(q) && !p.num.toLowerCase().includes(q)) return;
+      n++;
+      const tr=document.createElement('tr'); tr.className='prow'; tr.innerHTML=`
+        <td></td><td>${pill(c.status)}</td>
+        <td><span class="cert-num-link">${c.num}</span></td>
+        <td>${trunc(c.scheme,24)}</td><td><span style="font-weight:600;">${p.psn}</span> · ${trunc(p.owner)} · <span style="color:#666;">${p.address}</span></td><td>${c.mark}</td><td>${c.issued}</td><td>${c.body}</td>
+        <td style="text-align:center;">${c.expires}</td>
+        <td><button class="act-btn">⋮</button></td>`;
+      tr.addEventListener('click',e=>{ if(!e.target.closest('.act-btn')) openCertModal(c,p); });
+      tbody.appendChild(tr);
+    }));
+    document.getElementById('pageInfo').textContent=`1 – ${n} of ${n}`;
+    return;
+  }
+
+  let count=0;
+  PRODUCTS.forEach(p=>{
+    if(q && !p.num.toLowerCase().includes(q) && !p.file.toLowerCase().includes(q)
+       && !p.owner.toLowerCase().includes(q)
+       && !p.certs.some(c=>c.num.toLowerCase().includes(q)||c.scheme.toLowerCase().includes(q))) return;
+    count++;
+    const isOpen = expandAll || expandedIds.has(p.id);
+
+    const ptr=document.createElement('tr');
+    ptr.className=`prow${isOpen?' expanded':''}`;
+    ptr.dataset.pid=p.id;
+    ptr.innerHTML=`
+      <td><button class="xbtn" data-pid="${p.id}" aria-expanded="${isOpen}">${isOpen?'−':'+'}</button></td>
+      <td>${pill(p.status)}</td>
+      <td><span class="pnum-link">${p.num}</span></td>
+      <td style="font-size:12px;color:#666;">${p.family}</td>
+      <td style="font-size:12px;"><span style="font-weight:600;">${p.psn}</span> · ${trunc(p.owner)} · <span style="color:#666;">${p.address}</span></td>
+      <td style="font-size:12px;">${trunc(p.type,28)}</td>
+      <td>${p.file}</td>
+      <td>${p.by}</td>
+      <td style="text-align:center;"><span class="cert-badge">📄 ${p.certs.length}</span></td>
+      <td><button class="act-btn">⋮</button></td>`;
+
+    ptr.querySelector('.xbtn').addEventListener('click',e=>{
+      e.stopPropagation();
+      if(expandAll){ expandAll=false; expandedIds.clear(); }
+      if(expandedIds.has(p.id)) expandedIds.delete(p.id); else expandedIds.add(p.id);
+      render();
+      requestAnimationFrame(()=>{ const er=document.querySelector(`tr.exprow[data-pid="${p.id}"]`); if(er) er.scrollIntoView({behavior:'smooth',block:'nearest'}); });
+    });
+    ptr.addEventListener('click',e=>{
+      if(e.target.closest('.act-btn')||e.target.closest('.xbtn')) return;
+      if(expandAll){ expandAll=false; expandedIds.clear(); }
+      if(expandedIds.has(p.id)) expandedIds.delete(p.id); else expandedIds.add(p.id);
+      render();
+      requestAnimationFrame(()=>{ const er=document.querySelector(`tr.exprow[data-pid="${p.id}"]`); if(er) er.scrollIntoView({behavior:'smooth',block:'nearest'}); });
+    });
+    tbody.appendChild(ptr);
+
+    const etr=document.createElement('tr');
+    etr.className=`exprow${isOpen?' open':''}`;
+    etr.dataset.pid=p.id;
+    const etd=document.createElement('td');
+    etd.setAttribute('colspan','10');
+    etd.innerHTML=buildExpRow(p);
+    etr.appendChild(etd);
+    tbody.appendChild(etr);
+  });
+
+  document.getElementById('pageInfo').textContent=`1 – ${count} of ${count} products`;
+  bindCertClicks();
+  bindCertSearches();
+}
+
+function bindCertClicks(){
+  document.querySelectorAll('.cert-tr').forEach(tr=>{
+    tr.addEventListener('click',e=>{
+      if(e.target.closest('.act-btn')) return;
+      const p=PRODUCTS.find(x=>x.id===tr.dataset.pid);
+      const c=p&&p.certs.find(x=>x.id===tr.dataset.cid);
+      if(c&&p) openCertModal(c,p);
+    });
+  });
+}
+function bindCertSearches(){
+  document.querySelectorAll('.cert-search-input').forEach(inp=>{
+    inp.addEventListener('input',e=>{
+      e.stopPropagation();
+      const pid=inp.dataset.pid, q2=inp.value.toLowerCase();
+      document.querySelectorAll(`#ctbody-${pid} .cert-tr`).forEach(tr=>{
+        const p=PRODUCTS.find(x=>x.id===pid), c=p&&p.certs.find(x=>x.id===tr.dataset.cid);
+        tr.style.display=(!q2||c.num.toLowerCase().includes(q2)||c.scheme.toLowerCase().includes(q2)||c.mark.toLowerCase().includes(q2))?'':'none';
+      });
+    });
+    inp.addEventListener('click',e=>e.stopPropagation());
+  });
+}
+
+function openCertModal(c,p){
+  const overlay=document.getElementById('certModal');
+  const inner=document.getElementById('certModalInner');
+  inner.innerHTML=`
+    <div class="modal-hdr">
+      <div class="modal-hdr-left">
+        <div class="modal-status-row">${pill(c.status)}<span style="font-size:11px;color:#888;">Certificate</span></div>
+        <div class="modal-id" id="certModalTitle">${c.num}</div>
+        <button class="modal-copy" onclick="copyText('${c.num}')">📋 Copy URL</button>
+      </div>
+      <button class="modal-close" id="mclose">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" data-tab="details">DETAILS</div>
+      <div class="modal-tab" data-tab="parties">PARTIES</div>
+      <div class="modal-tab" data-tab="documents">DOCUMENTS</div>
+    </div>
+    <div class="modal-body" id="mBody">${buildCertDetails(c,p)}</div>
+    <div class="modal-footer">
+      <button class="btn" id="mclose2">Close</button>
+      <button class="btn btn-primary" onclick="showToast('Open in Full Page — coming soon')">↗ Open in Full Page</button>
+    </div>`;
+  overlay.classList.add('open');
+  inner.querySelectorAll('.modal-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      inner.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const b=document.getElementById('mBody');
+      if(tab.dataset.tab==='details') b.innerHTML=buildCertDetails(c,p);
+      else if(tab.dataset.tab==='parties') b.innerHTML=buildParties(p);
+      else b.innerHTML=buildDocs();
+    });
+  });
+  setTimeout(()=>{
+    const ppCard=inner.querySelector('.pp-card');
+    if(ppCard) ppCard.addEventListener('click',()=>{ closeModal(); expandedIds.add(p.id); render(); requestAnimationFrame(()=>{ const pr=document.querySelector(`tr.prow[data-pid="${p.id}"]`); if(pr) pr.scrollIntoView({behavior:'smooth',block:'nearest'}); }); });
+    document.getElementById('mclose').addEventListener('click',closeModal);
+    document.getElementById('mclose2').addEventListener('click',closeModal);
+  },0);
+}
+function buildCertDetails(c,p){ return `
+  <div class="pp-card" tabindex="0" role="button" aria-label="Go to ${p.num}" style="cursor:pointer;">
+    <div class="pp-card-label">📄 Parent Product</div>
+    <div class="pp-card-id">${p.num}</div>
+    <div class="pp-card-meta">
+      <span><span class="ppl">File No.</span>${p.file}</span>
+      <span><span class="ppl">Product Type</span>${trunc(p.type,22)}</span>
+      <span><span class="ppl">Status</span>${p.status}</span>
+    </div>
+  </div>
+  <div class="msec-title">General Information</div>
+  <div class="mfield-grid">
+    <div class="mfield"><span class="mfield-label">Certification Scheme</span><span class="mfield-value">${c.scheme}</span></div>
+    <div class="mfield"><span class="mfield-label">Certification Body</span><span class="mfield-value">${c.body}</span></div>
+    <div class="mfield"><span class="mfield-label">Mark</span><span class="mfield-value">${c.mark}</span></div>
+    <div class="mfield span2"><span class="mfield-label">Certificate Number</span><span class="mfield-value" style="word-break:break-all;">${c.num}</span></div>
+    <div class="mfield"><span class="mfield-label">Issued Date</span><span class="mfield-value">${c.issued}</span></div>
+    <div class="mfield"><span class="mfield-label">Expiration Date</span><span class="mfield-value">${c.expires}</span></div>
+    <div class="mfield"><span class="mfield-label">Revision Date</span><span class="mfield-value">${c.rev}</span></div>
+    <div class="mfield"><span class="mfield-label">Withdrawn Date</span><span class="mfield-value">${c.withdrawn}</span></div>
+    <div class="mfield"><span class="mfield-label">Owner PSN</span><span class="mfield-value">${p.psn}</span></div>
+    <div class="mfield"><span class="mfield-label">Status</span><span class="mfield-value">${c.status}</span></div>
+  </div>`; }
+function buildParties(p){ return `
+  <div class="msec-title">Parties</div>
+  <div class="mfield-grid">
+    <div class="mfield"><span class="mfield-label">Owner PSN</span><span class="mfield-value">${p.psn}</span></div>
+    <div class="mfield"><span class="mfield-label">Owner Name</span><span class="mfield-value">${p.owner}</span></div>
+    <div class="mfield span2"><span class="mfield-label">Owner Address</span><span class="mfield-value">${p.address}</span></div>
+  </div>`; }
+function buildDocs(){ return `<div class="msec-title">Documents</div>
+  <div style="text-align:center;padding:40px;color:#aaa;"><div style="font-size:36px;opacity:.3;margin-bottom:10px;">📄</div><p>No documents available.</p></div>`; }
+function closeModal(){ document.getElementById('certModal').classList.remove('open'); }
+
+document.querySelectorAll('.view-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); currentView=btn.dataset.view; expandAll=false; expandedIds.clear(); render();
+  });
+});
+document.getElementById('expandAllBtn').addEventListener('click',()=>{ expandAll=true; render(); });
+document.getElementById('collapseAllBtn').addEventListener('click',()=>{ expandAll=false; expandedIds.clear(); render(); });
+document.getElementById('lnavToggle').addEventListener('click',()=>{
+  const lnav = document.querySelector('.left-nav');
+  const expanded = lnav.classList.toggle('lnav-collapsed');
+  document.getElementById('lnavToggle').setAttribute('aria-expanded', String(!expanded));
+});
+document.getElementById('ftoggle').addEventListener('click',()=>{
+  filterOpen=!filterOpen;
+  document.getElementById('filterPanel').classList.toggle('collapsed',!filterOpen);
+  document.getElementById('ftoggle').innerHTML=filterOpen?'‹':'›';
+  document.getElementById('ftoggle').title=filterOpen?'Hide filters':'Show filters';
+});
+document.querySelectorAll('.fsec-hdr').forEach(h=>{
+  h.addEventListener('click',()=>{
+    const t=document.getElementById(h.dataset.t); if(!t) return;
+    const open=h.classList.toggle('open'); t.style.display=open?'block':'none';
+  });
+});
+document.getElementById('searchInput').addEventListener('input',e=>{ searchTerm=e.target.value; expandAll=false; expandedIds.clear(); render(); });
+function resetAll(){ document.getElementById('searchInput').value=''; searchTerm=''; expandAll=false; expandedIds.clear(); document.querySelectorAll('.filter-panel input[type=checkbox]').forEach(cb=>cb.checked=true); render(); showToast('Filters reset'); }
+document.getElementById('certModal').addEventListener('click',e=>{ if(e.target===document.getElementById('certModal')) closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+render();
+</script>
+</body>
+</html>

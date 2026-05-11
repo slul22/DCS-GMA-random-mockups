@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Article Lock Prototype — GMA News</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #e8e8e8;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top meta bar ─────────────────────────────────────────── */
+    .meta-bar {
+      background: #1a1a2e;
+      color: #aaa;
+      font-size: 11px;
+      padding: 5px 16px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .meta-bar b { color: #fff; }
+    .meta-bar .debug-btn {
+      margin-left: auto;
+      background: #444;
+      color: #f0c040;
+      border: 1px solid #f0c040;
+      border-radius: 3px;
+      padding: 2px 10px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .meta-bar .debug-btn:hover { background: #555; }
+
+    /* ── Split wrapper ────────────────────────────────────────── */
+    .split {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 4px;
+    }
+    .pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+    .pane-label {
+      background: #3c3c3c;
+      color: #ddd;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px 14px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .pane-scroll {
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       USER A — EDITOR PANE
+    ══════════════════════════════════════════════════════════ */
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1e7e34;
+      color: #fff;
+      font-size: 13px;
+      font-weight: bold;
+      padding: 6px 16px;
+      flex-shrink: 0;
+      position: relative;
+      transition: background 0.4s;
+    }
+    .status-bar.warning  { background: #c97d00; }
+    .status-bar.critical { background: #b00020; }
+    .status-bar.expired  { background: #555;    }
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #7fff7f;
+      display: inline-block;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px #7fff7f;
+    }
+    .status-bar.warning  .status-dot { background: #ffe07a; box-shadow: 0 0 6px #ffe07a; }
+    .status-bar.critical .status-dot { background: #ff8080; box-shadow: 0 0 6px #ff8080; }
+    .status-bar.expired  .status-dot { background: #aaa;    box-shadow: none; }
+    .status-refresh {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: normal;
+      opacity: 0;
+      transition: opacity 0.5s;
+      color: #c8ffc8;
+    }
+    .status-refresh.show { opacity: 1; }
+
+    /* Warning banners */
+    .warning-banner {
+      background: #fff3cd;
+      border-bottom: 2px solid #ffc107;
+      color: #6b4c00;
+      font-size: 13px;
+      padding: 8px 16px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .warning-banner.show { display: flex; }
+    .warning-banner b { flex: 1; }
+    .warning-banner button {
+      background: #cc8800;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 14px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .warning-banner button:hover { background: #a06600; }
+
+    /* Expired banner */
+    .expired-banner {
+      background: #f8d7da;
+      border-bottom: 2px solid #dc3545;
+      color: #842029;
+      font-size: 13px;
+      font-weight: bold;
+      padding: 10px 16px;
+      display: none;
+      flex-shrink: 0;
+    }
+    .expired-banner.show { display: block; }
+
+    /* GMA News form */
+    .form-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 16px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .form-title { font-size: 16px; font-weight: bold; color: #222; }
+    .form-meta  { font-size: 11px; color: #666; }
+    .form-actions { margin-left: auto; display: flex; gap: 8px; }
+    .btn {
+      padding: 6px 18px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid #bbb;
+      background: #fff;
+    }
+    .btn-outline { background: #fff; color: #333; }
+    .btn-next    { background: #1a4480; color: #fff; border-color: #1a4480; }
+    .btn-save    { background: #1e7e34; color: #fff; border-color: #1e7e34; }
+    .btn:hover   { filter: brightness(0.92); }
+
+    .tab-strip {
+      display: flex;
+      border-bottom: 2px solid #ddd;
+      background: #fafafa;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 10px 18px;
+      font-size: 12px;
+      color: #555;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+    .tab.active {
+      border-bottom-color: #1a4480;
+      color: #1a4480;
+      font-weight: bold;
+    }
+    .tab .tab-icon {
+      width: 14px; height: 14px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .tab.active .tab-icon { background: #1a4480; border-color: #1a4480; }
+
+    .form-body { padding: 20px 20px 30px; }
+    .form-section-title { font-size: 18px; font-weight: bold; color: #222; margin-bottom: 6px; }
+    .form-hint { font-size: 13px; color: #555; margin-bottom: 20px; }
+
+    .field-group { margin-bottom: 18px; }
+    .field-label {
+      font-size: 11px;
+      font-weight: bold;
+      color: #333;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .field-label .ext { font-weight: normal; color: #888; font-size: 10px; text-transform: none; }
+    .field-label .req { color: #cc0000; margin-left: 2px; }
+    .field-row { display: flex; gap: 14px; }
+    .field-row .field-group { flex: 1; }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #bbb;
+      border-radius: 3px;
+      font-size: 13px;
+      color: #333;
+      background: #fff;
+      appearance: none;
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #1a4480;
+      box-shadow: 0 0 0 2px rgba(26,68,128,0.15);
+    }
+    .form-select-wrap { position: relative; }
+    .form-select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      pointer-events: none;
+      font-size: 12px;
+    }
+    .form-select.disabled-select {
+      background: #f5f5f5;
+      color: #aaa;
+      pointer-events: none;
+    }
+    .date-wrap { position: relative; }
+    .date-wrap input { padding-right: 32px; }
+    .date-wrap::after {
+      content: '📅';
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       USER B — VIEWER PANE
+    ══════════════════════════════════════════════════════════ */
+    .list-header {
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #222;
+      flex-shrink: 0;
+    }
+    .list-header small { font-weight: normal; color: #777; font-size: 12px; margin-left: 8px; }
+
+    .article-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+    .article-card {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 14px 16px;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .article-card.locked { border-left: 4px solid #dc3545; }
+    .article-card.unlocked { border-left: 4px solid #28a745; }
+
+    .card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    .card-title { font-size: 13px; font-weight: bold; color: #222; flex: 1; line-height: 1.5; }
+    .lock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fde8ea;
+      color: #b00020;
+      border: 1px solid #f5c2c7;
+      border-radius: 12px;
+      font-size: 11px;
+      padding: 2px 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .avail-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      border-radius: 12px;
+      font-size: 11px;
+      padding: 2px 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card-meta { font-size: 11px; color: #777; margin-bottom: 10px; }
+    .card-meta span { margin-right: 14px; }
+
+    .card-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-edit {
+      padding: 5px 16px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+    }
+    .btn-edit-locked {
+      background: #e0e0e0;
+      color: #999;
+      border: 1px solid #ccc;
+      cursor: not-allowed;
+    }
+    .btn-edit-locked:hover { background: #d5d5d5; }
+    .btn-edit-avail {
+      background: #1a4480;
+      color: #fff;
+    }
+    .btn-edit-avail:hover { background: #153668; }
+    .lock-hint { font-size: 11px; color: #b00020; }
+
+    /* ── Modals ───────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      width: 420px;
+      max-width: 95vw;
+      overflow: hidden;
+      animation: slideIn 0.18s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-24px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .modal-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .modal-icon.red  { background: #fde8ea; }
+    .modal-icon.amber{ background: #fff3cd; }
+    .modal-title { font-size: 15px; font-weight: bold; color: #222; }
+    .modal-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #888;
+      line-height: 1;
+    }
+    .modal-close:hover { color: #333; }
+
+    .modal-body { padding: 16px 20px; font-size: 13px; color: #444; line-height: 1.6; }
+    .modal-body .lock-by { font-weight: bold; color: #222; }
+    .modal-body .expiry  { color: #b00020; font-weight: bold; }
+
+    .modal-footer {
+      padding: 12px 20px 16px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      border-top: 1px solid #eee;
+    }
+    .btn-modal-primary {
+      background: #1a4480; color: #fff;
+      border: none; border-radius: 4px;
+      padding: 7px 22px; font-size: 13px; cursor: pointer;
+    }
+    .btn-modal-primary:hover { background: #153668; }
+    .btn-modal-secondary {
+      background: #fff; color: #555;
+      border: 1px solid #bbb; border-radius: 4px;
+      padding: 7px 18px; font-size: 13px; cursor: pointer;
+    }
+    .btn-modal-secondary:hover { background: #f5f5f5; }
+    .btn-modal-danger {
+      background: #dc3545; color: #fff;
+      border: none; border-radius: 4px;
+      padding: 7px 18px; font-size: 13px; cursor: pointer;
+    }
+    .btn-modal-danger:hover { background: #b02a37; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #1e7e34;
+      color: #fff;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      z-index: 2000;
+      transition: transform 0.3s, opacity 0.3s;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top meta bar ──────────────────────────────────────────── -->
+<div class="meta-bar">
+  <span>🔒 <b>Article Lock Prototype</b></span>
+  <span>Lock duration: <b>25 min</b></span>
+  <span>Heartbeat: <b>60 s</b></span>
+  <span>Idle timeout: <b>10 min</b></span>
+  <button class="debug-btn" onclick="debugSkipTo5()">⚡ Skip to 5-min warning</button>
+  <button class="debug-btn" onclick="debugSkipTo1()">⚡ Skip to 1-min warning</button>
+  <button class="debug-btn" onclick="debugExpire()">⚡ Expire lock now</button>
+</div>
+
+<!-- ── Split ─────────────────────────────────────────────────── -->
+<div class="split">
+
+  <!-- ════════════════════════════════════════════════════════
+       PANE A — EDITOR (User A)
+  ════════════════════════════════════════════════════════ -->
+  <div class="pane">
+    <div class="pane-label">👤 User A — Sharvanika (Editor)</div>
+
+    <!-- Status bar -->
+    <div class="status-bar" id="statusBar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Editing</span>
+      <span>|</span>
+      <span id="statusTimer">⏱ 25m 00s left</span>
+      <span class="status-refresh" id="refreshFlash">Lock refreshed ✓</span>
+    </div>
+
+    <!-- Warning banners (stacked, each shown at threshold) -->
+    <div class="warning-banner" id="warn5">
+      <b>⚠️ Your lock expires in 5 minutes.</b>
+      <button onclick="extendLock()">Extend Lock</button>
+      <button class="btn-modal-secondary" style="border:none;background:transparent;cursor:pointer;font-size:18px;color:#888" onclick="dismissBanner('warn5')">✕</button>
+    </div>
+    <div class="warning-banner" id="warn2">
+      <b>⚠️ Your lock expires in 2 minutes!</b>
+      <button onclick="extendLock()">Extend Lock</button>
+      <button class="btn-modal-secondary" style="border:none;background:transparent;cursor:pointer;font-size:18px;color:#888" onclick="dismissBanner('warn2')">✕</button>
+    </div>
+    <div class="warning-banner" id="warn1">
+      <b>🚨 Your lock expires in 1 minute!</b>
+      <button onclick="extendLock()">Extend Lock</button>
+      <button class="btn-modal-secondary" style="border:none;background:transparent;cursor:pointer;font-size:18px;color:#888" onclick="dismissBanner('warn1')">✕</button>
+    </div>
+
+    <!-- Expired banner -->
+    <div class="expired-banner" id="expiredBanner">
+      🔴 Your lock has expired. You can no longer save changes. <button onclick="reacquireLock()" style="margin-left:12px;background:#1a4480;color:#fff;border:none;border-radius:4px;padding:4px 14px;cursor:pointer;font-size:12px;">Re-acquire Lock</button>
+    </div>
+
+    <div class="pane-scroll" id="paneAScroll">
+      <!-- GMA News Form Header -->
+      <div class="form-header">
+        <div>
+          <div class="form-title">New GMA News</div>
+          <div class="form-meta">Status: Draft &nbsp;|&nbsp; Originator: Lakshminarayanan, Sharvanika &nbsp;|&nbsp; Last saved at: May 7, 2026, 10:44:52 AM</div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-outline">Close</button>
+          <button class="btn btn-next">Next →</button>
+          <button class="btn btn-save">Save</button>
+        </div>
+      </div>
+
+      <!-- Tab strip -->
+      <div class="tab-strip">
+        <div class="tab active"><span class="tab-icon"></span> News content</div>
+        <div class="tab"><span class="tab-icon"></span> Impact analysis</div>
+        <div class="tab"><span class="tab-icon"></span> Documents</div>
+        <div class="tab"><span class="tab-icon"></span> Triggers</div>
+        <div class="tab"><span class="tab-icon"></span> Standard and regulations</div>
+        <div class="tab"><span class="tab-icon"></span> Review</div>
+      </div>
+
+      <!-- Form body -->
+      <div class="form-body">
+        <div class="form-section-title">Add news contents</div>
+        <div class="form-hint">Fill out the following fields to add a new news item. Click the question mark icon to find out more about the requirements for each field.</div>
+
+        <!-- Scanned Date -->
+        <div class="field-group">
+          <div class="field-label">Scanned Date <span class="req">*</span></div>
+          <div class="date-wrap">
+            <input class="form-input" type="text" value="05/06/2026" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="field-group">
+          <div class="field-label">Title <span class="ext">(External)</span> <span class="req">*</span></div>
+          <input class="form-input" type="text" value="European Union - CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 - Safety Requirements for Audio/Video, Information and Communication Technology Equipment" />
+        </div>
+
+        <!-- Scheme -->
+        <div class="field-group">
+          <div class="field-label">Scheme <span class="ext">(External)</span></div>
+          <div class="form-select-wrap">
+            <select class="form-select">
+              <option value="" disabled selected>Select options</option>
+              <option>D-Mark scheme</option>
+              <option>ANZ Certification scheme</option>
+              <option>Aruba - DTC</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Country/Bloc + Region -->
+        <div class="field-row">
+          <div class="field-group">
+            <div class="field-label">Country/Bloc <span class="ext">(External)</span></div>
+            <div class="form-select-wrap">
+              <select class="form-select">
+                <option value="" disabled selected>Select options</option>
+                <option>European Union</option>
+                <option>United States</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">Region <span class="ext">(External)</span></div>
+            <div class="form-select-wrap">
+              <select class="form-select disabled-select">
+                <option value="" disabled selected>Select options</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Regulation Type + News Level -->
+        <div class="field-row">
+          <div class="field-group">
+            <div class="field-label">Regulation Type <span class="ext">(External)</span></div>
+            <div class="form-select-wrap">
+              <select class="form-select">
+                <option value="" disabled selected>Select options</option>
+                <option>Standard</option>
+                <option>Directive</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">News Level <span class="ext">(External)</span></div>
+            <div class="form-select-wrap">
+              <select class="form-select">
+                <option value="" disabled selected>Select an item</option>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Impacted Industries -->
+        <div class="field-group">
+          <div class="field-label">Impacted Industries</div>
+          <div class="form-select-wrap">
+            <select class="form-select disabled-select">
+              <option value="" disabled selected>Select options</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Mandatory Date -->
+        <div class="field-group">
+          <div class="field-label">Mandatory Date</div>
+          <div class="date-wrap">
+            <input class="form-input" type="text" placeholder="MM/DD/YYYY" />
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="field-group">
+          <div class="field-label">Summary <span class="ext">(External)</span></div>
+          <textarea class="form-input" rows="4" placeholder="Enter a brief summary of the news item..."></textarea>
+        </div>
+      </div>
+    </div><!-- /pane-scroll -->
+  </div><!-- /pane A -->
+
+  <!-- ════════════════════════════════════════════════════════
+       PANE B — VIEWER (User B)
+  ════════════════════════════════════════════════════════ -->
+  <div class="pane" style="background:#f8f8f8;">
+    <div class="pane-label">👤 User B — John (Viewer / Another Editor)</div>
+
+    <div class="pane-scroll">
+      <div class="list-header">
+        GMA News Articles
+        <small>Click Edit to open an article</small>
+      </div>
+
+      <div class="article-list">
+
+        <!-- Article 1 — LOCKED -->
+        <div class="article-card locked" id="card1">
+          <div class="card-top">
+            <div class="card-title">European Union — CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 — Safety Requirements for Audio/Video, Information and Communication Technology Equipment</div>
+            <span class="lock-badge" id="lockBadge1">🔒 <span id="lockBadgeText1">Locked by Sharvanika</span></span>
+          </div>
+          <div class="card-meta">
+            <span>📅 Scanned: 05/06/2026</span>
+            <span>🗂 Scheme: D-Mark scheme, ANZ Certification scheme</span>
+            <span>📊 Level: High</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-edit btn-edit-locked" id="editBtn1" onclick="tryEdit1()">✏️ Edit</button>
+            <span class="lock-hint" id="lockHint1">🔒 Locked by Sharvanika — expires in <span id="lockHintTimer1">25m 00s</span></span>
+          </div>
+        </div>
+
+        <!-- Article 2 — AVAILABLE -->
+        <div class="article-card unlocked" id="card2">
+          <div class="card-top">
+            <div class="card-title">North American Union — CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 — Safety Requirements, Information and Communication Technology Equipment</div>
+            <span class="avail-badge">✅ Available</span>
+          </div>
+          <div class="card-meta">
+            <span>📅 Scanned: 05/06/2026</span>
+            <span>🗂 Scheme: D-Mark scheme, Bahamas - URCA</span>
+            <span>📊 Level: Medium</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-edit btn-edit-avail" onclick="tryEdit2()">✏️ Edit</button>
+          </div>
+        </div>
+
+      </div><!-- /article-list -->
+    </div>
+  </div><!-- /pane B -->
+
+</div><!-- /split -->
+
+<!-- ── Modal: Lock Blocked (User B tries to edit locked article) ── -->
+<div class="modal-overlay" id="modalLocked">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon red">🔒</div>
+      <div class="modal-title">Article Currently Locked</div>
+      <button class="modal-close" onclick="closeModal('modalLocked')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>This article is currently being edited by:</p>
+      <p style="margin:10px 0 4px"><span class="lock-by">Lakshminarayanan, Sharvanika</span></p>
+      <p>Lock expires in: <span class="expiry" id="modalLockTimer">25m 00s</span></p>
+      <p style="margin-top:12px;color:#555">You cannot edit this article while another user holds an active lock. Please try again after the lock is released or expired.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-secondary" onclick="notifyMe()">🔔 Notify me when available</button>
+      <button class="btn-modal-primary" onclick="closeModal('modalLocked')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Idle Detection (User A idle too long) ── -->
+<div class="modal-overlay" id="modalIdle">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon amber">⏸️</div>
+      <div class="modal-title">You Appear Idle</div>
+    </div>
+    <div class="modal-body">
+      <p>You have been inactive for <strong>10 minutes</strong>. Your article lock will be released soon if no action is taken.</p>
+      <p style="margin-top:10px">Would you like to extend or release the lock?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-danger" onclick="releaseLock()">Release Lock</button>
+      <button class="btn-modal-primary" onclick="extendFromIdle()">Extend Lock</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Lock Released (after User A releases) ── -->
+<div class="modal-overlay" id="modalReleased">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon red">🔓</div>
+      <div class="modal-title">Lock Released</div>
+      <button class="modal-close" onclick="closeModal('modalReleased')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>The article lock held by <span class="lock-by">Lakshminarayanan, Sharvanika</span> has been <strong>released</strong>.</p>
+      <p style="margin-top:8px">The article is now available for other users to edit.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-primary" onclick="closeModal('modalReleased')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── Lock State ───────────────────────────────────────────────
+  const LOCK_DURATION  = 25 * 60;    // 25 min in seconds
+  const IDLE_TIMEOUT   = 10 * 60;    // 10 min
+  const HEARTBEAT_INT  = 60;         // seconds
+
+  let secondsLeft    = LOCK_DURATION;
+  let lockActive     = true;
+  let idleSeconds    = 0;
+  let idleModalShown = false;
+  let heartbeatTick  = 0;
+
+  // Thresholds (track whether we've shown each)
+  let shown5 = false, shown2 = false, shown1 = false;
+
+  // ─── Main 1-second tick ───────────────────────────────────────
+  const ticker = setInterval(() => {
+    if (!lockActive) return;
+
+    secondsLeft = Math.max(0, secondsLeft - 1);
+    idleSeconds++;
+    heartbeatTick++;
+
+    updateStatusBar();
+    updateUserBText();
+
+    // Heartbeat flash every 60s
+    if (heartbeatTick >= HEARTBEAT_INT) {
+      heartbeatTick = 0;
+      flashRefresh();
+    }
+
+    // Warning banners
+    if (!shown5 && secondsLeft <= 5 * 60) { shown5 = true; showBanner('warn5'); }
+    if (!shown2 && secondsLeft <= 2 * 60) { shown2 = true; showBanner('warn2'); }
+    if (!shown1 && secondsLeft <= 1 * 60) { shown1 = true; showBanner('warn1'); }
+
+    // Idle detection
+    if (!idleModalShown && idleSeconds >= IDLE_TIMEOUT) {
+      idleModalShown = true;
+      openModal('modalIdle');
+    }
+
+    // Expiry
+    if (secondsLeft === 0) {
+      expireLock();
+    }
+  }, 1000);
+
+  // ─── Idle reset on activity ───────────────────────────────────
+  ['mousemove','keydown','mousedown','touchstart'].forEach(evt => {
+    document.addEventListener(evt, () => {
+      idleSeconds = 0;
+      if (idleModalShown) {
+        // Already shown; don't hide automatically — user must respond
+      }
+    }, { passive: true });
+  });
+
+  // ─── Helpers ─────────────────────────────────────────────────
+  function fmt(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}m ${String(sec).padStart(2,'0')}s`;
+  }
+
+  function updateStatusBar() {
+    const el = document.getElementById('statusBar');
+    const timerEl = document.getElementById('statusTimer');
+    const textEl  = document.getElementById('statusText');
+    timerEl.textContent = `⏱ ${fmt(secondsLeft)} left`;
+
+    if (!lockActive) {
+      el.className = 'status-bar expired';
+      textEl.textContent = 'Lock Expired';
+      return;
+    }
+    if (secondsLeft <= 1 * 60)      { el.className = 'status-bar critical'; }
+    else if (secondsLeft <= 5 * 60) { el.className = 'status-bar warning';  }
+    else                            { el.className = 'status-bar';           }
+    textEl.textContent = 'Editing';
+  }
+
+  function updateUserBText() {
+    // Update lock hint on card
+    const hint = document.getElementById('lockHintTimer1');
+    if (hint) hint.textContent = fmt(secondsLeft);
+
+    // Update open lock modal if visible
+    const ml = document.getElementById('modalLockTimer');
+    if (ml) ml.textContent = fmt(secondsLeft);
+
+    // Update badge text
+    const badge = document.getElementById('lockBadgeText1');
+    if (badge && lockActive) badge.textContent = `Locked by Sharvanika`;
+  }
+
+  function flashRefresh() {
+    const el = document.getElementById('refreshFlash');
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  function showBanner(id) {
+    document.getElementById(id).classList.add('show');
+  }
+  function dismissBanner(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  function openModal(id)  { document.getElementById(id).classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  // ─── Lock actions ─────────────────────────────────────────────
+  function extendLock() {
+    secondsLeft = LOCK_DURATION;
+    shown5 = false; shown2 = false; shown1 = false;
+    ['warn5','warn2','warn1'].forEach(id => dismissBanner(id));
+    updateStatusBar();
+    flashRefresh();
+    showToast('✓ Lock extended by 25 minutes.');
+  }
+
+  function extendFromIdle() {
+    closeModal('modalIdle');
+    idleModalShown = false;
+    idleSeconds = 0;
+    extendLock();
+  }
+
+  function releaseLock() {
+    closeModal('modalIdle');
+    lockActive = false;
+    secondsLeft = 0;
+    clearInterval(ticker);
+    updateStatusBar();
+    updateUserBText();
+    markArticleAvailable();
+    openModal('modalReleased');
+  }
+
+  function expireLock() {
+    lockActive = false;
+    clearInterval(ticker);
+    updateStatusBar();
+    document.getElementById('expiredBanner').classList.add('show');
+    markArticleAvailable();
+  }
+
+  function reacquireLock() {
+    lockActive = true;
+    secondsLeft = LOCK_DURATION;
+    shown5 = false; shown2 = false; shown1 = false;
+    document.getElementById('expiredBanner').classList.remove('show');
+    ['warn5','warn2','warn1'].forEach(id => dismissBanner(id));
+    markArticleLocked();
+    showToast('✓ Lock re-acquired. You have 25 minutes.');
+
+    // Restart ticker
+    idleSeconds = 0;
+    idleModalShown = false;
+    heartbeatTick = 0;
+    const newTicker = setInterval(() => {
+      if (!lockActive) { clearInterval(newTicker); return; }
+      secondsLeft = Math.max(0, secondsLeft - 1);
+      idleSeconds++;
+      heartbeatTick++;
+      updateStatusBar();
+      updateUserBText();
+      if (heartbeatTick >= HEARTBEAT_INT) { heartbeatTick = 0; flashRefresh(); }
+      if (!shown5 && secondsLeft <= 5*60) { shown5=true; showBanner('warn5'); }
+      if (!shown2 && secondsLeft <= 2*60) { shown2=true; showBanner('warn2'); }
+      if (!shown1 && secondsLeft <= 1*60) { shown1=true; showBanner('warn1'); }
+      if (!idleModalShown && idleSeconds >= IDLE_TIMEOUT) { idleModalShown=true; openModal('modalIdle'); }
+      if (secondsLeft === 0) { clearInterval(newTicker); expireLock(); }
+    }, 1000);
+  }
+
+  function markArticleAvailable() {
+    const card   = document.getElementById('card1');
+    const badge  = document.getElementById('lockBadge1');
+    const btn    = document.getElementById('editBtn1');
+    const hint   = document.getElementById('lockHint1');
+
+    card.className  = 'article-card unlocked';
+    badge.outerHTML = '<span class="avail-badge" id="lockBadge1">✅ Available</span>';
+    btn.className   = 'btn-edit btn-edit-avail';
+    btn.textContent = '✏️ Edit';
+    btn.onclick     = tryEdit2;
+    if (hint) hint.style.display = 'none';
+  }
+
+  function markArticleLocked() {
+    const card  = document.getElementById('card1');
+    const btn   = document.getElementById('editBtn1');
+    const hint  = document.getElementById('lockHint1');
+
+    card.className = 'article-card locked';
+    btn.className  = 'btn-edit btn-edit-locked';
+    btn.textContent= '✏️ Edit';
+    btn.onclick    = tryEdit1;
+    if (hint) hint.style.display = '';
+    // Restore badge if it was replaced
+    const badgeEl = document.getElementById('lockBadge1');
+    if (badgeEl && !badgeEl.classList.contains('lock-badge')) {
+      badgeEl.outerHTML = '<span class="lock-badge" id="lockBadge1">🔒 <span id="lockBadgeText1">Locked by Sharvanika</span></span>';
+    }
+  }
+
+  // ─── User B interactions ──────────────────────────────────────
+  function tryEdit1() {
+    if (!lockActive) {
+      showToast('✅ Article is now available. Opening editor...');
+      return;
+    }
+    openModal('modalLocked');
+  }
+
+  function tryEdit2() {
+    showToast('✅ Article is available. You can proceed to edit.');
+  }
+
+  function notifyMe() {
+    closeModal('modalLocked');
+    showToast('🔔 You will be notified when the article is unlocked.');
+  }
+
+  // ─── Debug shortcuts ──────────────────────────────────────────
+  function debugSkipTo5() {
+    if (!lockActive) return showToast('Lock is not active.');
+    secondsLeft = 5 * 60 - 1;
+    shown5 = false;
+    showToast('⚡ Jumped to 5-min mark.');
+  }
+  function debugSkipTo1() {
+    if (!lockActive) return showToast('Lock is not active.');
+    secondsLeft = 1 * 60 - 1;
+    shown5 = true; shown2 = true; shown1 = false;
+    ['warn5','warn2'].forEach(id => dismissBanner(id));
+    showToast('⚡ Jumped to 1-min mark.');
+  }
+  function debugExpire() {
+    if (!lockActive) return showToast('Lock is already expired.');
+    secondsLeft = 1;
+    shown5 = true; shown2 = true; shown1 = true;
+    ['warn5','warn2','warn1'].forEach(id => dismissBanner(id));
+    showToast('⚡ Expiring in 1 second...');
+  }
+</script>
+</body>
+</html>

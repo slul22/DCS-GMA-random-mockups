@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GMA News – Article Lock Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Open Sans','Segoe UI',Arial,sans-serif;
+      font-size: 14px;
+      background: #f4f6f8;
+      color: #222;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── DEBUG BAR ── */
+    .debug-bar {
+      background: #1a1a2e;
+      color: #aaa;
+      font-size: 11px;
+      padding: 4px 16px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .debug-bar .debug-label { color: #fff; font-weight: 600; margin-right: 4px; }
+    .debug-sep { color: #444; }
+    .debug-btn {
+      background: #2a2a3e;
+      color: #f0c040;
+      border: 1px solid #f0c040;
+      border-radius: 3px;
+      padding: 2px 10px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: inherit;
+      transition: background .12s;
+    }
+    .debug-btn:hover { background: #3a3a50; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border-bottom: 1px solid #dce1e7;
+      height: 52px;
+      flex-shrink: 0;
+    }
+    .navbar-left { display: flex; align-items: center; }
+    .nav-hamburger {
+      width: 52px; height: 52px;
+      border: none; background: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      border-right: 1px solid #dce1e7;
+    }
+    .nav-hamburger:hover { background: #f4f6f8; }
+    .nav-hamburger-inner { display: flex; flex-direction: column; gap: 4px; }
+    .nav-hamburger-bar { display: block; width: 18px; height: 2px; background: #555; border-radius: 1px; }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 15px; color: #c00;
+      padding: 0 20px;
+      user-select: none;
+    }
+    .nav-items { display: flex; align-items: center; gap: 4px; }
+    .nav-item {
+      padding: 0 14px; height: 52px;
+      display: flex; align-items: center;
+      cursor: pointer; font-size: 14px; color: #444;
+      border-bottom: 3px solid transparent;
+      gap: 4px; user-select: none;
+    }
+    .nav-item:hover { color: #0057b8; }
+    .nav-item.active { color: #0057b8; border-bottom-color: #0057b8; font-weight: 600; }
+    .nav-avatar {
+      width: 34px; height: 34px;
+      background: #c00; color: #fff;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+      margin-right: 20px;
+      flex-shrink: 0;
+      transition: background .25s;
+    }
+
+    /* ── PAGE SHELL ── */
+    .page-shell { display: flex; flex: 1; overflow: hidden; }
+    .left-nav {
+      width: 232px; flex-shrink: 0;
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(38,50,56,.12), 0 4px 5px rgba(38,50,56,.14);
+      overflow-y: auto; overflow-x: hidden;
+      transition: width .22s ease;
+      z-index: 50;
+    }
+    .left-nav.collapsed { width: 0; }
+    .lnav-section-hdr { padding: 22px 21px 8px; font-weight: 600; font-size: 15px; color: #3E3E3E; white-space: nowrap; }
+    .lnav-section-hdr.sub { padding-top: 14px; font-size: 12px; color: #767676; letter-spacing: 0.3px; text-transform: uppercase; }
+    .lnav-items { padding: 0 8px 8px; }
+    .lnav-item {
+      display: flex; align-items: center; gap: 8px;
+      height: 32px; border-radius: 4px;
+      cursor: pointer; margin-bottom: 2px;
+      white-space: nowrap; background: #fff;
+      transition: background .12s;
+      padding: 0 8px; font-size: 14px; color: #3E3E3E;
+    }
+    .lnav-item:hover { background: #f0f6ff; }
+    .lnav-item.active { background: #3E3E3E; color: #fff; font-weight: 600; }
+    .lnav-icon { font-size: 13px; flex-shrink: 0; }
+
+    /* ── PAGE CONTENT ── */
+    .page-content {
+      flex: 1; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── GMA TOPBAR ── */
+    .gma-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 28px;
+      background: #fff; border-bottom: 1px solid #BBC1C8;
+      flex-shrink: 0; gap: 12px;
+    }
+    .gma-topbar-left {
+      display: flex; align-items: center;
+      gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0;
+    }
+    .gma-topbar-title { font-size: 19px; font-weight: 700; color: #000; white-space: nowrap; }
+    .gma-topbar-meta {
+      font-size: 12.5px; color: #595959;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .meta-key { font-weight: 700; }
+    .status-dot-meta {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #096072; display: inline-block; margin-right: 4px;
+    }
+    .gma-topbar-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+    /* ── LOCK CHIP ── */
+    .lock-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 13px;
+      border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      border: 1.5px solid;
+      white-space: nowrap;
+      transition: background .5s, border-color .5s, color .5s;
+    }
+    .lock-chip.green { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
+    .lock-chip.amber { background: #fff8e1; color: #e65100; border-color: #ffa726; }
+    .lock-chip.red   {
+      background: #fde8ea; color: #b00020; border-color: #ef5350;
+      animation: pulse-red 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse-red {
+      0%,100% { box-shadow: 0 0 0 0 rgba(176,0,32,.3); }
+      50%      { box-shadow: 0 0 0 6px rgba(176,0,32,0); }
+    }
+    .lock-chip-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+    }
+
+    /* ── STEP TABS ── */
+    .gma-steptabs {
+      display: flex; align-items: center;
+      background: #fff; border-bottom: 2px solid #e0e4ea;
+      padding: 0 28px; flex-shrink: 0; overflow-x: auto;
+    }
+    .gma-steptab {
+      display: flex; align-items: center; gap: 8px;
+      padding: 13px 20px;
+      cursor: pointer; color: #666; font-size: 13px;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      white-space: nowrap; user-select: none;
+    }
+    .gma-steptab:hover:not(.active) { color: #333; }
+    .gma-steptab.active { color: #01518A; border-bottom-color: #01518A; font-weight: 600; }
+    .steptab-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px dashed #4D4D4D;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; flex-shrink: 0; color: #4D4D4D;
+    }
+    .gma-steptab.active .steptab-icon {
+      border-color: #01518A; border-style: solid;
+      color: #01518A; background: #e3f0fa;
+    }
+
+    /* ── VIEWER LOCK BANNER ── */
+    .viewer-lock-banner {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: #fffbf0;
+      border-bottom: 2px solid #f59e0b;
+      padding: 11px 28px;
+      flex-shrink: 0;
+    }
+    .viewer-lock-banner.show { display: flex; }
+    .vlb-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #c00; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+    .vlb-text { flex: 1; min-width: 0; }
+    .vlb-title { font-size: 13px; font-weight: 700; color: #92400e; }
+    .vlb-sub   { font-size: 12px; color: #78350f; margin-top: 2px; }
+    .vlb-timer {
+      font-size: 13px; font-weight: 700; color: #b45309;
+      background: #fef3c7; border: 1px solid #fbbf24;
+      border-radius: 4px; padding: 4px 11px; white-space: nowrap; flex-shrink: 0;
+    }
+    .vlb-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ── VIEWER EXPIRED BANNER ── */
+    .viewer-expired-banner {
+      display: none;
+      align-items: center; gap: 10px;
+      background: #f0faf0;
+      border-bottom: 2px solid #66bb6a;
+      padding: 10px 28px;
+      font-size: 13px; color: #1b5e20;
+      flex-shrink: 0;
+    }
+    .viewer-expired-banner.show { display: flex; }
+
+    /* ── EDITOR WARNING BANNERS ── */
+    .warn-banner {
+      display: none;
+      align-items: center; gap: 10px;
+      padding: 9px 28px;
+      font-size: 13px; font-weight: 600;
+      flex-shrink: 0;
+      border-bottom: 1.5px solid;
+    }
+    .warn-banner.show { display: flex; }
+    .warn-banner.amber { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+    .warn-banner.red   { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+    .warn-banner b { flex: 1; font-weight: 700; }
+    .warn-banner-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 15px; color: #aaa; line-height: 1; padding: 0 2px; flex-shrink: 0;
+    }
+    .warn-banner-close:hover { color: #555; }
+
+    /* ── EDITOR EXPIRED BANNER ── */
+    .editor-expired-banner {
+      display: none;
+      align-items: center; gap: 10px;
+      background: #fef2f2;
+      border-bottom: 2px solid #dc2626;
+      padding: 10px 28px;
+      font-size: 13px; color: #7f1d1d; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .editor-expired-banner.show { display: flex; }
+
+    /* ── FORM BODY ── */
+    .gma-body {
+      flex: 1; overflow-y: auto;
+      padding: 24px 40px;
+      background: #f4f6f8;
+    }
+    .gma-form-section {
+      background: #fff;
+      max-width: 880px;
+      padding: 28px 32px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+    }
+    .gma-form-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #000; }
+    .form-subtitle { font-size: 13px; color: #595959; margin-bottom: 22px; line-height: 1.55; }
+
+    /* Read-only tint overlay on form section */
+    .form-readonly-tint {
+      position: absolute; inset: 0;
+      background: rgba(245,245,245,0.55);
+      z-index: 5;
+      pointer-events: none;
+      display: none;
+      border-radius: inherit;
+    }
+    .form-readonly-tint.show { display: block; }
+
+    /* ── FIELDS ── */
+    .field-group { margin-bottom: 17px; }
+    .field-row { display: flex; gap: 20px; margin-bottom: 17px; }
+    .field-row .field-group { flex: 1; margin-bottom: 0; }
+    .field-label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: #595959; margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .field-label .ext { font-weight: 400; color: #767676; text-transform: none; letter-spacing: 0; font-size: 11px; }
+    .field-label .req { color: #c00; margin-left: 2px; }
+    .field-label .dim { color: #bbb; }
+    .field-input, .field-select {
+      width: 100%; padding: 8px 10px;
+      border: 1px solid #4D4D4D; border-radius: 0;
+      font-size: 14px; font-family: 'Open Sans',sans-serif;
+      color: #333; background: #fff; outline: none;
+      transition: border-color .15s; height: 38px;
+    }
+    .field-input:focus, .field-select:focus {
+      border-color: #01518A;
+      box-shadow: 0 0 0 2px rgba(1,81,138,.1);
+    }
+    .field-input:disabled, .field-select:disabled {
+      background: #f5f5f5; color: #999;
+      cursor: not-allowed; border-color: #e0e0e0;
+    }
+    .field-select {
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    /* Country chips */
+    .chips-wrap {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      padding: 7px 10px;
+      border: 1px solid #4D4D4D;
+      min-height: 38px; background: #fff;
+      transition: background .25s, border-color .25s;
+    }
+    .chips-wrap.readonly { background: #f5f5f5; border-color: #e0e0e0; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #e8f0fe; color: #1a4480;
+      border: 1px solid #adc4ef;
+      border-radius: 3px;
+      font-size: 12px; padding: 2px 9px;
+      transition: background .25s, color .25s, border-color .25s;
+    }
+    .chips-wrap.readonly .chip {
+      background: #f0f0f0; color: #999; border-color: #ddd;
+    }
+
+    /* Auto badge */
+    .auto-badge {
+      background: #e8f5e9; color: #2e7d32;
+      border: 1px solid #a5d6a7;
+      border-radius: 3px; padding: 1px 6px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0; text-transform: none;
+      vertical-align: middle;
+    }
+
+    /* RTE */
+    .rte-wrap { border: 1px solid #4D4D4D; overflow: hidden; transition: border-color .25s; }
+    .rte-wrap.readonly { border-color: #e0e0e0; }
+    .rte-toolbar {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
+      padding: 5px 8px;
+      background: #f8f9fa; border-bottom: 1px solid #ddd;
+    }
+    .rte-btn {
+      background: none; border: none; padding: 3px 6px;
+      cursor: pointer; font-size: 13px; color: #444; border-radius: 3px; line-height: 1.4;
+    }
+    .rte-btn:hover { background: #e9ecef; }
+    .rte-btn:disabled { color: #ccc; cursor: not-allowed; }
+    .rte-btn:disabled:hover { background: none; }
+    .rte-sep { width: 1px; height: 18px; background: #ddd; margin: 0 4px; }
+    .rte-select {
+      font-size: 12px; padding: 2px 6px;
+      border: 1px solid #ddd; border-radius: 3px;
+      background: #fff; cursor: pointer; color: #444;
+    }
+    .rte-body {
+      min-height: 110px; padding: 12px; outline: none;
+      font-size: 14px; color: #333; background: #fff; line-height: 1.6;
+      transition: background .25s, color .25s;
+    }
+    .rte-body.readonly {
+      background: #f5f5f5; pointer-events: none; color: #888;
+    }
+
+    .section-divider { border: none; border-top: 1px solid #e5e8ed; margin: 22px 0; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 8px 18px; border-radius: 4px;
+      font-size: 14px; cursor: pointer;
+      border: 1px solid #ccc; background: #fff; color: #333;
+      font-family: inherit;
+      transition: background .14s, border-color .14s, opacity .14s;
+    }
+    .btn:hover { background: #f0f2f5; }
+    .btn-next { background: #01518A; color: #fff; border-color: #01518A; font-weight: 700; }
+    .btn-next:hover { background: #013f6e; }
+    .btn-save { background: #fff; color: #146615; border-color: #146615; font-weight: 700; }
+    .btn-save:hover { background: #f0faf0; }
+    .btn-sm { padding: 5px 14px; font-size: 12px; }
+    .btn-amber { background: #f59e0b; color: #fff; border-color: #f59e0b; font-weight: 600; }
+    .btn-amber:hover { background: #d97706; }
+    .btn-danger { background: #dc2626; color: #fff; border-color: #dc2626; font-weight: 600; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:disabled:hover { filter: none; background: initial; }
+    .readonly-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f5f5f5; color: #767676;
+      border: 1px solid #ddd; border-radius: 4px;
+      font-size: 13px; padding: 7px 16px;
+      cursor: default; white-space: nowrap; font-family: inherit;
+    }
+
+    /* ── FOOTER ── */
+    .gma-footer {
+      background: #1A1A1A; color: #fff;
+      padding: 11px 44px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .gma-footer-links { text-decoration: underline; color: #fff; }
+
+    /* ── MODALS ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.42);
+      z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: #fff; border-radius: 6px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.22);
+      width: 460px; max-width: 95vw;
+      animation: slideIn .18s cubic-bezier(.16,1,.3,1);
+      overflow: hidden;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-18px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    .modal-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid #eee;
+    }
+    .modal-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px; flex-shrink: 0;
+    }
+    .modal-icon.blue  { background: #e3f0fa; }
+    .modal-icon.amber { background: #fff8e1; }
+    .modal-icon.red   { background: #fde8ea; }
+    .modal-icon.green { background: #e8f5e9; }
+    .modal-title { font-size: 16px; font-weight: 700; color: #000; flex: 1; }
+    .modal-close {
+      background: none; border: none; font-size: 20px;
+      color: #aaa; cursor: pointer; line-height: 1; flex-shrink: 0;
+    }
+    .modal-close:hover { color: #333; }
+    .modal-body {
+      padding: 18px 22px 20px;
+      font-size: 14px; color: #444; line-height: 1.65;
+    }
+    .modal-body p + p { margin-top: 10px; }
+    .modal-body strong { color: #222; }
+    .modal-info {
+      background: #f0f7ff; border: 1px solid #bdd7f5;
+      border-radius: 4px; padding: 10px 14px;
+      font-size: 13px; color: #1a4480; margin-top: 14px;
+      line-height: 1.5;
+    }
+    .modal-info.amber { background: #fffbeb; border-color: #fbbf24; color: #92400e; }
+    .modal-footer {
+      padding: 12px 22px 16px;
+      display: flex; gap: 10px; justify-content: flex-end;
+      border-top: 1px solid #eee;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      color: #fff;
+      border-radius: 6px; padding: 11px 24px;
+      font-size: 13px; font-family: inherit;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+      z-index: 2000;
+      transition: transform .3s cubic-bezier(.16,1,.3,1), opacity .3s;
+      opacity: 0; pointer-events: none;
+      display: flex; align-items: center; gap: 9px;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.green { background: #2e7d32; }
+    .toast.blue  { background: #01518A; }
+    .toast.amber { background: #c97d00; }
+
+    /* ── DEMO PILL ── */
+    .demo-pill {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: #1a1a2e; color: #fff;
+      border-radius: 40px;
+      box-shadow: 0 4px 22px rgba(0,0,0,0.38);
+      display: flex; align-items: center;
+      padding: 6px 6px 6px 15px;
+      gap: 10px; z-index: 900;
+    }
+    .demo-pill-label { color: #888; font-size: 11px; white-space: nowrap; }
+    .demo-pill-btns { display: flex; gap: 4px; }
+    .demo-pill-btn {
+      padding: 6px 14px; border-radius: 30px;
+      font-size: 12px; cursor: pointer; border: none;
+      font-family: inherit; font-weight: 600;
+      transition: background .15s, color .15s;
+    }
+    .demo-pill-btn.inactive { background: transparent; color: #777; }
+    .demo-pill-btn.inactive:hover { background: #2a2a3e; color: #ccc; }
+    .demo-pill-btn.is-editor { background: #2e7d32; color: #fff; }
+    .demo-pill-btn.is-viewer { background: #b45309; color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- ── Debug Bar ── -->
+<div class="debug-bar">
+  <span class="debug-label">🔒 Lock Prototype</span>
+  <span class="debug-sep">|</span>
+  <span style="color:#aaa;">Duration: 30 min &nbsp; Skip to:</span>
+  <button class="debug-btn" onclick="debugSkipTo(300)">⚡ 5-min warning</button>
+  <button class="debug-btn" onclick="debugSkipTo(60)">⚡ 1-min warning</button>
+  <button class="debug-btn" onclick="debugExpire()">⚡ Expire now</button>
+  <button class="debug-btn" onclick="debugReset()">↺ Reset</button>
+</div>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="nav-hamburger" id="lnavToggle" aria-label="Toggle navigation" aria-expanded="true">
+      <span class="nav-hamburger-inner">
+        <span class="nav-hamburger-bar"></span>
+        <span class="nav-hamburger-bar"></span>
+        <span class="nav-hamburger-bar"></span>
+      </span>
+    </button>
+    <div class="logo">
+      <svg viewBox="0 0 36 36" width="34" height="34" xmlns="http://www.w3.org/2000/svg">
+        <rect width="36" height="36" rx="4" fill="#C00"/>
+        <text x="18" y="23" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="13">UL</text>
+      </svg>
+      GMA
+    </div>
+    <div class="nav-items">
+      <div class="nav-item active">News <span style="font-size:10px;">▾</span></div>
+      <div class="nav-item">Regulations <span style="font-size:10px;">▾</span></div>
+      <div class="nav-item">Standards <span style="font-size:10px;">▾</span></div>
+      <div class="nav-item">Reports</div>
+    </div>
+  </div>
+  <div class="nav-avatar" id="navAvatar">SL</div>
+</nav>
+
+<!-- ── Page Shell ── -->
+<div class="page-shell">
+
+  <!-- Left Nav -->
+  <div class="left-nav" id="leftNav">
+    <div class="lnav-section-hdr">GMA News</div>
+    <div class="lnav-items">
+      <div class="lnav-item active"><span class="lnav-icon">📋</span> All News</div>
+      <div class="lnav-item"><span class="lnav-icon">⭐</span> Favorites</div>
+      <div class="lnav-item"><span class="lnav-icon">📝</span> My Drafts</div>
+      <div class="lnav-item"><span class="lnav-icon">🔍</span> Pending Review</div>
+      <div class="lnav-item"><span class="lnav-icon">✅</span> Published</div>
+      <div class="lnav-item"><span class="lnav-icon">🗂</span> Archived</div>
+    </div>
+    <div class="lnav-section-hdr sub">Filters</div>
+    <div class="lnav-items">
+      <div class="lnav-item"><span class="lnav-icon">🌍</span> By Region</div>
+      <div class="lnav-item"><span class="lnav-icon">🏷</span> By Scheme</div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- GMA Topbar -->
+    <div class="gma-topbar">
+      <div class="gma-topbar-left">
+        <span class="gma-topbar-title">EU — CENELEC EN IEC 62368-1:2024/A11:2024</span>
+        <div class="gma-topbar-meta">
+          <span><span class="meta-key">Status:</span> <span class="status-dot-meta"></span>Draft</span>
+          <span><span class="meta-key">Originator:</span> Lakshminarayanan, Sharvanika</span>
+          <span><span class="meta-key">Last saved:</span> May 11, 2026 09:15 AM</span>
+        </div>
+        <!-- Editor lock chip -->
+        <div class="lock-chip green" id="editorLockChip">
+          <span class="lock-chip-dot"></span>
+          <span>You're editing</span>
+          <span style="opacity:.5;">·</span>
+          <span id="lockChipTimer">30m 00s left</span>
+        </div>
+      </div>
+
+      <!-- Editor topbar actions -->
+      <div class="gma-topbar-actions" id="editorActions">
+        <button class="btn" style="border-color:#000;font-weight:700;">Close</button>
+        <button class="btn btn-next" id="btnNext">Next &nbsp;&#8594;</button>
+        <button class="btn btn-save" id="btnSave">Save</button>
+      </div>
+
+      <!-- Viewer topbar actions (hidden by default) -->
+      <div class="gma-topbar-actions" id="viewerActions" style="display:none;">
+        <button class="btn" style="border-color:#000;font-weight:700;">Close</button>
+        <span class="readonly-badge">🔒 Read only</span>
+      </div>
+    </div>
+
+    <!-- Step Tabs -->
+    <div class="gma-steptabs">
+      <div class="gma-steptab active">
+        <span style="font-size:15px;">⏰</span> News content
+      </div>
+      <div class="gma-steptab"><div class="steptab-icon">•</div> Impact analysis</div>
+      <div class="gma-steptab"><div class="steptab-icon">•</div> Documents</div>
+      <div class="gma-steptab"><div class="steptab-icon">•</div> Triggers</div>
+      <div class="gma-steptab"><div class="steptab-icon">•</div> Standard &amp; regulations</div>
+      <div class="gma-steptab"><div class="steptab-icon">•</div> Review</div>
+    </div>
+
+    <!-- ── VIEWER: Lock Banner ── -->
+    <div class="viewer-lock-banner" id="viewerLockBanner">
+      <div class="vlb-avatar">SL</div>
+      <div class="vlb-text">
+        <div class="vlb-title">Sharvanika L. is currently editing this article</div>
+        <div class="vlb-sub">This article is locked. You can view it in read-only mode.</div>
+      </div>
+      <div class="vlb-timer" id="vlbTimer">⏱ 30m 00s remaining</div>
+      <div class="vlb-actions">
+        <button class="btn btn-sm" onclick="openModal('modalNotify')" style="border-color:#92400e;color:#92400e;font-weight:600;">🔔 Notify me</button>
+        <button class="btn btn-sm btn-amber" onclick="openModal('modalRequest')">📨 Request access</button>
+      </div>
+    </div>
+
+    <!-- ── VIEWER: Session Ended Banner ── -->
+    <div class="viewer-expired-banner" id="viewerExpiredBanner">
+      <span style="font-size:16px;">✅</span>
+      <span style="flex:1;"><strong>Editing session ended.</strong> This article is now available for editing.</span>
+      <button class="btn btn-sm btn-next" onclick="showToast('You now have edit access — lock acquired', 'blue')">Edit Now</button>
+    </div>
+
+    <!-- ── EDITOR: Warning Banners ── -->
+    <div class="warn-banner amber" id="warn5">
+      <b>⚠️ Your editing lock expires in 5 minutes. Unsaved changes will be lost if it expires.</b>
+      <button class="btn btn-sm btn-amber" onclick="extendLock()">Extend Lock</button>
+      <button class="warn-banner-close" onclick="dismissBanner('warn5')" title="Dismiss">✕</button>
+    </div>
+    <div class="warn-banner amber" id="warn2">
+      <b>⚠️ Your editing lock expires in 2 minutes!</b>
+      <button class="btn btn-sm btn-amber" onclick="extendLock()">Extend Lock</button>
+      <button class="warn-banner-close" onclick="dismissBanner('warn2')" title="Dismiss">✕</button>
+    </div>
+    <div class="warn-banner red" id="warn1">
+      <b>🚨 Less than 1 minute remaining — your lock is about to expire!</b>
+      <button class="btn btn-sm btn-danger" onclick="extendLock()">Extend Lock</button>
+      <button class="warn-banner-close" onclick="dismissBanner('warn1')" title="Dismiss">✕</button>
+    </div>
+
+    <!-- ── EDITOR: Expired Banner ── -->
+    <div class="editor-expired-banner" id="editorExpiredBanner">
+      <span style="font-size:16px;">🔴</span>
+      <span style="flex:1;">Your editing lock has expired. Changes can no longer be saved.</span>
+      <button class="btn btn-sm" style="background:#01518A;color:#fff;border-color:#01518A;font-weight:600;" onclick="reacquireLock()">Re-acquire Lock</button>
+    </div>
+
+    <!-- Form Body -->
+    <div class="gma-body">
+      <div class="gma-form-section" id="formSection">
+        <!-- Read-only tint layer for viewer/expired state -->
+        <div class="form-readonly-tint" id="formReadonlyTint"></div>
+
+        <h2>Add news contents</h2>
+        <p class="form-subtitle">Fill out the following fields to add a new news item. Click the question mark icon to find out more about the requirements for each field.</p>
+
+        <!-- Scanned Date -->
+        <div class="field-group">
+          <label class="field-label">Scanned Date <span class="req">*</span></label>
+          <input type="date" class="field-input" id="f-scanned" value="2026-05-11" style="max-width:240px;" />
+        </div>
+
+        <!-- Title -->
+        <div class="field-group">
+          <label class="field-label">Title <span class="ext">(External)</span> <span class="req">*</span></label>
+          <input type="text" class="field-input" id="f-title" value="European Union — CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 — Safety Requirements for Audio/Video, Information and Communication Technology Equipment" />
+        </div>
+
+        <!-- Scheme -->
+        <div class="field-group">
+          <label class="field-label">Scheme <span class="ext">(External)</span></label>
+          <select class="field-select" id="f-scheme">
+            <option>[3] schemes selected</option>
+            <option>IECEE CB Scheme</option>
+            <option>D-Mark Scheme</option>
+            <option>ANZ Certification Scheme</option>
+          </select>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Country / Jurisdiction -->
+        <div class="field-group">
+          <label class="field-label">Country and Jurisdiction <span class="req">*</span> <span class="ext">(External)</span></label>
+          <div class="chips-wrap" id="f-countries">
+            <span class="chip">🇪🇺 European Union</span>
+            <span class="chip">🇩🇪 Germany</span>
+            <span class="chip">🇫🇷 France</span>
+            <span class="chip">🇮🇹 Italy</span>
+            <span class="chip">🇪🇸 Spain</span>
+            <span class="chip">🇳🇱 Netherlands</span>
+          </div>
+        </div>
+
+        <!-- Region (auto) -->
+        <div class="field-group">
+          <label class="field-label">Region <span class="ext">(External)</span> <span class="auto-badge">AUTO</span></label>
+          <div class="chips-wrap" id="f-region" style="pointer-events:none;">
+            <span class="chip">🌍 Europe</span>
+          </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Regulation Type + News Level -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Regulation Type <span class="ext">(External)</span></label>
+            <select class="field-select" id="f-regtype">
+              <option value="">Select an item</option>
+              <option selected>Standard</option>
+              <option>Directive</option>
+              <option>Regulation</option>
+              <option>Technical Specification</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">News Level <span class="ext">(External)</span></label>
+            <select class="field-select" id="f-newslevel">
+              <option value="">Select an item</option>
+              <option>Draft</option>
+              <option selected>Finalized</option>
+              <option>In Development</option>
+              <option>Notification</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Issuer -->
+        <div class="field-group">
+          <label class="field-label">Issuer <span class="ext">(External)</span></label>
+          <select class="field-select" id="f-issuer">
+            <option value="">Select an item</option>
+            <option selected>CENELEC</option>
+            <option>European Commission</option>
+            <option>IEC</option>
+            <option>ISO</option>
+          </select>
+        </div>
+
+        <!-- Details Affected Products -->
+        <div class="field-group">
+          <label class="field-label">Details <span class="ext">(External)</span></label>
+          <div class="rte-wrap" id="rteDetailsWrap">
+            <div class="rte-toolbar">
+              <select class="rte-select"><option>Paragraph</option><option>Heading 1</option><option>Heading 2</option></select>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" id="rte1-b" onclick="rteCmd('rte-details','bold')"><b>B</b></button>
+              <button class="rte-btn" id="rte1-i" onclick="rteCmd('rte-details','italic')"><i>I</i></button>
+              <button class="rte-btn" id="rte1-u" onclick="rteCmd('rte-details','underline')"><u>U</u></button>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" id="rte1-ul" onclick="rteCmd('rte-details','insertUnorderedList')">• —</button>
+              <button class="rte-btn" id="rte1-ol" onclick="rteCmd('rte-details','insertOrderedList')">1 —</button>
+            </div>
+            <div class="rte-body" id="rte-details" contenteditable="true">
+              <p>CENELEC has published the amended standard EN IEC 62368-1:2024/A11:2024 covering safety requirements for audio/video, information and communication technology equipment. The amendment introduces updated test procedures for thermal hazards and revised insulation requirements applicable to products sold across EU member states.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="field-group">
+          <label class="field-label">Summary <span class="ext">(External)</span></label>
+          <div class="rte-wrap" id="rteSummaryWrap">
+            <div class="rte-toolbar">
+              <select class="rte-select"><option>Paragraph</option><option>Heading 1</option><option>Heading 2</option></select>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" id="rte2-b" onclick="rteCmd('rte-summary','bold')"><b>B</b></button>
+              <button class="rte-btn" id="rte2-i" onclick="rteCmd('rte-summary','italic')"><i>I</i></button>
+              <button class="rte-btn" id="rte2-u" onclick="rteCmd('rte-summary','underline')"><u>U</u></button>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" id="rte2-ul" onclick="rteCmd('rte-summary','insertUnorderedList')">• —</button>
+              <button class="rte-btn" id="rte2-ol" onclick="rteCmd('rte-summary','insertOrderedList')">1 —</button>
+            </div>
+            <div class="rte-body" id="rte-summary" contenteditable="true">
+              <p>Published amendment to EN IEC 62368-1:2024 with updated thermal hazard test procedures and revised insulation requirements for AV/IT equipment sold in the EU market.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates row -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Published Date <span class="ext">(External)</span></label>
+            <input type="date" class="field-input" id="f-pubdate" value="2026-05-08" style="max-width:240px;" />
+          </div>
+          <div class="field-group">
+            <label class="field-label"><span class="dim">Mandatory Date <span class="ext dim">(External)</span></span></label>
+            <input type="date" class="field-input" id="f-manddate" disabled style="max-width:240px;" />
+          </div>
+        </div>
+
+      </div><!-- /gma-form-section -->
+    </div><!-- /gma-body -->
+
+    <!-- Footer -->
+    <div class="gma-footer">
+      <span>● &nbsp;UL LLC ©2026. All rights reserved.</span>
+      <span class="gma-footer-links">Online Policies &nbsp;&nbsp; About Cookies &nbsp;&nbsp; Data Subject Access Request Portal</span>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /page-shell -->
+
+<!-- ── Demo Toggle Pill ── -->
+<div class="demo-pill">
+  <span class="demo-pill-label">Viewing as</span>
+  <div class="demo-pill-btns">
+    <button class="demo-pill-btn is-editor" id="pillEditor" onclick="setRole('editor')">✏️ Editor · Sharvanika</button>
+    <button class="demo-pill-btn inactive"  id="pillViewer" onclick="setRole('viewer')">👁 Viewer · John</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════════ -->
+
+<!-- Extend Lock -->
+<div class="modal-overlay" id="modalExtend">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon blue">🔒</div>
+      <div class="modal-title">Extend editing lock</div>
+      <button class="modal-close" onclick="closeModal('modalExtend')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Extending your lock will give you an additional <strong>30 minutes</strong> of exclusive editing access to this article.</p>
+      <div class="modal-info">
+        📌 Other users attempting to edit will continue to see this article as locked until your session ends or you close the editor.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalExtend')">Cancel</button>
+      <button class="btn btn-next" onclick="confirmExtend()">Extend by 30 minutes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notify Me -->
+<div class="modal-overlay" id="modalNotify">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon blue">🔔</div>
+      <div class="modal-title">Notify me when available</div>
+      <button class="modal-close" onclick="closeModal('modalNotify')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>You'll receive an in-app notification as soon as <strong>Sharvanika L.</strong> releases the lock or their session expires.</p>
+      <p style="font-size:13px;color:#767676;">The article will remain in read-only mode until then. You can continue browsing other articles in the meantime.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalNotify')">Cancel</button>
+      <button class="btn btn-next" onclick="confirmNotify()">Notify me</button>
+    </div>
+  </div>
+</div>
+
+<!-- Request Access -->
+<div class="modal-overlay" id="modalRequest">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon amber">📨</div>
+      <div class="modal-title">Request editing access</div>
+      <button class="modal-close" onclick="closeModal('modalRequest')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>A notification will be sent to <strong>Sharvanika L.</strong> asking them to release the lock on this article.</p>
+      <p style="font-size:13px;color:#767676;">They can choose to save and release, or decline your request. You'll be notified of their response.</p>
+      <div class="modal-info amber">
+        ⚠️ Only send if urgent — this will interrupt Sharvanika's current editing session.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalRequest')">Cancel</button>
+      <button class="btn btn-amber" onclick="confirmRequest()">Send request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Re-acquire Lock -->
+<div class="modal-overlay" id="modalReacquire">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon red">⏰</div>
+      <div class="modal-title">Editing lock expired</div>
+      <button class="modal-close" onclick="closeModal('modalReacquire')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Your 30-minute editing lock has expired. <strong>Your unsaved changes are still visible</strong> but cannot be saved until you re-acquire the lock.</p>
+      <p style="font-size:13px;color:#767676;">If no other user has taken the lock, you can re-acquire it immediately.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalReacquire')">Discard changes</button>
+      <button class="btn btn-next" onclick="confirmReacquire()">Re-acquire lock &amp; save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast green" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">Done.</span>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+const LOCK_DURATION = 30 * 60; // seconds
+let secondsLeft = LOCK_DURATION;
+let role = 'editor';
+let expired = false;
+let warn5Shown = false;
+let warn2Shown = false;
+let warn1Shown = false;
+
+// ════════════════════════════════════════════════════════
+//  TIMER
+// ════════════════════════════════════════════════════════
+function fmtTime(s) {
+  const m  = Math.floor(s / 60);
+  const ss = s % 60;
+  return `${m}m ${String(ss).padStart(2, '0')}s`;
+}
+
+function tick() {
+  if (expired) return;
+  if (secondsLeft > 0) secondsLeft--;
+  updateTimerDisplays();
+  checkThresholds();
+  if (secondsLeft === 0 && !expired) triggerExpiry();
+}
+
+function updateTimerDisplays() {
+  const t = fmtTime(secondsLeft);
+  document.getElementById('lockChipTimer').textContent = `${t} left`;
+  document.getElementById('vlbTimer').textContent = `⏱ ${t} remaining`;
+}
+
+function checkThresholds() {
+  if (secondsLeft <= 300 && secondsLeft > 120 && !warn5Shown) {
+    document.getElementById('warn5').classList.add('show');
+    warn5Shown = true;
+    setChipColor('amber');
+  }
+  if (secondsLeft <= 120 && secondsLeft > 60 && !warn2Shown) {
+    document.getElementById('warn2').classList.add('show');
+    warn2Shown = true;
+  }
+  if (secondsLeft <= 60 && !warn1Shown) {
+    document.getElementById('warn1').classList.add('show');
+    warn1Shown = true;
+    setChipColor('red');
+  }
+}
+
+function setChipColor(color) {
+  const chip = document.getElementById('editorLockChip');
+  chip.className = `lock-chip ${color}`;
+}
+
+function triggerExpiry() {
+  expired = true;
+  setChipColor('red');
+  document.getElementById('lockChipTimer').textContent = 'Expired';
+  if (role === 'editor') {
+    showEditorExpired();
+  } else {
+    showViewerExpired();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  ROLE SWITCHING
+// ════════════════════════════════════════════════════════
+function setRole(r) {
+  role = r;
+  const isEditor = (r === 'editor');
+
+  // Demo pill
+  document.getElementById('pillEditor').className = 'demo-pill-btn ' + (isEditor ? 'is-editor' : 'inactive');
+  document.getElementById('pillViewer').className = 'demo-pill-btn ' + (!isEditor ? 'is-viewer' : 'inactive');
+
+  // Avatar
+  document.getElementById('navAvatar').textContent   = isEditor ? 'SL' : 'JP';
+  document.getElementById('navAvatar').style.background = isEditor ? '#c00' : '#555';
+
+  // Topbar actions
+  document.getElementById('editorLockChip').style.display = isEditor ? '' : 'none';
+  document.getElementById('editorActions').style.display  = isEditor ? '' : 'none';
+  document.getElementById('viewerActions').style.display  = isEditor ? 'none' : '';
+
+  // Viewer banners
+  const vl  = document.getElementById('viewerLockBanner');
+  const vle = document.getElementById('viewerExpiredBanner');
+  if (!isEditor) {
+    if (expired) { vl.classList.remove('show'); vle.classList.add('show'); }
+    else         { vl.classList.add('show');    vle.classList.remove('show'); }
+  } else {
+    vl.classList.remove('show');
+    vle.classList.remove('show');
+  }
+
+  // Editor banners — hide/show based on role and state
+  const warnIds = ['warn5','warn2','warn1'];
+  warnIds.forEach(id => {
+    document.getElementById(id).style.display = (isEditor) ? '' : 'none';
+  });
+
+  const expBanner = document.getElementById('editorExpiredBanner');
+  expBanner.style.display = (isEditor && expired) ? '' : 'none';
+  if (isEditor && expired) expBanner.classList.add('show');
+  else expBanner.classList.remove('show');
+
+  // Form fields
+  setFormReadOnly(!isEditor || expired);
+}
+
+function setFormReadOnly(readonly) {
+  // Standard inputs/selects
+  ['f-scanned', 'f-title', 'f-scheme', 'f-regtype', 'f-newslevel', 'f-issuer', 'f-pubdate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = readonly;
+  });
+
+  // RTE bodies
+  ['rte-details', 'rte-summary'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.contentEditable = readonly ? 'false' : 'true';
+      el.classList.toggle('readonly', readonly);
+    }
+  });
+
+  // RTE wraps
+  ['rteDetailsWrap', 'rteSummaryWrap'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('readonly', readonly);
+  });
+
+  // RTE toolbar buttons
+  ['rte1-b','rte1-i','rte1-u','rte1-ul','rte1-ol',
+   'rte2-b','rte2-i','rte2-u','rte2-ul','rte2-ol'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = readonly;
+  });
+
+  // Chip wraps
+  ['f-countries'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('readonly', readonly);
+  });
+
+  // Tint overlay
+  document.getElementById('formReadonlyTint').classList.toggle('show', readonly);
+}
+
+// ════════════════════════════════════════════════════════
+//  EXPIRED STATES
+// ════════════════════════════════════════════════════════
+function showEditorExpired() {
+  ['warn5','warn2','warn1'].forEach(id => document.getElementById(id).classList.remove('show'));
+  const eb = document.getElementById('editorExpiredBanner');
+  eb.style.display = '';
+  eb.classList.add('show');
+  setFormReadOnly(true);
+  ['btnNext','btnSave'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) { b.disabled = true; }
+  });
+}
+
+function showViewerExpired() {
+  document.getElementById('viewerLockBanner').classList.remove('show');
+  document.getElementById('viewerExpiredBanner').classList.add('show');
+}
+
+// ════════════════════════════════════════════════════════
+//  ACTIONS
+// ════════════════════════════════════════════════════════
+function extendLock() { openModal('modalExtend'); }
+
+function confirmExtend() {
+  closeModal('modalExtend');
+  secondsLeft = LOCK_DURATION;
+  expired = false;
+  warn5Shown = false; warn2Shown = false; warn1Shown = false;
+  setChipColor('green');
+  ['warn5','warn2','warn1'].forEach(id => document.getElementById(id).classList.remove('show'));
+  updateTimerDisplays();
+  showToast('Lock extended — 30 minutes remaining', 'blue');
+}
+
+function reacquireLock() { openModal('modalReacquire'); }
+
+function confirmReacquire() {
+  closeModal('modalReacquire');
+  secondsLeft = LOCK_DURATION;
+  expired = false;
+  warn5Shown = false; warn2Shown = false; warn1Shown = false;
+  setChipColor('green');
+  const eb = document.getElementById('editorExpiredBanner');
+  eb.classList.remove('show');
+  updateTimerDisplays();
+  setFormReadOnly(false);
+  ['btnNext','btnSave'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) { b.disabled = false; }
+  });
+  showToast('Lock re-acquired — 30 minutes remaining', 'blue');
+}
+
+function confirmNotify() {
+  closeModal('modalNotify');
+  showToast("You'll be notified when the article is available", 'blue');
+}
+
+function confirmRequest() {
+  closeModal('modalRequest');
+  showToast('Request sent — Sharvanika L. has been notified', 'amber');
+}
+
+function dismissBanner(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// ════════════════════════════════════════════════════════
+//  MODALS & TOAST
+// ════════════════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+let toastTimer = null;
+function showToast(msg, type) {
+  const t    = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  const msgEl= document.getElementById('toastMsg');
+  t.className = 'toast ' + (type || 'green');
+  icon.textContent  = type === 'amber' ? '📨' : type === 'blue' ? '🔒' : '✅';
+  msgEl.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3800);
+}
+
+// ════════════════════════════════════════════════════════
+//  DEBUG HELPERS
+// ════════════════════════════════════════════════════════
+function debugSkipTo(s) {
+  secondsLeft = s + 1; // +1 so next tick lands exactly on threshold
+  updateTimerDisplays();
+}
+
+function debugExpire() {
+  secondsLeft = 0;
+  triggerExpiry();
+  updateTimerDisplays();
+}
+
+function debugReset() {
+  secondsLeft = LOCK_DURATION;
+  expired = false;
+  warn5Shown = false; warn2Shown = false; warn1Shown = false;
+  setChipColor('green');
+  ['warn5','warn2','warn1'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('show');
+    el.style.display = '';
+  });
+  document.getElementById('editorExpiredBanner').classList.remove('show');
+  document.getElementById('viewerExpiredBanner').classList.remove('show');
+  updateTimerDisplays();
+  setFormReadOnly(false);
+  setRole(role); // re-apply current role cleanly
+  ['btnNext','btnSave'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) { b.disabled = false; }
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  RTE
+// ════════════════════════════════════════════════════════
+function rteCmd(targetId, cmd) {
+  document.getElementById(targetId).focus();
+  document.execCommand(cmd, false, null);
+}
+
+// ════════════════════════════════════════════════════════
+//  LEFT NAV TOGGLE
+// ════════════════════════════════════════════════════════
+document.getElementById('lnavToggle').addEventListener('click', () => {
+  const lnav = document.getElementById('leftNav');
+  lnav.classList.toggle('collapsed');
+  document.getElementById('lnavToggle').setAttribute(
+    'aria-expanded', String(!lnav.classList.contains('collapsed'))
+  );
+});
+
+// ════════════════════════════════════════════════════════
+//  MODAL: CLOSE ON OVERLAY CLICK + ESC
+// ════════════════════════════════════════════════════════
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(el => el.classList.remove('show'));
+  }
+});
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+setInterval(tick, 1000);
+setRole('editor');
+updateTimerDisplays();
+</script>
+</body>
+</html>
