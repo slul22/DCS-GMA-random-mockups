@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GMA News – Distribution Settings Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Open Sans','Segoe UI',Arial,sans-serif;
+      font-size: 14px;
+      background: #f4f6f8;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff; border-bottom: 1px solid #dce1e7;
+      height: 52px; flex-shrink: 0;
+    }
+    .navbar-left { display: flex; align-items: center; }
+    .nav-hamburger {
+      width: 52px; height: 52px;
+      border: none; background: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-right: 1px solid #dce1e7;
+    }
+    .nav-hamburger-inner { display: flex; flex-direction: column; gap: 4px; }
+    .nav-hamburger-bar { display: block; width: 18px; height: 2px; background: #555; border-radius: 1px; }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 15px; color: #c00;
+      padding: 0 20px; user-select: none;
+    }
+    .logo svg { width: 28px; height: 28px; }
+    .nav-avatar {
+      width: 34px; height: 34px;
+      background: #c00; color: #fff;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+      margin-right: 20px;
+    }
+
+    /* ── TOPBAR ── */
+    .gma-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 28px;
+      background: #fff; border-bottom: 1px solid #BBC1C8;
+      flex-shrink: 0; gap: 12px;
+    }
+    .gma-topbar-left { display: flex; flex-direction: column; gap: 3px; }
+    .gma-topbar-title { font-size: 19px; font-weight: 700; color: #000; }
+    .gma-topbar-meta {
+      font-size: 12.5px; color: #595959;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .meta-key { font-weight: 700; }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #096072; display: inline-block; margin-right: 4px;
+    }
+    .gma-topbar-actions { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      padding: 7px 18px; border-radius: 3px;
+      font-size: 13px; font-weight: 600;
+      border: 1.5px solid; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
+    }
+    .btn-primary { background: #01518A; color: #fff; border-color: #01518A; }
+    .btn-primary:hover { background: #013f6b; }
+    .btn-secondary { background: #fff; color: #01518A; border-color: #01518A; }
+    .btn-secondary:hover { background: #e3f0fa; }
+    .btn-ghost { background: #fff; color: #444; border-color: #ccc; }
+    .btn-ghost:hover { background: #f4f6f8; }
+
+    /* ── STEP TABS ── */
+    .gma-steptabs {
+      display: flex; align-items: center;
+      background: #fff; border-bottom: 2px solid #e0e4ea;
+      padding: 0 28px; flex-shrink: 0;
+    }
+    .gma-steptab {
+      display: flex; align-items: center; gap: 8px;
+      padding: 13px 20px;
+      cursor: pointer; color: #666; font-size: 13px;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      white-space: nowrap; user-select: none;
+    }
+    .gma-steptab.active { color: #01518A; border-bottom-color: #01518A; font-weight: 600; }
+    .steptab-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px dashed #4D4D4D;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; flex-shrink: 0; color: #4D4D4D;
+    }
+    .gma-steptab.active .steptab-icon {
+      border-color: #01518A; border-style: solid;
+      color: #01518A; background: #e3f0fa;
+    }
+
+    /* ── BODY ── */
+    .gma-body {
+      flex: 1;
+      padding: 32px 40px;
+      background: #f4f6f8;
+    }
+    .gma-form-section {
+      background: #fff;
+      max-width: 880px;
+      padding: 28px 32px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .gma-form-section h2 {
+      font-size: 18px; font-weight: 700;
+      margin-bottom: 6px; color: #000;
+    }
+    .form-subtitle {
+      font-size: 13px; color: #595959;
+      margin-bottom: 22px; line-height: 1.55;
+    }
+
+    /* ── FIELDS ── */
+    .field-group { margin-bottom: 17px; }
+    .field-label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: #595959; margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .field-label .ext { font-weight: 400; color: #767676; text-transform: none; letter-spacing: 0; font-size: 11px; }
+    .field-label .req { color: #c00; margin-left: 2px; }
+    .field-input, .field-select {
+      width: 100%; padding: 8px 10px;
+      border: 1px solid #4D4D4D; border-radius: 0;
+      font-size: 14px; font-family: 'Open Sans',sans-serif;
+      color: #333; background: #fff; outline: none;
+      height: 38px;
+    }
+    .field-input:focus, .field-select:focus {
+      border-color: #01518A;
+      box-shadow: 0 0 0 2px rgba(1,81,138,.1);
+    }
+    .field-select {
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    .section-divider { border: none; border-top: 1px solid #e8eaed; margin: 22px 0; }
+
+    /* ── TOGGLE ── */
+    .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #ccc; border-radius: 22px;
+      cursor: pointer; transition: background .2s;
+    }
+    .toggle-track::before {
+      content: ''; position: absolute;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px;
+      transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    }
+    .toggle-switch input:checked + .toggle-track { background: #2e7d32; }
+    .toggle-switch input:checked + .toggle-track::before { transform: translateX(18px); }
+    .toggle-switch input:focus-visible + .toggle-track { outline: 2px solid #2e7d32; outline-offset: 2px; }
+
+    /* ── DISTRIBUTION ROW ── */
+    .distribution-row {
+      display: flex; align-items: center; gap: 28px;
+      background: #f5f7f9; border: 1px solid #e0e4ea;
+      border-radius: 6px; padding: 10px 14px;
+      margin-bottom: 17px;
+    }
+    .dist-label {
+      font-size: 11px; font-weight: 600; color: #595959;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      min-width: 100px; flex-shrink: 0;
+    }
+    .dist-divider {
+      width: 1px; height: 28px; background: #d0d5db; flex-shrink: 0;
+    }
+    .dist-options {
+      display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+    }
+    .dist-option {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dist-option-label {
+      font-size: 13px; color: #2d2d2d; white-space: nowrap;
+    }
+    .dist-option-sublabel {
+      font-size: 11px; color: #767676; margin-top: 1px;
+    }
+
+    /* ── VARIANT ANNOTATION ── */
+    .prototype-note {
+      background: #1a1a2e; color: #f0c040;
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 3px;
+      display: inline-block; margin-bottom: 18px;
+      letter-spacing: 0.3px;
+    }
+    .variant-section {
+      margin-bottom: 40px;
+    }
+    .variant-title {
+      font-size: 13px; font-weight: 700; color: #595959;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 12px; padding-bottom: 6px;
+      border-bottom: 2px solid #e0e4ea;
+    }
+
+    /* ── CHIPS ── */
+    .chips-wrap {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      padding: 7px 10px;
+      border: 1px solid #4D4D4D;
+      min-height: 38px; background: #fff;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #e8f0f7; color: #1b3a5c;
+      border-radius: 3px; padding: 2px 8px;
+      font-size: 12px; font-weight: 600;
+    }
+
+    /* status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      background: #e8f5e9; color: #2e7d32; border: 1.5px solid #66bb6a;
+    }
+    .status-dot-sm { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+    /* notification preview panel */
+    .notify-preview {
+      display: none;
+      margin-top: 10px;
+      background: #f0faf0; border: 1px solid #a5d6a7;
+      border-radius: 5px; padding: 12px 16px;
+      font-size: 13px; color: #1b5e20; line-height: 1.55;
+      animation: fadeIn .2s ease;
+    }
+    .notify-preview.show { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .notify-preview strong { color: #1b5e20; }
+    .notify-preview .notify-preview-chips {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    }
+    .notify-preview .notify-chip {
+      background: #c8e6c9; color: #1b5e20;
+      border-radius: 3px; padding: 2px 8px;
+      font-size: 11px; font-weight: 600;
+    }
+
+    /* ── MULTISELECT DROPDOWN ── */
+    .ms-wrapper { position: relative; }
+    .ms-trigger {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 8px 10px;
+      border: 1px solid #4D4D4D; border-radius: 0;
+      background: #fff; cursor: pointer;
+      font-size: 14px; font-family: inherit; color: #333;
+      min-height: 38px; user-select: none;
+    }
+    .ms-trigger:focus { outline: 2px solid #01518A; outline-offset: -2px; }
+    .ms-trigger.open { border-color: #01518A; box-shadow: 0 0 0 2px rgba(1,81,138,.1); }
+    .ms-trigger-text { flex: 1; text-align: left; }
+    .ms-trigger-text.placeholder { color: #999; }
+    .ms-caret {
+      font-size: 10px; color: #666; margin-left: 8px; flex-shrink: 0;
+      transition: transform .15s;
+    }
+    .ms-trigger.open .ms-caret { transform: rotate(180deg); }
+    .ms-dropdown {
+      display: none; position: absolute; top: calc(100% + 2px); left: 0; right: 0;
+      background: #fff; border: 1px solid #4D4D4D;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
+      z-index: 100; max-height: 240px; overflow-y: auto;
+    }
+    .ms-dropdown.open { display: block; }
+    .ms-option {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 14px; cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background .1s;
+    }
+    .ms-option:last-child { border-bottom: none; }
+    .ms-option:hover { background: #f0f6ff; }
+    .ms-option.selected { background: #e8f5e9; }
+    .ms-option input[type=checkbox] { margin-top: 2px; flex-shrink: 0; accent-color: #2e7d32; width: 15px; height: 15px; }
+    .ms-option-content { flex: 1; }
+    .ms-option-label { font-size: 13px; font-weight: 600; color: #2d2d2d; }
+    .ms-option-desc { font-size: 11px; color: #767676; margin-top: 2px; }
+    .ms-tags {
+      display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;
+    }
+    .ms-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #e8f0f7; color: #1b3a5c;
+      border-radius: 3px; padding: 3px 8px;
+      font-size: 12px; font-weight: 600;
+    }
+    .ms-tag.green { background: #e8f5e9; color: #2e7d32; }
+    .ms-tag-remove {
+      background: none; border: none; cursor: pointer;
+      color: inherit; font-size: 13px; padding: 0; line-height: 1;
+      opacity: .6;
+    }
+    .ms-tag-remove:hover { opacity: 1; }
+
+    /* single-select as field */
+    .dist-select-row {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      background: #f5f7f9; border: 1px solid #e0e4ea;
+      border-radius: 6px; padding: 10px 14px;
+      margin-bottom: 17px;
+    }
+    .dist-select-row .dist-label { min-width: 100px; flex-shrink: 0; }
+    .dist-select-row .dist-field { flex: 1; min-width: 180px; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <button class="nav-hamburger" aria-label="Menu">
+        <span class="nav-hamburger-inner">
+          <span class="nav-hamburger-bar"></span>
+          <span class="nav-hamburger-bar"></span>
+          <span class="nav-hamburger-bar"></span>
+        </span>
+      </button>
+      <div class="logo">
+        <svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="4" fill="#c00"/><text x="5" y="20" font-family="Arial" font-weight="700" font-size="14" fill="#fff">UL</text></svg>
+        GMA News
+      </div>
+    </div>
+    <div class="nav-avatar">RB</div>
+  </nav>
+
+  <!-- TOPBAR -->
+  <div class="gma-topbar">
+    <div class="gma-topbar-left">
+      <div class="gma-topbar-title">European Union — CENELEC Published Amended Standard</div>
+      <div class="gma-topbar-meta">
+        <span><span class="meta-key">Status:</span> <span class="status-dot"></span>In Progress</span>
+        <span><span class="meta-key">Originator:</span> Ryan Bell</span>
+        <span><span class="meta-key">Last saved:</span> Today, 9:41 AM</span>
+      </div>
+    </div>
+    <div class="gma-topbar-actions">
+      <button class="btn btn-ghost">Save draft</button>
+      <button class="btn btn-primary">Publish</button>
+    </div>
+  </div>
+
+  <!-- STEP TABS -->
+  <div class="gma-steptabs">
+    <div class="gma-steptab active">
+      <span class="steptab-icon">1</span> Add news contents
+    </div>
+    <div class="gma-steptab">
+      <span class="steptab-icon">2</span> Review
+    </div>
+    <div class="gma-steptab">
+      <span class="steptab-icon">3</span> Publish
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="gma-body">
+    <div class="gma-form-section">
+
+      <span class="prototype-note">PROTOTYPE — Distribution Settings · Option B</span>
+
+      <h2>Add news contents</h2>
+      <p class="form-subtitle">Fill out the following fields to add a new news item. Click the question mark icon to find out more about the requirements for each field.</p>
+
+      <!-- ── VARIANT A: Minimal flat row ── -->
+      <div class="variant-section">
+        <div class="variant-title">Variant A — Minimal flat row</div>
+
+        <div class="distribution-row">
+          <span class="dist-label">Distribution</span>
+          <div class="dist-divider"></div>
+          <div class="dist-options">
+            <div class="dist-option">
+              <label class="toggle-switch" aria-label="Toggle Emergo News">
+                <input type="checkbox" id="emergo-a" />
+                <span class="toggle-track"></span>
+              </label>
+              <span class="dist-option-label">Emergo News</span>
+            </div>
+            <div class="dist-option">
+              <label class="toggle-switch" aria-label="Notify customers">
+                <input type="checkbox" id="notify-a" onchange="togglePreview('preview-a', this)" />
+                <span class="toggle-track"></span>
+              </label>
+              <span class="dist-option-label">Notify customers when published</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="notify-preview" id="preview-a">
+          <strong>Customer notification will be sent on publish.</strong>
+          Subscribed customers for the following schemes will receive an email notification:
+          <div class="notify-preview-chips">
+            <span class="notify-chip">IECEE CB Scheme</span>
+            <span class="notify-chip">D-Mark Scheme</span>
+            <span class="notify-chip">ANZ Certification Scheme</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VARIANT B: Two field rows ── -->
+      <div class="variant-section">
+        <div class="variant-title">Variant B — Two inline field rows</div>
+
+        <div class="field-group" style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e0e4ea;border-radius:4px;padding:10px 14px;background:#f5f7f9;margin-bottom:8px;">
+          <div>
+            <div class="field-label" style="margin-bottom:2px;">Emergo News</div>
+            <div style="font-size:12px;color:#767676;">Tag this article for Emergo News distribution</div>
+          </div>
+          <label class="toggle-switch" aria-label="Emergo News">
+            <input type="checkbox" id="emergo-b" />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="field-group" style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e0e4ea;border-radius:4px;padding:10px 14px;background:#f5f7f9;">
+          <div>
+            <div class="field-label" style="margin-bottom:2px;">Customer Notification</div>
+            <div style="font-size:12px;color:#767676;">Notify subscribed customers by email when this article is published</div>
+          </div>
+          <label class="toggle-switch" aria-label="Customer notification">
+            <input type="checkbox" id="notify-b" onchange="togglePreview('preview-b', this)" />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="notify-preview" id="preview-b">
+          <strong>Customer notification will be sent on publish.</strong>
+          Subscribed customers for the following schemes will receive an email notification:
+          <div class="notify-preview-chips">
+            <span class="notify-chip">IECEE CB Scheme</span>
+            <span class="notify-chip">D-Mark Scheme</span>
+            <span class="notify-chip">ANZ Certification Scheme</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VARIANT C: Compact chips ── -->
+      <div class="variant-section">
+        <div class="variant-title">Variant C — Compact with status chips</div>
+
+        <div class="distribution-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
+          <span class="dist-label">Distribution Settings</span>
+          <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
+            <div class="dist-option" style="gap:10px;">
+              <label class="toggle-switch" aria-label="Emergo News">
+                <input type="checkbox" id="emergo-c" onchange="updateChip('chip-emergo-c', this, 'Emergo News')" />
+                <span class="toggle-track"></span>
+              </label>
+              <div>
+                <div class="dist-option-label">Emergo News</div>
+                <div class="dist-option-sublabel">Routes to Emergo publication feed</div>
+              </div>
+            </div>
+            <div class="dist-option" style="gap:10px;">
+              <label class="toggle-switch" aria-label="Notify customers">
+                <input type="checkbox" id="notify-c" onchange="updateChip('chip-notify-c', this, 'Customer notification'); togglePreview('preview-c', this)" />
+                <span class="toggle-track"></span>
+              </label>
+              <div>
+                <div class="dist-option-label">Notify customers</div>
+                <div class="dist-option-sublabel">Sends email to subscribed customers on publish</div>
+              </div>
+            </div>
+          </div>
+          <div id="dist-chips-c" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="notify-preview" id="preview-c">
+          <strong>Customer notification will be sent on publish.</strong>
+          Subscribed customers for the following schemes will receive an email notification:
+          <div class="notify-preview-chips">
+            <span class="notify-chip">IECEE CB Scheme</span>
+            <span class="notify-chip">D-Mark Scheme</span>
+            <span class="notify-chip">ANZ Certification Scheme</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VARIANT D: Single multiselect dropdown ── -->
+      <div class="variant-section">
+        <div class="variant-title">Variant D — Single multiselect dropdown</div>
+
+        <div class="field-group">
+          <label class="field-label">Distribution <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#767676;">(select all that apply)</span></label>
+          <div class="ms-wrapper" id="ms-d">
+            <button type="button" class="ms-trigger" id="ms-d-trigger" onclick="toggleDropdown('ms-d')" aria-haspopup="listbox" aria-expanded="false">
+              <span class="ms-trigger-text placeholder" id="ms-d-text">Select distribution options…</span>
+              <span class="ms-caret">&#9660;</span>
+            </button>
+            <div class="ms-dropdown" id="ms-d-dropdown" role="listbox" aria-multiselectable="true">
+              <label class="ms-option" id="ms-d-opt-emergo">
+                <input type="checkbox" value="emergo" onchange="syncDropdown('ms-d')" />
+                <div class="ms-option-content">
+                  <div class="ms-option-label">Emergo News</div>
+                  <div class="ms-option-desc">Routes this article to the Emergo publication feed</div>
+                </div>
+              </label>
+              <label class="ms-option" id="ms-d-opt-notify">
+                <input type="checkbox" value="notify" onchange="syncDropdown('ms-d'); togglePreview('preview-d', this)" />
+                <div class="ms-option-content">
+                  <div class="ms-option-label">Notify customers when published</div>
+                  <div class="ms-option-desc">Sends an email to subscribed customers on publish</div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="ms-tags" id="ms-d-tags"></div>
+        </div>
+
+        <div class="notify-preview" id="preview-d">
+          <strong>Customer notification will be sent on publish.</strong>
+          Subscribed customers for the following schemes will receive an email notification:
+          <div class="notify-preview-chips">
+            <span class="notify-chip">IECEE CB Scheme</span>
+            <span class="notify-chip">D-Mark Scheme</span>
+            <span class="notify-chip">ANZ Certification Scheme</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VARIANT E: Two separate selects inline ── -->
+      <div class="variant-section">
+        <div class="variant-title">Variant E — Two inline select fields</div>
+
+        <div class="dist-select-row">
+          <span class="dist-label">Distribution</span>
+
+          <div class="dist-field">
+            <div class="field-label" style="margin-bottom:4px;">Emergo News</div>
+            <select class="field-select" id="sel-emergo-e" onchange="updateSelectTag('tag-emergo-e', this)">
+              <option value="">— Not included —</option>
+              <option value="yes">Include in Emergo News</option>
+            </select>
+          </div>
+
+          <div class="dist-field">
+            <div class="field-label" style="margin-bottom:4px;">Customer Notification</div>
+            <select class="field-select" id="sel-notify-e" onchange="updateSelectTag('tag-notify-e', this); togglePreviewBySelect('preview-e', this)">
+              <option value="">— No notification —</option>
+              <option value="yes">Notify customers on publish</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ms-tags" id="e-tags">
+          <span id="tag-emergo-e" style="display:none;" class="ms-tag">Emergo News</span>
+          <span id="tag-notify-e" style="display:none;" class="ms-tag green">Customer notification</span>
+        </div>
+
+        <div class="notify-preview" id="preview-e" style="margin-top:10px;">
+          <strong>Customer notification will be sent on publish.</strong>
+          Subscribed customers for the following schemes will receive an email notification:
+          <div class="notify-preview-chips">
+            <span class="notify-chip">IECEE CB Scheme</span>
+            <span class="notify-chip">D-Mark Scheme</span>
+            <span class="notify-chip">ANZ Certification Scheme</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- REST OF FORM (context) -->
+      <div class="field-group">
+        <label class="field-label">Scanned Date <span class="req">*</span></label>
+        <input type="date" class="field-input" value="2026-05-11" style="max-width:240px;" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Title <span class="ext">(External)</span> <span class="req">*</span></label>
+        <input type="text" class="field-input" value="European Union — CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Scheme <span class="ext">(External)</span></label>
+        <select class="field-select">
+          <option>[3] schemes selected</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // close dropdowns on outside click
+    document.addEventListener('click', function(e) {
+      document.querySelectorAll('.ms-wrapper').forEach(function(w) {
+        if (!w.contains(e.target)) closeDropdown(w.id);
+      });
+    });
+
+    function toggleDropdown(id) {
+      const trigger = document.getElementById(id + '-trigger');
+      const dropdown = document.getElementById(id + '-dropdown');
+      const isOpen = dropdown.classList.contains('open');
+      if (isOpen) { closeDropdown(id); } else {
+        trigger.classList.add('open');
+        dropdown.classList.add('open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function closeDropdown(id) {
+      const trigger = document.getElementById(id + '-trigger');
+      const dropdown = document.getElementById(id + '-dropdown');
+      if (trigger) { trigger.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); }
+      if (dropdown) dropdown.classList.remove('open');
+    }
+
+    function syncDropdown(id) {
+      const dropdown = document.getElementById(id + '-dropdown');
+      const textEl = document.getElementById(id + '-text');
+      const tagsEl = document.getElementById(id + '-tags');
+      const checked = Array.from(dropdown.querySelectorAll('input[type=checkbox]:checked'));
+      const labels = {
+        'emergo': 'Emergo News',
+        'notify': 'Notify customers'
+      };
+      const colorMap = { 'emergo': '', 'notify': 'green' };
+
+      // update trigger text
+      if (checked.length === 0) {
+        textEl.textContent = 'Select distribution options…';
+        textEl.classList.add('placeholder');
+      } else {
+        textEl.textContent = checked.map(c => labels[c.value]).join(', ');
+        textEl.classList.remove('placeholder');
+      }
+
+      // update selected state on options
+      dropdown.querySelectorAll('.ms-option').forEach(function(opt) {
+        const cb = opt.querySelector('input');
+        opt.classList.toggle('selected', cb.checked);
+      });
+
+      // rebuild tags
+      tagsEl.innerHTML = '';
+      checked.forEach(function(c) {
+        const tag = document.createElement('span');
+        tag.className = 'ms-tag ' + (colorMap[c.value] || '');
+        tag.textContent = labels[c.value];
+        tagsEl.appendChild(tag);
+      });
+    }
+
+    function updateSelectTag(tagId, select) {
+      const tag = document.getElementById(tagId);
+      if (tag) tag.style.display = select.value ? 'inline-flex' : 'none';
+    }
+
+    function togglePreviewBySelect(id, select) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('show', !!select.value);
+    }
+
+    function togglePreview(id, checkbox) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('show', checkbox.checked);
+    }
+
+    function updateChip(chipId, checkbox, label) {
+      const container = document.getElementById('dist-chips-c');
+      let chip = document.getElementById(chipId);
+      if (checkbox.checked) {
+        if (!chip) {
+          chip = document.createElement('span');
+          chip.id = chipId;
+          chip.className = 'status-badge';
+          chip.innerHTML = '<span class="status-dot-sm"></span>' + label;
+          container.appendChild(chip);
+        }
+      } else {
+        if (chip) chip.remove();
+      }
+    }
+  </script>
+</body>
+</html>

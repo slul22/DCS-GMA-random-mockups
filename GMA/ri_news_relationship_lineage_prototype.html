@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RI – News Relationship, Lineage & Revision Views</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; background: #f4f6f8; color: #222; min-height: 100vh; }
+
+  /* ── NAVBAR ── */
+  .navbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #C02032; height: 52px; padding: 0 20px; position: sticky; top: 0; z-index: 50;
+  }
+  .navbar-left { display: flex; align-items: center; gap: 0; height: 100%; }
+  .brand { display: flex; align-items: center; gap: 10px; padding-right: 24px; }
+  .brand-logo { font-weight: 800; font-size: 18px; color: #fff; letter-spacing: .03em; }
+  .brand-app { font-size: 13px; font-weight: 600; color: #fff; padding-left: 14px; border-left: 1px solid rgba(255,255,255,.4); white-space: nowrap; }
+  .nav-tabs { display: flex; height: 100%; }
+  .nav-tab {
+    padding: 0 18px; height: 52px; display: flex; align-items: center;
+    font-size: 13px; font-weight: 600; color: rgba(255,255,255,.85); cursor: pointer;
+    border-bottom: 3px solid transparent; white-space: nowrap;
+  }
+  .nav-tab:hover { background: rgba(255,255,255,.1); color: #fff; }
+  .nav-tab.active { color: #fff; border-bottom-color: #fff; }
+  .navbar-right { display: flex; align-items: center; gap: 4px; }
+  .nav-icon { width: 40px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,.85); font-size: 18px; position: relative; }
+  .nav-icon:hover { background: rgba(255,255,255,.12); }
+  .notif-dot { position: absolute; top: 6px; right: 6px; width: 14px; height: 14px; background: #FFA700; border-radius: 50%; font-size: 9px; font-weight: 700; color: #333; display: flex; align-items: center; justify-content: center; }
+  .nav-account { display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 52px; border-left: 1px solid rgba(255,255,255,.25); cursor: pointer; color: #fff; font-size: 13px; font-weight: 600; }
+  .nav-account:hover { background: rgba(255,255,255,.08); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: #1a3d6e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+  /* ── LAYOUT ── */
+  .page-wrapper { max-width: 1440px; margin: 0 auto; }
+
+  /* ── BUTTONS ── */
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 3px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid #BBC1C8; background: #fff; color: #333; white-space: nowrap; font-weight: 500; transition: background .12s; text-decoration: none; }
+  .btn:hover { background: #f0f2f5; }
+  .btn-primary { background: #01518A; color: #fff; border-color: #01518A; font-weight: 600; }
+  .btn-primary:hover { background: #013f6e; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-ghost { background: transparent; border: none; color: #01518A; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; }
+  .btn-ghost:hover { text-decoration: underline; }
+
+  /* ── BADGES ── */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.6; }
+  .badge-level-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .badge-draft { background: #fff3e0; color: #a85b00; }
+  .badge-finalized { background: #e3f4ea; color: #1c7a4e; }
+  .badge-superseded { background: #eceef1; color: #555; }
+  .badge-revised { background: #dde9fa; color: #0b4f8a; border: 1px solid #b4ccec; }
+  .badge-revised-since { background: #fff0d4; color: #7a4d00; border: 1px solid #f0d6a2; }
+  .badge-correction { background: #fde8ea; color: #a30f22; }
+  .badge-version { background: #eef2f7; color: #333; border: 1px solid #dde2e7; }
+
+  /* ── CHIPS for relationship types ── */
+  .rel-chip { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .rel-supersedes { background: #f1e6f6; color: #6a2c8a; }
+  .rel-correction { background: #fde8ea; color: #a30f22; }
+  .rel-related { background: #e8f0f8; color: #0b4f8a; }
+  .rel-consolidates { background: #fff3e0; color: #a85b00; }
+  .rel-references { background: #eef2f5; color: #444; }
+  .rel-follow-up { background: #e6f5ec; color: #1c7a4e; }
+
+  /* ════════════════════════════════
+     NEWS LIST PAGE
+  ════════════════════════════════ */
+  .list-page { padding: 0; }
+  .list-page-header {
+    background: #fff; border-bottom: 1px solid #dce1e7;
+    padding: 16px 24px 0;
+  }
+  .list-page-title { font-size: 26px; font-weight: 300; color: #444; padding-bottom: 12px; }
+  .list-tabs { display: flex; gap: 0; }
+  .list-tab {
+    padding: 10px 20px; font-size: 13px; font-weight: 600; color: #666; cursor: pointer;
+    border-bottom: 3px solid transparent; display: flex; align-items: center; gap: 7px;
+  }
+  .list-tab:hover { color: #333; }
+  .list-tab.active { color: #C02032; border-bottom-color: #C02032; }
+  .list-tab-icon { font-size: 15px; }
+  .list-header-right { display: flex; align-items: center; gap: 14px; }
+  .list-actions { display: flex; gap: 8px; align-items: center; padding: 10px 24px; background: #fff; border-bottom: 1px solid #dce1e7; justify-content: flex-end; }
+
+  .list-body { display: flex; }
+  .list-sidebar {
+    width: 230px; flex-shrink: 0; background: #fff; border-right: 1px solid #dce1e7;
+    padding: 16px; min-height: calc(100vh - 150px);
+  }
+  .sidebar-group { margin-bottom: 18px; }
+  .sidebar-group-title { font-size: 12px; font-weight: 700; color: #444; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .sidebar-group-title:hover { color: #01518A; }
+  .sidebar-group-title::after { content: "▾"; font-size: 10px; color: #999; }
+  .sidebar-radio { display: flex; flex-direction: column; gap: 7px; }
+  .sidebar-radio label { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #555; cursor: pointer; }
+  .sidebar-radio label:hover { color: #222; }
+  .sidebar-radio input[type=radio] { accent-color: #C02032; }
+  .sidebar-input-wrap { position: relative; margin-bottom: 6px; }
+  .sidebar-search-input { width: 100%; border: 1px solid #BBC1C8; border-radius: 2px; padding: 5px 28px 5px 8px; font-size: 12px; font-family: inherit; color: #333; }
+  .sidebar-search-input:focus { outline: none; border-color: #01518A; }
+  .sidebar-search-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #888; font-size: 13px; }
+
+  .list-main { flex: 1; padding: 16px 24px; min-width: 0; }
+  .list-results-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+  .results-count { font-size: 16px; font-weight: 600; }
+  .results-controls { display: flex; align-items: center; gap: 12px; }
+  .sort-label { font-size: 13px; color: #666; }
+  .sort-select { border: 1px solid #BBC1C8; border-radius: 2px; padding: 5px 8px; font-size: 13px; font-family: inherit; }
+  .search-all { display: flex; border: 1px solid #BBC1C8; border-radius: 2px; overflow: hidden; }
+  .search-all input { padding: 6px 10px; font-size: 13px; font-family: inherit; border: none; outline: none; width: 200px; }
+  .search-all button { background: #f0f2f5; border: none; border-left: 1px solid #BBC1C8; padding: 0 12px; cursor: pointer; color: #555; font-size: 15px; }
+  .export-btn { border: 1px solid #BBC1C8; background: #fff; padding: 6px 14px; font-size: 13px; border-radius: 2px; cursor: pointer; font-weight: 600; color: #333; }
+  .export-btn:hover { background: #f0f2f5; }
+
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .filter-bar-label { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .04em; display: flex; align-items: center; gap: 5px; }
+
+  /* Active-only toggle */
+  .toggle-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid #dce1e7; border-radius: 4px;
+    padding: 8px 14px; margin-bottom: 14px; font-size: 13px; color: #555;
+  }
+  .toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #BBC1C8; border-radius: 20px; transition: .2s; }
+  .toggle-slider::before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+  .toggle input:checked + .toggle-slider { background: #01518A; }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+  /* Article card */
+  .article-card {
+    background: #fff; border: 1px solid #dce1e7; border-radius: 3px; padding: 14px 16px;
+    margin-bottom: 8px; cursor: pointer; transition: border-color .15s, box-shadow .15s;
+  }
+  .article-card:hover { border-color: #01518A; box-shadow: 0 2px 8px rgba(1,81,138,.08); }
+  .article-card.superseded-card { opacity: .82; border-left: 3px solid #aaa; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .card-meta { font-size: 11px; color: #888; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .card-meta strong { color: #555; }
+  .card-badges { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .card-title { font-size: 14px; font-weight: 600; color: #01518A; line-height: 1.4; margin-bottom: 5px; }
+  .card-excerpt { font-size: 12px; color: #555; line-height: 1.5; }
+  .card-actions { display: flex; align-items: center; justify-content: flex-end; margin-top: 8px; }
+  .bookmark-btn { background: none; border: none; cursor: pointer; color: #888; font-size: 18px; padding: 2px; }
+  .bookmark-btn.bookmarked { color: #01518A; }
+
+  /* Pagination */
+  .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; font-size: 13px; color: #555; }
+  .pagination-controls { display: flex; align-items: center; gap: 6px; }
+  .page-btn { border: 1px solid #BBC1C8; background: #fff; padding: 5px 10px; border-radius: 2px; cursor: pointer; font-size: 12px; }
+  .page-btn:hover { background: #f0f2f5; }
+  .page-btn.active { background: #01518A; color: #fff; border-color: #01518A; }
+  .items-per-page { display: flex; align-items: center; gap: 6px; }
+  .items-per-page select { border: 1px solid #BBC1C8; border-radius: 2px; padding: 4px 6px; font-size: 12px; }
+
+  /* ════════════════════════════════
+     NEWS DETAIL PAGE
+  ════════════════════════════════ */
+  .detail-page { display: none; }
+  .detail-page.show { display: block; }
+
+  .detail-back { padding: 10px 24px; background: #fff; border-bottom: 1px solid #dce1e7; }
+  .back-link { color: #C02032; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
+  .back-link:hover { text-decoration: underline; }
+
+  /* Inactive banner */
+  .inactive-banner {
+    background: #fff8e1; border-bottom: 2px solid #f0a500;
+    padding: 10px 24px; display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: #7a4d00; display: none;
+  }
+  .inactive-banner.show { display: flex; }
+  .inactive-banner strong { font-weight: 700; }
+  .inactive-banner .spacer { flex: 1; }
+
+  /* Revised banner */
+  .revised-banner {
+    background: #eaf2ff; border-bottom: 2px solid #4a90d9;
+    padding: 10px 24px; align-items: center; gap: 10px;
+    font-size: 13px; color: #0b4f8a; display: none;
+  }
+  .revised-banner.show { display: flex; }
+  .revised-banner strong { font-weight: 700; }
+  .revised-banner .spacer { flex: 1; }
+
+  .detail-header-wrap { background: #fff; border-bottom: 1px solid #dce1e7; padding: 16px 24px; }
+  .detail-news-id { font-size: 13px; font-weight: 700; color: #C02032; margin-bottom: 6px; }
+  .detail-title { font-size: 20px; font-weight: 700; color: #1a1a1a; line-height: 1.35; margin-bottom: 10px; }
+  .detail-header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .detail-meta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #666; }
+  .detail-meta-row strong { color: #444; }
+  .detail-header-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+  /* Version breadcrumb */
+  .version-breadcrumb {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    background: #f8f9fb; border: 1px solid #dce1e7; border-radius: 4px;
+    padding: 8px 14px; margin: 12px 24px 0; font-size: 12px; color: #555;
+  }
+  .version-breadcrumb .vb-node {
+    padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    background: #eef2f7; color: #444; cursor: pointer; border: 1px solid #dde2e7; white-space: nowrap;
+  }
+  .version-breadcrumb .vb-node:hover { background: #dde9fa; border-color: #4a90d9; color: #0b4f8a; }
+  .version-breadcrumb .vb-node.current { background: #01518A; color: #fff; border-color: #01518A; cursor: default; }
+  .version-breadcrumb .vb-arrow { color: #aaa; font-size: 14px; }
+  .version-breadcrumb .vb-label { font-weight: 700; color: #888; margin-right: 4px; }
+  .version-breadcrumb .vb-nav { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .version-breadcrumb .vb-nav a { font-size: 12px; color: #01518A; cursor: pointer; font-weight: 600; }
+  .version-breadcrumb .vb-nav a:hover { text-decoration: underline; }
+  .version-breadcrumb .vb-nav span { color: #bbb; }
+
+  /* Detail layout */
+  .detail-body { display: flex; padding: 20px 24px; gap: 20px; }
+  .detail-sidebar { width: 220px; flex-shrink: 0; }
+  .detail-main { flex: 1; min-width: 0; }
+  .sidebar-block { margin-bottom: 18px; }
+  .sidebar-block-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .sidebar-tag { display: inline-flex; align-items: center; gap: 5px; background: #f0f2f5; border: 1px solid #dce1e7; border-radius: 3px; padding: 4px 8px; font-size: 12px; color: #333; margin: 2px 2px 2px 0; }
+  .flag-emoji { font-size: 14px; }
+  .sidebar-block-val { font-size: 13px; color: #444; }
+
+  .detail-section { background: #fff; border: 1px solid #dce1e7; border-radius: 4px; margin-bottom: 16px; overflow: hidden; }
+  .detail-section-header { padding: 12px 16px; border-bottom: 1px solid #dce1e7; font-size: 14px; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+  .detail-section-header:hover { background: #fafbfc; }
+  .section-chevron { transition: transform .2s; color: #aaa; font-size: 12px; }
+  .section-chevron.open { transform: rotate(180deg); }
+  .detail-section-body { padding: 16px; }
+  .detail-section-body.collapsed { display: none; }
+
+  .content-heading { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+  .content-para { font-size: 13px; color: #333; line-height: 1.7; margin-bottom: 10px; }
+  .content-link { color: #01518A; text-decoration: underline; cursor: pointer; }
+
+  /* ─ Relationships & Version History ─ */
+  .rvh-tabs { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 2px solid #dce1e7; }
+  .rvh-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+  .rvh-tab:hover { color: #333; }
+  .rvh-tab.active { color: #01518A; border-bottom-color: #01518A; }
+
+  /* Lineage timeline */
+  .lineage-timeline { display: flex; flex-direction: column; gap: 0; }
+  .lineage-row { display: flex; align-items: stretch; gap: 0; }
+  .lineage-connector { display: flex; flex-direction: column; align-items: center; width: 28px; flex-shrink: 0; }
+  .lc-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #BBC1C8; background: #fff; flex-shrink: 0; margin-top: 14px; }
+  .lc-dot.current-dot { border-color: #01518A; background: #01518A; }
+  .lc-dot.superseded-dot { border-color: #BBC1C8; background: #d6dae0; }
+  .lc-line { width: 2px; flex: 1; background: #dce1e7; }
+  .lineage-card {
+    flex: 1; margin: 6px 0 6px 8px; padding: 10px 12px;
+    border: 1px solid #dce1e7; border-radius: 4px; background: #fff; cursor: pointer;
+    transition: border-color .15s;
+  }
+  .lineage-card:hover { border-color: #01518A; }
+  .lineage-card.current-card { border-color: #01518A; background: #f3f8ff; }
+  .lineage-card.superseded-card-lh { background: #fafbfc; }
+  .lineage-card.locked-card { background: #fafbfc; cursor: default; }
+  .lh-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .lh-card-title { font-size: 13px; font-weight: 600; color: #01518A; }
+  .lineage-card.current-card .lh-card-title { color: #013f6e; }
+  .lineage-card.superseded-card-lh .lh-card-title { color: #555; }
+  .lineage-card.locked-card .lh-card-title { color: #888; }
+  .lh-card-meta { font-size: 11px; color: #888; }
+  .lh-change-note { font-size: 12px; color: #555; margin-top: 5px; padding-top: 5px; border-top: 1px solid #eef0f3; }
+  .lh-locked-notice { font-size: 11px; color: #888; font-style: italic; }
+
+  /* Related items */
+  .rel-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 1px solid #dce1e7; border-radius: 4px; margin-bottom: 8px; background: #fff; cursor: pointer; transition: border-color .15s; }
+  .rel-item:hover { border-color: #01518A; }
+  .rel-item-body { flex: 1; min-width: 0; }
+  .rel-item-title { font-size: 13px; font-weight: 600; color: #01518A; margin-bottom: 3px; }
+  .rel-item-meta { font-size: 11px; color: #888; }
+  .rel-item-locked { background: #fafbfc; cursor: default; }
+  .rel-item-locked .rel-item-title { color: #888; }
+
+  /* Revision history */
+  .rev-list { display: flex; flex-direction: column; gap: 0; }
+  .rev-item { display: flex; align-items: stretch; gap: 0; }
+  .rev-connector { display: flex; flex-direction: column; align-items: center; width: 28px; flex-shrink: 0; }
+  .rev-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #BBC1C8; background: #fff; flex-shrink: 0; margin-top: 14px; }
+  .rev-dot.substantive-dot { border-color: #0b4f8a; background: #0b4f8a; }
+  .rev-dot.minor-dot { border-color: #BBC1C8; background: #d6dae0; }
+  .rev-line { width: 2px; flex: 1; background: #dce1e7; }
+  .rev-card { flex: 1; margin: 4px 0 4px 8px; padding: 10px 12px; border: 1px solid #dce1e7; border-radius: 4px; background: #fff; }
+  .rev-card.substantive-rev { border-left: 3px solid #0b4f8a; }
+  .rev-card.minor-rev { border-left: 3px solid #dde2e7; }
+  .rev-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .rev-date { font-size: 12px; font-weight: 700; color: #444; }
+  .rev-note { font-size: 12px; color: #444; line-height: 1.5; margin-bottom: 5px; }
+  .rev-fields { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+  .rev-field-tag { background: #f0f2f5; border: 1px solid #dde2e7; border-radius: 3px; padding: 1px 7px; font-size: 11px; color: #555; }
+
+  /* Bookmark indicators */
+  .bookmark-indicator {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .bi-stale { background: #fff8e1; border: 1px solid #f0d6a2; color: #7a4d00; }
+  .bi-revised { background: #eaf2ff; border: 1px solid #b4ccec; color: #0b4f8a; }
+
+  /* Subscription gated */
+  .gated-ref { background: #f5f6f8; border: 1px dashed #BBC1C8; border-radius: 4px; padding: 10px 14px; font-size: 12px; color: #888; display: flex; align-items: center; gap: 8px; }
+  .gated-lock { font-size: 16px; }
+
+  /* ─ Info/warn boxes ─ */
+  .info-box { background: #f0f7ff; border: 1px solid #c4ddf5; border-radius: 4px; padding: 10px 12px; font-size: 12px; color: #0b4f8a; margin-bottom: 10px; }
+  .warn-box { background: #fffaed; border: 1px solid #f0d6a2; border-radius: 4px; padding: 10px 12px; font-size: 12px; color: #7a4d00; }
+
+  /* ── FOOTER ── */
+  .site-footer { background: #333; color: #fff; padding: 14px 24px; font-size: 11px; display: flex; align-items: center; justify-content: space-between; margin-top: 40px; }
+  .site-footer a { color: #ccc; text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  /* ── MISC ── */
+  .divider { height: 1px; background: #dce1e7; margin: 12px 0; }
+  .text-muted { color: #888; font-size: 12px; }
+  .spacer { flex: 1; }
+
+  /* ── Ask an Expert floater ── */
+  .expert-floater {
+    position: fixed; right: 0; bottom: 80px;
+    background: #2c2c2c; color: #fff; border-radius: 4px 0 0 4px;
+    padding: 10px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+    writing-mode: vertical-lr; text-orientation: mixed; letter-spacing: .06em;
+    box-shadow: -2px 0 10px rgba(0,0,0,.2); z-index: 40;
+  }
+  .expert-floater:hover { background: #111; }
+
+  /* Transition for detail/list */
+  #view-list, #view-detail { transition: opacity .15s; }
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <div class="brand">
+      <span class="brand-logo">UL Solutions</span>
+      <span class="brand-app">Regulatory Intelligence</span>
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab" onclick="goHome()">Dashboard</div>
+      <div class="nav-tab active" id="nav-news">News</div>
+      <div class="nav-tab">Revision History</div>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div style="display:flex;align-items:center;gap:6px;margin-right:6px;">
+      <span style="color:rgba(255,255,255,.8);font-size:12px;">GCM RI</span>
+      <span style="color:rgba(255,255,255,.5);font-size:12px;">▾</span>
+    </div>
+    <div class="nav-icon" title="Help">?</div>
+    <div class="nav-icon" title="Notifications" style="position:relative;">
+      🔔<span class="notif-dot">2</span>
+    </div>
+    <div class="nav-account">
+      <div class="avatar">SL</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+<!-- ════════════ NEWS LIST ════════════ -->
+<div id="view-list">
+  <div class="list-page">
+
+    <div class="list-page-header">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+        <h1 class="list-page-title">News</h1>
+        <div class="list-header-right">
+          <button class="btn btn-sm">✉ Follow News</button>
+          <button class="btn btn-sm">ℹ Tips and definitions</button>
+        </div>
+      </div>
+      <div class="list-tabs">
+        <div class="list-tab active"><span class="list-tab-icon">⬡</span> All</div>
+        <div class="list-tab"><span class="list-tab-icon">✓</span> Following</div>
+        <div class="list-tab"><span class="list-tab-icon">🔖</span> Bookmarks</div>
+      </div>
+    </div>
+
+    <div class="list-body">
+      <!-- Left filter sidebar -->
+      <div class="list-sidebar">
+        <div style="margin-bottom:14px;">
+          <button class="btn btn-sm" style="width:100%;justify-content:space-between;">Saved searches <span>▾</span></button>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Recently added</div>
+          <div class="sidebar-radio">
+            <label><input type="radio" name="dateFilter"/> Last 7 Days</label>
+            <label><input type="radio" name="dateFilter"/> Last 30 Days</label>
+            <label><input type="radio" name="dateFilter"/> Last 90 Days</label>
+            <label><input type="radio" name="dateFilter"/> Last 180 Days</label>
+            <label><input type="radio" name="dateFilter"/> Range</label>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
+            <div style="font-size:11px;color:#888;">from</div>
+            <input type="text" placeholder="YYYY-MM-DD" style="width:100%;border:1px solid #BBC1C8;border-radius:2px;padding:4px 6px;font-size:11px;"/>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:4px;align-items:center;">
+            <div style="font-size:11px;color:#888;">to</div>
+            <input type="text" placeholder="YYYY-MM-DD" style="width:100%;border:1px solid #BBC1C8;border-radius:2px;padding:4px 6px;font-size:11px;"/>
+          </div>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Product categories</div>
+          <div class="sidebar-input-wrap">
+            <input type="text" class="sidebar-search-input" placeholder="Search products"/>
+            <button class="sidebar-search-btn">🔍</button>
+          </div>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Markets</div>
+          <div class="sidebar-input-wrap">
+            <input type="text" class="sidebar-search-input" placeholder="Search markets"/>
+            <button class="sidebar-search-btn">🔍</button>
+          </div>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Regulatory Category</div>
+          <div class="sidebar-input-wrap">
+            <input type="text" class="sidebar-search-input" placeholder="Search categories"/>
+            <button class="sidebar-search-btn">🔍</button>
+          </div>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">News Level</div>
+          <div class="sidebar-radio">
+            <label><input type="radio" name="levelFilter"/> Draft</label>
+            <label><input type="radio" name="levelFilter"/> Finalized</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main content area -->
+      <div class="list-main">
+        <!-- Active-only toggle -->
+        <div class="toggle-bar">
+          <label class="toggle">
+            <input type="checkbox" id="active-toggle" checked onchange="toggleActiveFilter(this)"/>
+            <span class="toggle-slider"></span>
+          </label>
+          <span id="active-toggle-label"><strong>Showing active articles only.</strong> Toggle off to include superseded versions.</span>
+        </div>
+
+        <!-- Results bar -->
+        <div class="list-results-bar">
+          <div class="results-count">Search results (12,777)</div>
+          <div class="results-controls">
+            <span class="sort-label">Sort by</span>
+            <select class="sort-select">
+              <option>Recently added</option>
+              <option>Published date</option>
+              <option>Effective date</option>
+              <option>Relevance</option>
+            </select>
+            <div class="search-all">
+              <input type="text" placeholder="Search All News"/>
+              <button>🔍</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <span class="filter-bar-label">⇌ FILTERING BY</span>
+          <span style="font-size:12px;color:#888;">No filters applied</span>
+          <span class="spacer"></span>
+          <button class="export-btn">Export (12,777)</button>
+        </div>
+
+        <!-- Article cards -->
+        <div id="article-list"></div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <div class="items-per-page">
+            Items per page: <select><option>20</option><option>50</option><option>100</option></select>
+          </div>
+          <div style="font-size:13px;color:#555;">1 – 20 of 12,777</div>
+          <div class="pagination-controls">
+            <button class="page-btn">⟨⟨</button>
+            <button class="page-btn">⟨</button>
+            <span style="font-size:13px;color:#555;">Page</span>
+            <select style="border:1px solid #BBC1C8;border-radius:2px;padding:3px 5px;font-size:12px;"><option>1</option></select>
+            <span style="font-size:13px;color:#555;">of 639</span>
+            <button class="page-btn">⟩</button>
+            <button class="page-btn">⟩⟩</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ NEWS DETAIL ════════════ -->
+<div id="view-detail" style="display:none;">
+
+  <!-- Back nav -->
+  <div class="detail-back">
+    <a class="back-link" onclick="showList()">← Back to News</a>
+  </div>
+
+  <!-- Inactive article banner (shown for superseded articles) -->
+  <div class="inactive-banner" id="inactive-banner">
+    <span>⚠</span>
+    <span><strong>This article has been superseded.</strong> A newer version is available.</span>
+    <span class="spacer"></span>
+    <button class="btn btn-sm btn-primary" onclick="navigateToArticle('current')">Go to current version →</button>
+  </div>
+
+  <!-- Revised banner (shown when article has been revised since last viewed) -->
+  <div class="revised-banner" id="revised-banner">
+    <span>ℹ</span>
+    <span><strong>This article was revised on <span id="revised-date-banner"></span>.</strong> Content has changed since you last viewed it.</span>
+    <span class="spacer"></span>
+    <button class="btn btn-sm" onclick="document.getElementById('revised-banner').classList.remove('show')">Dismiss</button>
+  </div>
+
+  <!-- Detail header -->
+  <div class="detail-header-wrap">
+    <div id="detail-news-id" class="detail-news-id"></div>
+    <div class="detail-header-row">
+      <div style="flex:1;min-width:0;">
+        <div class="detail-title" id="detail-title"></div>
+        <div class="detail-meta-row" id="detail-meta-row"></div>
+      </div>
+      <div class="detail-header-actions">
+        <button class="btn btn-sm" id="bookmark-action-btn" onclick="toggleBookmark()">🔖 Bookmark</button>
+        <button class="btn btn-sm">🔗 Share</button>
+        <button class="btn btn-sm btn-primary">🖨 Print</button>
+      </div>
+    </div>
+    <div id="bookmark-indicator-wrap" style="margin-top:8px;display:none;"></div>
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+      <span id="detail-level-badge"></span>
+      <span id="detail-revised-badge"></span>
+      <span id="detail-version-badge"></span>
+      <span style="flex:1;"></span>
+      <span style="font-size:12px;color:#888;">0 Comments</span>
+    </div>
+  </div>
+
+  <!-- Version lineage breadcrumb -->
+  <div id="version-breadcrumb-wrap" style="display:none;">
+    <div class="version-breadcrumb" id="version-breadcrumb"></div>
+  </div>
+
+  <!-- Detail body -->
+  <div class="detail-body">
+
+    <!-- Left sidebar: metadata -->
+    <div class="detail-sidebar">
+      <div class="sidebar-block">
+        <div class="sidebar-block-title">Markets</div>
+        <div id="detail-markets"></div>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-block-title">Regulatory Category</div>
+        <div id="detail-reg-cat"></div>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-block-title">Product categories</div>
+        <div id="detail-products"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="sidebar-block">
+        <div class="sidebar-block-title">Issuer</div>
+        <div class="sidebar-block-val" id="detail-issuer"></div>
+      </div>
+    </div>
+
+    <!-- Main article content -->
+    <div class="detail-main">
+
+      <!-- Article content section -->
+      <div class="detail-section">
+        <div class="detail-section-header" onclick="toggleSection(this)">
+          <span>Summary</span>
+          <span class="section-chevron open">▲</span>
+        </div>
+        <div class="detail-section-body" id="detail-summary-body"></div>
+      </div>
+
+      <!-- Combined History & Relationships section -->
+      <div class="detail-section">
+        <div class="detail-section-header" onclick="toggleSection(this)">
+          <span>History &amp; Relationships</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="rvh-badge" style="font-size:12px;font-weight:500;color:#888;"></span>
+            <span class="section-chevron open">▲</span>
+          </div>
+        </div>
+        <div class="detail-section-body" id="rvh-body">
+          <div class="rvh-tabs" id="rvh-tabs">
+            <div class="rvh-tab active" onclick="switchRVHTab(this, 'lineage')">Version &amp; Revision History</div>
+            <div class="rvh-tab" onclick="switchRVHTab(this, 'corrections')">Corrections</div>
+            <div class="rvh-tab" onclick="switchRVHTab(this, 'related')">Related Coverage</div>
+            <div class="rvh-tab" onclick="switchRVHTab(this, 'references')">References</div>
+          </div>
+          <div id="rvh-tab-content"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</div><!-- .page-wrapper -->
+
+<!-- Ask an Expert floater -->
+<div class="expert-floater" title="Ask an Expert">Ask an expert</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <span>UL LLC ©2026. All rights reserved.</span>
+  <span style="display:flex;gap:20px;">
+    <a href="#">Terms &amp; Conditions</a>
+    <a href="#">About Cookies</a>
+    <a href="#">Access Your Data</a>
+  </span>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════════
+
+const ARTICLES = [
+  {
+    id: 'A001', newsId: '14428', version: 3, isActive: true, isSuperseded: false,
+    levelDot: '#1e7d4f', levelLabel: 'Finalized',
+    title: 'Montenegro Ministry of Spatial Planning – Revised Building Product Regulation (Final)',
+    issuer: 'Ministry of Spatial Planning, Urbanism and State Property of Montenegro',
+    markets: ['🇲🇪 Montenegro'],
+    regCat: ['Construction'],
+    products: ['Building Materials', 'Fire Safety'],
+    added: '2026-05-18', published: '2026-05-05', mandatory: '2026-05-13', effective: '2026-05-13',
+    consultationClosing: null,
+    summary: `Montenegro's Ministry of Spatial Planning, Urbanism and State Property has issued a finalized regulation updating building product certification requirements effective May 13, 2026. The regulation mandates third-party conformity assessment for structural and fire-safety products above a specified risk threshold, aligning with EU Construction Products Regulation principles ahead of potential accession requirements.\n\nManufacturers supplying the Montenegrin market must update technical documentation and re-submit affected product families for assessment by designated conformity bodies before August 1, 2026.`,
+    announcements: ['https://mspuip.gov.me/regulations/2026/building-products-final', 'https://mspuip.gov.me/media/2026/CPR-alignment-guidelines.pdf'],
+    hasRevision: true, lastRevisionDate: '2026-05-16', revisionType: 'substantive',
+    isBookmarked: false, bookmarkStale: false, revisedSinceBookmark: true,
+    lineage: {
+      predecessors: [
+        { newsId: '14102', version: 1, title: 'Montenegro – Draft Building Product Regulation – Public Consultation', status: 'Superseded', date: '2026-01-14', relType: 'Version 1', isLocked: false, changeNote: 'Draft consultation stage; no mandatory dates set.' },
+        { newsId: '14287', version: 2, title: 'Montenegro – Building Product Regulation (Consultation Closed, Pending Finalization)', status: 'Superseded', date: '2026-03-22', relType: 'Version 2', isLocked: false, changeNote: 'Consultation period closed; mandatory deadline added (Aug 1 2026). Product scope narrowed to structural/fire-safety only.' },
+      ],
+      current: { newsId: '14428', version: 3, title: 'Montenegro Ministry of Spatial Planning – Revised Building Product Regulation (Final)', status: 'Active', date: '2026-05-05', relType: 'Version 3 (Current)' }
+    },
+    corrections: [],
+    related: [
+      { newsId: '14395', title: 'EU Construction Products Regulation (CPR) 2025 Recast – Entry into Force', relType: 'related', date: '2026-04-30', markets: ['🇪🇺 European Union'], note: 'Montenegro alignment with CPR recast context.', isLocked: false },
+      { newsId: '14401', title: 'Serbia – Harmonized Building Standards Update', relType: 'related', date: '2026-05-02', markets: ['🇷🇸 Serbia'], note: 'Parallel regional update.', isLocked: false },
+    ],
+    references: [
+      { newsId: '—', title: 'EU CPR Regulation (EU) 305/2011', relType: 'references', date: null, markets: ['🇪🇺 EU'], note: null, isLocked: true }
+    ],
+    revisionHistory: [
+      { date: '2026-05-16', type: 'substantive', note: 'Updated mandatory deadline from July 1 to August 1, 2026 following ministry clarification. Impact assessment section revised to reflect extended transition period.', fields: ['Mandatory Date', 'Summary', 'Impact Assessment'] },
+      { date: '2026-05-06', type: 'minor', note: 'Fixed broken announcement URL.', fields: ['Announcements'] },
+    ]
+  },
+
+  {
+    id: 'A002', newsId: '14376', version: 1, isActive: true, isSuperseded: false,
+    levelDot: '#a85b00', levelLabel: 'Draft',
+    title: 'Zambia ZICTA Opened Public Consultation on Award of 2300 MHz and 3300 MHz Spectrum for 4G and 5G Services',
+    issuer: 'Zambia Information and Communications Technology Authority (ZICTA)',
+    markets: ['🇿🇲 Zambia'],
+    regCat: ['Wireless'],
+    products: ['Cellular'],
+    added: '2026-05-18', published: '2026-05-08', mandatory: null, effective: null,
+    consultationClosing: '2026-05-22',
+    summary: `On May 8, 2026, the Zambia Information and Communications Technology Authority (ZICTA) opened a public consultation on the proposed award of spectrum in the 2300 MHz and 3300 MHz frequency bands.\n\nComments are accepted until May 22, 2026 and can be submitted to spl@zicta.zm.`,
+    announcements: ['https://www.zicta.zm/media/publications', 'https://www.zicta.zm/media/publications/2026/spectrum-2300-3300-consultation.pdf'],
+    hasRevision: false, lastRevisionDate: null, revisionType: null,
+    isBookmarked: false, bookmarkStale: false, revisedSinceBookmark: false,
+    lineage: { predecessors: [], current: { newsId: '14376', version: 1, title: 'Zambia ZICTA Opened Public Consultation on Award of 2300 MHz and 3300 MHz Spectrum for 4G and 5G Services', status: 'Active', date: '2026-05-08', relType: 'Version 1 (Current)' } },
+    corrections: [],
+    related: [
+      { newsId: '13901', title: 'Zambia ZICTA – Previous Spectrum Award (700 MHz)', relType: 'related', date: '2025-09-14', markets: ['🇿🇲 Zambia'], note: 'Prior spectrum allocation in same jurisdiction.', isLocked: false }
+    ],
+    references: [],
+    revisionHistory: []
+  },
+
+  {
+    id: 'A003', newsId: '14287', version: 2, isActive: false, isSuperseded: true,
+    levelDot: '#1e7d4f', levelLabel: 'Finalized',
+    title: 'Montenegro – Building Product Regulation (Consultation Closed, Pending Finalization)',
+    issuer: 'Ministry of Spatial Planning, Urbanism and State Property of Montenegro',
+    markets: ['🇲🇪 Montenegro'],
+    regCat: ['Construction'],
+    products: ['Building Materials', 'Fire Safety'],
+    added: '2026-03-22', published: '2026-03-22', mandatory: '2026-08-01', effective: '2026-08-01',
+    consultationClosing: null,
+    summary: `Superseded by News ID 14428. This article covered the consultation-closed stage of Montenegro's building product regulation. Mandatory effective date was August 1, 2026; scope narrowed to structural and fire-safety products only.`,
+    announcements: ['https://mspuip.gov.me/regulations/2026/building-products-v2'],
+    hasRevision: false, lastRevisionDate: null, revisionType: null,
+    isBookmarked: true, bookmarkStale: true, revisedSinceBookmark: false,
+    supersededBy: 'A001',
+    lineage: {
+      predecessors: [
+        { newsId: '14102', version: 1, title: 'Montenegro – Draft Building Product Regulation – Public Consultation', status: 'Superseded', date: '2026-01-14', relType: 'Version 1', isLocked: false, changeNote: 'Draft consultation stage.' }
+      ],
+      current: { newsId: '14287', version: 2, title: 'Montenegro – Building Product Regulation (Consultation Closed)', status: 'Superseded — this article', date: '2026-03-22', relType: 'Version 2 (This article)' }
+    },
+    corrections: [],
+    related: [],
+    references: [],
+    revisionHistory: []
+  },
+
+  {
+    id: 'A004', newsId: '14511', version: 1, isActive: true, isSuperseded: false,
+    levelDot: '#1e7d4f', levelLabel: 'Finalized',
+    title: 'South Korea MSIT Published Amended Enforcement Decree of the Radio Waves Act',
+    issuer: 'South Korea Ministry of Science and ICT (MSIT)',
+    markets: ['🇰🇷 South Korea'],
+    regCat: ['Wireless'],
+    products: ['Cellular', 'Wi-Fi', 'Bluetooth'],
+    added: '2026-05-17', published: '2026-05-15', mandatory: '2026-07-01', effective: '2026-07-01',
+    consultationClosing: null,
+    summary: `South Korea's Ministry of Science and ICT (MSIT) published the amended Enforcement Decree of the Radio Waves Act on May 15, 2026. The amendment introduces updated technical specifications for 5G NR frequency bands and expands exemption categories for short-range devices.\n\nThe changes take effect July 1, 2026. Affected manufacturers must update KC certification documentation before the effective date.`,
+    announcements: ['https://www.msit.go.kr/bbs/radiowaves/2026/decree-amendment.do'],
+    hasRevision: true, lastRevisionDate: '2026-05-17', revisionType: 'substantive',
+    isBookmarked: true, bookmarkStale: false, revisedSinceBookmark: true,
+    lineage: { predecessors: [], current: { newsId: '14511', version: 1, title: 'South Korea MSIT Published Amended Enforcement Decree of the Radio Waves Act', status: 'Active', date: '2026-05-15', relType: 'Version 1 (Current)' } },
+    corrections: [
+      { newsId: '14518', title: 'Correction: South Korea Radio Waves Act Decree – Corrected Exemption Category List', relType: 'correction', date: '2026-05-17', markets: ['🇰🇷 South Korea'], note: 'Corrects an error in the original exemption device category table.', isLocked: false }
+    ],
+    related: [
+      { newsId: '14390', title: 'South Korea – 5G NR Technical Standard Update (MSIT)', relType: 'related', date: '2026-04-22', markets: ['🇰🇷 South Korea'], note: 'Related technical standard update.', isLocked: false },
+    ],
+    references: [],
+    revisionHistory: [
+      { date: '2026-05-17', type: 'substantive', note: 'Added KC certification impact assessment section following editorial review. Effective date confirmed July 1, 2026.', fields: ['Summary', 'Effective Date', 'Impact Assessment'] }
+    ]
+  },
+
+  {
+    id: 'A005', newsId: '14518', version: 1, isActive: true, isSuperseded: false,
+    levelDot: '#a30f22', levelLabel: 'Correction',
+    title: 'Correction: South Korea Radio Waves Act Decree – Corrected Exemption Category List',
+    issuer: 'South Korea Ministry of Science and ICT (MSIT)',
+    markets: ['🇰🇷 South Korea'],
+    regCat: ['Wireless'],
+    products: ['Cellular', 'Wi-Fi'],
+    added: '2026-05-17', published: '2026-05-17', mandatory: '2026-07-01', effective: '2026-07-01',
+    consultationClosing: null,
+    summary: `This article corrects an error in News ID 14511. The original article listed an incorrect device category under the short-range device exemption. The corrected table includes Bluetooth Low Energy (BLE) devices as a separate exemption line item.\n\nAll other content in News ID 14511 remains unchanged.`,
+    announcements: ['https://www.msit.go.kr/bbs/radiowaves/2026/decree-correction.do'],
+    hasRevision: false, lastRevisionDate: null, revisionType: null,
+    isBookmarked: false, bookmarkStale: false, revisedSinceBookmark: false,
+    lineage: { predecessors: [], current: { newsId: '14518', version: 1, title: 'Correction: South Korea – Corrected Exemption Category List', status: 'Active', date: '2026-05-17', relType: 'Version 1 (Current)' } },
+    corrections: [],
+    related: [],
+    correctionOf: { newsId: '14511', title: 'South Korea MSIT – Amended Enforcement Decree of the Radio Waves Act' },
+    references: [],
+    revisionHistory: []
+  }
+];
+
+let activeOnly = true;
+let currentArticle = null;
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER LIST
+// ═══════════════════════════════════════════════════════════
+
+function renderList() {
+  const container = document.getElementById('article-list');
+  const articles = activeOnly ? ARTICLES.filter(a => !a.isSuperseded) : ARTICLES;
+
+  const count = activeOnly ? articles.length : ARTICLES.length;
+  document.querySelector('.results-count').textContent = `Search results (${count === ARTICLES.length ? '12,777' : '12,521'})`;
+
+  container.innerHTML = articles.map(a => {
+    const levelColor = a.levelLabel === 'Correction' ? '#a30f22' : a.levelDot;
+    return `
+    <div class="article-card ${a.isSuperseded ? 'superseded-card' : ''}" onclick="openArticle('${a.id}')">
+      <div class="card-top">
+        <div class="card-meta">
+          <strong>News ID: ${a.newsId}</strong>
+          <span>LEVEL <span class="badge-level-dot" style="background:${levelColor};"></span> ${a.levelLabel}</span>
+          <span>Added: ${a.added}</span>
+          ${a.published ? `<span>Published: ${a.published}</span>` : ''}
+          ${a.mandatory ? `<span>Mandatory: ${a.mandatory}</span>` : '<span>Mandatory: N/A</span>'}
+          ${a.effective ? `<span>Effective: ${a.effective}</span>` : '<span>Effective: N/A</span>'}
+          ${a.isSuperseded ? '<span style="color:#a30f22;font-weight:700;">SUPERSEDED</span>' : ''}
+        </div>
+        <div class="card-badges">
+          ${a.hasRevision ? `<span class="badge badge-revised">✎ Revised</span>` : ''}
+          ${a.isBookmarked && a.bookmarkStale ? `<span class="badge badge-revised-since">⚠ Updated version available</span>` : ''}
+          ${a.isBookmarked && a.revisedSinceBookmark && !a.bookmarkStale ? `<span class="badge badge-revised-since">✎ Revised since bookmarked</span>` : ''}
+          <button class="bookmark-btn ${a.isBookmarked ? 'bookmarked' : ''}" onclick="event.stopPropagation();toggleBookmarkCard('${a.id}')" title="${a.isBookmarked ? 'Remove bookmark' : 'Bookmark'}">🔖</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#666;font-weight:600;margin-bottom:4px;">${a.issuer}</div>
+      <div class="card-title">${a.title}</div>
+      <div class="card-excerpt">${a.summary.substring(0, 180)}...</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleActiveFilter(el) {
+  activeOnly = el.checked;
+  const label = document.getElementById('active-toggle-label');
+  if (activeOnly) {
+    label.innerHTML = '<strong>Showing active articles only.</strong> Toggle off to include superseded versions.';
+  } else {
+    label.innerHTML = '<strong>Showing all articles including superseded versions.</strong> Toggle on to show active only.';
+  }
+  renderList();
+}
+
+function toggleBookmarkCard(id) {
+  const a = ARTICLES.find(x => x.id === id);
+  if (a) { a.isBookmarked = !a.isBookmarked; renderList(); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OPEN DETAIL
+// ═══════════════════════════════════════════════════════════
+
+function openArticle(id) {
+  const a = ARTICLES.find(x => x.id === id);
+  if (!a) return;
+  currentArticle = a;
+
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-detail').style.display = 'block';
+  window.scrollTo(0, 0);
+
+  // Header
+  document.getElementById('detail-news-id').textContent = `NEWS ID: ${a.newsId}`;
+  document.getElementById('detail-title').textContent = a.title;
+
+  const metaRow = document.getElementById('detail-meta-row');
+  metaRow.innerHTML = [
+    `Added: <strong>${a.added}</strong>`,
+    `Effective: <strong>${a.effective || 'No data'}</strong>`,
+    `Published: <strong>${a.published || 'No data'}</strong>`,
+    `Mandatory: <strong>${a.mandatory || 'No data'}</strong>`,
+    a.consultationClosing ? `Consultation closing: <strong>${a.consultationClosing}</strong>` : ''
+  ].filter(Boolean).join(' &nbsp;|&nbsp; ');
+
+  // Badges
+  const levelColor = a.levelLabel === 'Correction' ? '#a30f22' : a.levelDot;
+  document.getElementById('detail-level-badge').innerHTML = `<span class="badge" style="background:${levelColor}18;color:${levelColor};border:1px solid ${levelColor}44;"><span class="badge-level-dot" style="background:${levelColor};"></span> ${a.levelLabel}</span>`;
+  document.getElementById('detail-revised-badge').innerHTML = a.hasRevision ? `<span class="badge badge-revised">✎ Revised ${a.lastRevisionDate}</span>` : '';
+  document.getElementById('detail-version-badge').innerHTML = `<span class="badge badge-version">v${a.version}</span>`;
+
+  // Bookmark button & indicator
+  const bmBtn = document.getElementById('bookmark-action-btn');
+  bmBtn.innerHTML = a.isBookmarked ? '🔖 Bookmarked' : '🔖 Bookmark';
+  bmBtn.style.background = a.isBookmarked ? '#e8f2fb' : '';
+  bmBtn.style.borderColor = a.isBookmarked ? '#01518A' : '';
+
+  const bmiWrap = document.getElementById('bookmark-indicator-wrap');
+  if (a.isBookmarked && a.bookmarkStale) {
+    bmiWrap.style.display = 'block';
+    bmiWrap.innerHTML = `<span class="bookmark-indicator bi-stale">⚠ Updated version available — <button class="btn-ghost" onclick="openArticle('A001')" style="margin-left:4px;">go to current version</button> or <button class="btn-ghost" style="margin-left:4px;">re-bookmark current</button></span>`;
+  } else if (a.isBookmarked && a.revisedSinceBookmark) {
+    bmiWrap.style.display = 'block';
+    bmiWrap.innerHTML = `<span class="bookmark-indicator bi-revised">✎ Revised since you bookmarked (${a.lastRevisionDate}) — content has changed</span>`;
+  } else {
+    bmiWrap.style.display = 'none';
+  }
+
+  // Inactive banner
+  const inactiveBanner = document.getElementById('inactive-banner');
+  if (a.isSuperseded) {
+    inactiveBanner.classList.add('show');
+  } else {
+    inactiveBanner.classList.remove('show');
+  }
+
+  // Revised banner
+  const revisedBanner = document.getElementById('revised-banner');
+  if (a.hasRevision) {
+    revisedBanner.classList.add('show');
+    document.getElementById('revised-date-banner').textContent = a.lastRevisionDate;
+  } else {
+    revisedBanner.classList.remove('show');
+  }
+
+  // Version breadcrumb
+  const bcWrap = document.getElementById('version-breadcrumb-wrap');
+  const total = a.lineage.predecessors.length + 1;
+  if (total > 1) {
+    bcWrap.style.display = 'block';
+    let bcHtml = `<span class="vb-label">Version lineage:</span>`;
+    a.lineage.predecessors.forEach((p, i) => {
+      bcHtml += `<span class="vb-node" onclick="navigateToArticle('${p.newsId}')" title="v${p.version}: ${p.title}">v${p.version} — ${p.status}</span>`;
+      bcHtml += `<span class="vb-arrow">→</span>`;
+    });
+    bcHtml += `<span class="vb-node current">v${a.version} — ${a.isSuperseded ? 'This article (Superseded)' : 'Current'}</span>`;
+    // If superseded, add "Next version" nav
+    if (a.isSuperseded && a.supersededBy) {
+      const successor = ARTICLES.find(x => x.id === a.supersededBy);
+      if (successor) {
+        bcHtml += `<span class="vb-arrow">→</span>`;
+        bcHtml += `<span class="vb-node" onclick="openArticle('${successor.id}')" title="v${successor.version}: ${successor.title}">v${successor.version} — Current</span>`;
+      }
+    }
+    bcHtml += `<div class="vb-nav">`;
+    if (a.lineage.predecessors.length > 0) {
+      bcHtml += `<a onclick="navigatePrevVersion()">← Prev version</a>`;
+    }
+    if (!a.isSuperseded || a.supersededBy) {
+      const hasNext = a.isSuperseded && a.supersededBy;
+      if (hasNext) { bcHtml += `<span>|</span><a onclick="navigateNextVersion()">Next version →</a>`; }
+    }
+    bcHtml += `</div>`;
+    document.getElementById('version-breadcrumb').innerHTML = bcHtml;
+  } else {
+    bcWrap.style.display = 'none';
+  }
+
+  // Sidebar
+  document.getElementById('detail-markets').innerHTML = a.markets.map(m => `<span class="sidebar-tag">${m}</span>`).join('');
+  document.getElementById('detail-reg-cat').innerHTML = a.regCat.map(r => `<span class="sidebar-tag">${r}</span>`).join('');
+  document.getElementById('detail-products').innerHTML = a.products.map(p => `<span class="sidebar-tag">${p}</span>`).join('');
+  document.getElementById('detail-issuer').textContent = a.issuer;
+
+  // Summary
+  document.getElementById('detail-summary-body').innerHTML = buildSummaryHTML(a);
+
+  // Combined History & Relationships section
+  buildRVHSection(a);
+  buildRevisionHistory(a);
+}
+
+function buildSummaryHTML(a) {
+  const paras = a.summary.split('\n\n').map(p => `<p class="content-para">${p}</p>`).join('');
+  let html = `<h3 class="content-heading">Summary</h3>${paras}`;
+  if (a.announcements && a.announcements.length) {
+    html += `<h3 class="content-heading" style="margin-top:16px;">Announcements</h3><ul style="padding-left:20px;">`;
+    a.announcements.forEach(url => {
+      html += `<li style="margin-bottom:6px;"><a class="content-link" href="${url}" target="_blank" rel="noopener">${url}</a></li>`;
+    });
+    html += `</ul>`;
+  }
+  if (a.correctionOf) {
+    html += `<div class="info-box" style="margin-top:14px;"><strong>This is a correction to:</strong> <a class="content-link" onclick="openArticleByNewsId('${a.correctionOf.newsId}')">${a.correctionOf.title} (News ID ${a.correctionOf.newsId})</a></div>`;
+  }
+  return html;
+}
+
+function buildRVHSection(a) {
+  const totalRelCount = a.lineage.predecessors.length + a.corrections.length + a.related.length + a.references.length + a.revisionHistory.length;
+  document.getElementById('rvh-badge').textContent = totalRelCount > 0 ? `${totalRelCount} item${totalRelCount !== 1 ? 's' : ''}` : '';
+
+  // Reset tabs
+  document.querySelectorAll('.rvh-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.rvh-tab').classList.add('active');
+
+  renderRVHTab('lineage');
+}
+
+function switchRVHTab(el, tab) {
+  document.querySelectorAll('.rvh-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderRVHTab(tab);
+}
+
+function renderRVHTab(tab) {
+  const a = currentArticle;
+  const container = document.getElementById('rvh-tab-content');
+  if (!a) return;
+
+  if (tab === 'lineage') {
+    const allVersions = [...a.lineage.predecessors, a.lineage.current];
+    if (allVersions.length <= 1 && a.lineage.predecessors.length === 0) {
+      container.innerHTML = `<div style="color:#888;font-size:13px;padding:10px 0;">This article has no version lineage — it is the first and only version in its chain.</div>`;
+      return;
+    }
+
+    // Build a merged chronological timeline of version nodes + inline revision events.
+    // Each version node is expanded to show revisions that belong to it (date falls within that version's publish window).
+    // Revisions for the current version are shown as indented child events on the current node.
+
+    const allVersionNodes = [
+      ...a.lineage.predecessors.map(p => ({ ...p, isCurrentArticle: false, isCurrent: false })),
+      { ...a.lineage.current, isCurrentArticle: true, isCurrent: !a.isSuperseded }
+    ];
+
+    // Attach revision events to the current article node
+    const revsByNode = {};
+    if (a.revisionHistory && a.revisionHistory.length > 0) {
+      revsByNode[a.newsId] = a.revisionHistory;
+    }
+
+    const hasAnything = allVersionNodes.length > 1 || (revsByNode[a.newsId] && revsByNode[a.newsId].length > 0);
+    if (!hasAnything) {
+      container.innerHTML = `<div style="color:#888;font-size:13px;padding:10px 0;">This is the first and only version of this article. No editorial revisions recorded.</div>`;
+      return;
+    }
+
+    let html = `<div class="info-box" style="margin-bottom:12px;">The timeline below shows how this regulation has evolved across versions and how this article has been editorially revised. Click any version to navigate to it.</div>`;
+    html += `<div class="lineage-timeline">`;
+
+    allVersionNodes.forEach((node, ni) => {
+      const isLast = ni === allVersionNodes.length - 1 && !a.isSuperseded;
+      const dotClass = node.isCurrentArticle && !a.isSuperseded ? 'current-dot' : 'superseded-dot';
+      const cardClass = node.isCurrentArticle && !a.isSuperseded ? 'current-card' : 'superseded-card-lh';
+      const chipClass = node.isCurrentArticle && !a.isSuperseded ? 'rel-follow-up' : 'rel-supersedes';
+      const badgeClass = node.isCurrentArticle && !a.isSuperseded ? 'badge-finalized' : 'badge-superseded';
+      const badgeLabel = node.isCurrentArticle ? (a.isSuperseded ? 'Superseded' : 'Active') : node.status;
+      const nodeRevisions = revsByNode[node.newsId] || [];
+      const hasRevs = nodeRevisions.length > 0;
+
+      // Show a connector line if there's more content after this node
+      const needsLine = ni < allVersionNodes.length - 1 || (node.isCurrentArticle && a.isSuperseded && a.supersededBy) || hasRevs;
+
+      html += `
+      <div class="lineage-row">
+        <div class="lineage-connector">
+          <div class="lc-dot ${dotClass}"></div>
+          ${needsLine ? '<div class="lc-line"></div>' : ''}
+        </div>
+        <div style="flex:1;margin-bottom:0;">
+          <div class="lineage-card ${cardClass}" style="margin-left:8px;margin-top:6px;" ${node.isCurrentArticle ? '' : `onclick="navigateToArticle('${node.newsId}')"`}>
+            <div class="lh-card-top">
+              <span class="rel-chip ${chipClass}">${node.relType}</span>
+              <span class="badge ${badgeClass}">${badgeLabel}</span>
+              <span style="margin-left:auto;font-size:11px;color:#888;">Published ${node.date}</span>
+            </div>
+            <div class="lh-card-title">News ID ${node.newsId} – ${node.title}${node.isCurrentArticle ? ' <em style="font-weight:400;color:#555;">(this article)</em>' : ''}</div>
+            ${node.changeNote ? `<div class="lh-change-note">What changed: ${node.changeNote}</div>` : ''}
+          </div>
+
+          ${hasRevs ? `
+          <div style="margin-left:32px;">
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 6px;">Editorial revisions to this version</div>
+            ${nodeRevisions.map((rev, ri) => `
+            <div class="rev-item" style="margin-bottom:${ri < nodeRevisions.length - 1 ? '0' : '6px'};">
+              <div class="rev-connector">
+                <div class="rev-dot ${rev.type === 'substantive' ? 'substantive-dot' : 'minor-dot'}"></div>
+                ${ri < nodeRevisions.length - 1 ? '<div class="rev-line"></div>' : ''}
+              </div>
+              <div class="rev-card ${rev.type === 'substantive' ? 'substantive-rev' : 'minor-rev'}" style="margin-left:8px;">
+                <div class="rev-card-top">
+                  <span class="rev-date">${rev.date}</span>
+                  <span class="badge ${rev.type === 'substantive' ? 'badge-revised' : ''}" style="${rev.type === 'minor' ? 'background:#f0f3f6;color:#555;' : ''}">${rev.type === 'substantive' ? 'Substantive revision' : 'Minor revision'}</span>
+                </div>
+                <div class="rev-note">${rev.note}</div>
+                ${rev.fields && rev.fields.length ? `<div class="rev-fields">${rev.fields.map(f => `<span class="rev-field-tag">${f}</span>`).join('')}</div>` : ''}
+              </div>
+            </div>`).join('')}
+          </div>` : ''}
+        </div>
+      </div>`;
+    });
+
+    // If this article is superseded, show the active successor at the end
+    if (a.isSuperseded && a.supersededBy) {
+      const succ = ARTICLES.find(x => x.id === a.supersededBy);
+      if (succ) {
+        html += `
+        <div class="lineage-row">
+          <div class="lineage-connector">
+            <div class="lc-dot current-dot"></div>
+          </div>
+          <div class="lineage-card current-card" style="margin-left:8px;margin-top:6px;" onclick="openArticle('${succ.id}')">
+            <div class="lh-card-top">
+              <span class="rel-chip rel-follow-up">Version ${succ.version} (Current)</span>
+              <span class="badge badge-finalized">Active</span>
+              <span style="margin-left:auto;font-size:11px;color:#888;">Published ${succ.published}</span>
+            </div>
+            <div class="lh-card-title">News ID ${succ.newsId} – ${succ.title}</div>
+          </div>
+        </div>`;
+      }
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
+
+  } else if (tab === 'corrections') {
+    if (!a.corrections.length) {
+      container.innerHTML = `<div style="color:#888;font-size:13px;padding:10px 0;">No corrections have been issued for this article.</div>`;
+      return;
+    }
+    let html = '';
+    a.corrections.forEach(c => {
+      html += renderRelItem(c, false);
+    });
+    container.innerHTML = html;
+
+  } else if (tab === 'related') {
+    if (!a.related.length) {
+      container.innerHTML = `<div style="color:#888;font-size:13px;padding:10px 0;">No related coverage linked to this article.</div>`;
+      return;
+    }
+    let html = '';
+    a.related.forEach(r => {
+      html += renderRelItem(r, r.isLocked);
+    });
+    container.innerHTML = html;
+
+  } else if (tab === 'references') {
+    if (!a.references.length) {
+      container.innerHTML = `<div style="color:#888;font-size:13px;padding:10px 0;">No references linked to this article.</div>`;
+      return;
+    }
+    let html = '';
+    a.references.forEach(r => {
+      html += renderRelItem(r, r.isLocked);
+    });
+    container.innerHTML = html;
+  }
+}
+
+function renderRelItem(rel, locked) {
+  if (locked) {
+    return `
+    <div class="gated-ref" style="margin-bottom:8px;">
+      <span class="gated-lock">🔒</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#666;">${rel.title}</div>
+        <div style="font-size:11px;color:#999;margin-top:2px;">This article is outside your current subscription. Contact your account manager to unlock.</div>
+      </div>
+    </div>`;
+  }
+  const chipClass = {
+    'related': 'rel-related', 'correction': 'rel-correction', 'references': 'rel-references',
+    'consolidates': 'rel-consolidates', 'supersedes': 'rel-supersedes', 'follow-up': 'rel-follow-up'
+  }[rel.relType] || 'rel-related';
+
+  return `
+  <div class="rel-item" onclick="openArticleByNewsId('${rel.newsId}')">
+    <div style="flex-shrink:0;"><span class="rel-chip ${chipClass}">${rel.relType}</span></div>
+    <div class="rel-item-body">
+      <div class="rel-item-title">News ID ${rel.newsId} – ${rel.title}</div>
+      <div class="rel-item-meta">${rel.markets ? rel.markets.join(', ') : ''} ${rel.date ? '· Published ' + rel.date : ''}</div>
+      ${rel.note ? `<div style="font-size:12px;color:#555;margin-top:3px;">${rel.note}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function buildRevisionHistory(a) {
+  // No-op: revision history is now rendered inside the unified History & Relationships section (Revision History tab)
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function showList() {
+  document.getElementById('view-list').style.display = 'block';
+  document.getElementById('view-detail').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+function goHome() { showList(); }
+
+function navigateToArticle(newsId) {
+  const a = ARTICLES.find(x => x.newsId === newsId);
+  if (a) openArticle(a.id);
+}
+
+function openArticleByNewsId(newsId) {
+  navigateToArticle(newsId);
+}
+
+function navigateToArticle(target) {
+  if (target === 'current') {
+    // Find current version for current article
+    if (currentArticle && currentArticle.supersededBy) {
+      openArticle(currentArticle.supersededBy);
+    }
+    return;
+  }
+  const a = ARTICLES.find(x => x.newsId === target);
+  if (a) openArticle(a.id);
+}
+
+function navigatePrevVersion() {
+  if (!currentArticle || !currentArticle.lineage.predecessors.length) return;
+  const prev = currentArticle.lineage.predecessors[currentArticle.lineage.predecessors.length - 1];
+  navigateToArticle(prev.newsId);
+}
+
+function navigateNextVersion() {
+  if (!currentArticle || !currentArticle.supersededBy) return;
+  openArticle(currentArticle.supersededBy);
+}
+
+function toggleBookmark() {
+  if (!currentArticle) return;
+  currentArticle.isBookmarked = !currentArticle.isBookmarked;
+  openArticle(currentArticle.id); // re-render header
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SECTION TOGGLES
+// ═══════════════════════════════════════════════════════════
+
+function toggleSection(headerEl) {
+  const body = headerEl.nextElementSibling;
+  const chevron = headerEl.querySelector('.section-chevron');
+  if (body.classList.contains('collapsed')) {
+    body.classList.remove('collapsed');
+    chevron.classList.add('open');
+  } else {
+    body.classList.add('collapsed');
+    chevron.classList.remove('open');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+
+renderList();
+</script>
+</body>
+</html>

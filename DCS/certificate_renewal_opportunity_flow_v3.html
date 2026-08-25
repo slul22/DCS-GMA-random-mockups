@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Certificate Renewal → Sales Opportunity Flow</title>
+<style>
+  :root {
+    --ul-red: #DA291C;
+    --ink: #101010;
+    --muted: #444444;
+    --circle-bg: #E7E7E7;
+    --line: #101010;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--ink);
+  }
+
+  .slide {
+    width: 1160px;
+    margin: 0 auto;
+    padding: 40px 40px 34px;
+    position: relative;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 26px;
+    letter-spacing: -0.01em;
+  }
+
+  .roadmap {
+    position: relative;
+    width: 1080px;
+    margin: 0 auto;
+  }
+
+  .connector-svg {
+    display: block;
+    width: 100%;
+    height: 60px;
+    overflow: visible;
+  }
+  .connector-svg path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2;
+    stroke-dasharray: 6 6;
+  }
+  .connector-svg circle {
+    fill: var(--ink);
+  }
+
+  .stick {
+    position: absolute;
+    width: 0;
+    border-left: 2px solid var(--ink);
+    top: 60px;
+  }
+
+  .row {
+    position: relative;
+    margin-top: 0;
+  }
+
+  .stop {
+    position: absolute;
+    top: 0;
+    width: 216px;
+    text-align: left;
+  }
+
+  .icon-circle {
+    width: 108px;
+    height: 108px;
+    border-radius: 50%;
+    background: var(--circle-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-left: 0;
+  }
+  .icon-circle svg { width: 48px; height: 48px; }
+
+  .accent-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--ul-red);
+    border-radius: 50%;
+  }
+
+  .stop-tag {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ul-red);
+    margin: 16px 0 6px;
+  }
+  .stop-text .headline {
+    font-weight: 700;
+    font-size: 13.5px;
+    line-height: 1.35;
+    margin: 0 0 6px;
+  }
+  .stop-text .body {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--muted);
+    margin: 0;
+    max-width: 200px;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 40px;
+  }
+  .footer .ul-logo-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--ul-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--ul-red);
+  }
+  .footer .brand {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+</style>
+</head>
+<body>
+
+  <div class="slide">
+    <h1>Certificate Renewal &rarr; Sales Opportunity Flow</h1>
+
+    <div class="roadmap">
+      <!-- Zigzag dashed connector: 5 dots at x = 40,310,580,850,1040 (viewBox 1080x60) alternating y 10/50 -->
+      <svg class="connector-svg" viewBox="0 0 1080 60" preserveAspectRatio="none">
+        <path d="M0,10 H40 V50 H310 V10 H580 V50 H850 V10 H1040 V50 H1080" />
+        <circle cx="40"   cy="50" r="5" />
+        <circle cx="310"  cy="10" r="5" />
+        <circle cx="580"  cy="50" r="5" />
+        <circle cx="850"  cy="10" r="5" />
+        <circle cx="1040" cy="50" r="5" />
+      </svg>
+
+      <div class="row" style="height: 108px;">
+        <!-- vertical sticks from dot to icon top -->
+        <div class="stick" style="left:40px;  height:10px;"></div>
+        <div class="stick" style="left:310px; height:50px;"></div>
+        <div class="stick" style="left:580px; height:10px;"></div>
+        <div class="stick" style="left:850px; height:50px;"></div>
+        <div class="stick" style="left:1040px;height:10px;"></div>
+
+        <!-- Stop 1: DCS -->
+        <div class="stop" style="left:0px;">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="1.6"><path d="M6 3h9l3 3v15H6V3z"/><path d="M15 3v3h3"/><path d="M9 12h6M9 15h6M9 9h3"/></svg>
+            <span class="accent-dot" style="right:10px; top:12px;"></span>
+          </div>
+        </div>
+
+        <!-- Stop 2: OIC -->
+        <div class="stop" style="left:256px;">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="1.6"><path d="M4 12a8 8 0 0 1 13.66-5.66L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-13.66 5.66L4 16"/><path d="M4 20v-4h4"/></svg>
+            <span class="accent-dot" style="left:8px; bottom:10px;"></span>
+          </div>
+        </div>
+
+        <!-- Stop 3: Salesforce -->
+        <div class="stop" style="left:526px;">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="1.6"><path d="M7 17a4 4 0 0 1-1-7.9 5 5 0 0 1 9.6-1.8A4.5 4.5 0 0 1 17 17H7z"/><path d="M9.5 14.5l2 2 3-3.5"/></svg>
+            <span class="accent-dot" style="right:12px; top:14px;"></span>
+          </div>
+        </div>
+
+        <!-- Stop 4: Account Owner -->
+        <div class="stop" style="left:796px;">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4.2-6 7-6s5.8 2 7 6"/></svg>
+            <span class="accent-dot" style="left:10px; bottom:16px;"></span>
+          </div>
+        </div>
+
+        <!-- Stop 5: Customer -->
+        <div class="stop" style="left:986px;">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19.5c1.1-3.6 3.8-5.5 6.5-5.5s5.4 1.9 6.5 5.5"/><path d="M15 3.6c1 .35 1.7 1.3 1.7 2.4s-.7 2.05-1.7 2.4"/><path d="M17.5 14.3c1.7.6 2.9 2 3.5 4.2"/></svg>
+            <span class="accent-dot" style="right:14px; top:10px;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text row, aligned under each icon -->
+      <div class="row" style="height:150px; margin-top:18px;">
+        <div class="stop" style="left:0px;">
+          <div class="stop-text">
+            <span class="stop-tag">DCS</span>
+            <p class="headline">Certificate expiration<br/>is detected.</p>
+            <p class="body">DCS identifies certificates approaching expiration and generates a renewal notice with product data.</p>
+          </div>
+        </div>
+        <div class="stop" style="left:256px;">
+          <div class="stop-text">
+            <span class="stop-tag">OIC</span>
+            <p class="headline">Alerts are combined<br/>and enriched.</p>
+            <p class="body">OIC consolidates related certificates per account and maps Account Owner and COU into a custom field.</p>
+          </div>
+        </div>
+        <div class="stop" style="left:526px;">
+          <div class="stop-text">
+            <span class="stop-tag">Salesforce</span>
+            <p class="headline">One opportunity<br/>is created.</p>
+            <p class="body">A single, consolidated opportunity is created per account, carrying certificate details in a custom field.</p>
+          </div>
+        </div>
+        <div class="stop" style="left:796px;">
+          <div class="stop-text">
+            <span class="stop-tag">Account Owner</span>
+            <p class="headline">Rep reviews and<br/>reaches out.</p>
+            <p class="body">The account owner sees all expiring certificates at once and starts the renewal conversation.</p>
+          </div>
+        </div>
+        <div class="stop" style="left:986px; width:180px;">
+          <div class="stop-text">
+            <span class="stop-tag">Customer</span>
+            <p class="headline">Customer gets one<br/>clear renewal ask.</p>
+            <p class="body">One timely, consolidated conversation instead of multiple disconnected notices.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer" style="margin-top:0;">
+      <span class="ul-logo-circle">UL</span>
+      <span class="brand">Solutions</span>
+    </div>
+  </div>
+
+</body>
+</html>

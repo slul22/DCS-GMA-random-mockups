@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GMA News — Manage News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --brand-red: #CA0123; --brand-red-2: #C02031; --brand-red-3: #C02032;
+    --blue: #01518A; --blue-dark: #013f6b;
+    --ink: #3E3E3E; --ink-2: #4D4D4D; --ink-3: #1F2327;
+    --muted: #999999; --muted-2: #B3B3B3;
+    --bg: #FFFFFF; --bg-alt: #F5F5F5; --bg-chip: #f0f3f6;
+    --border: #D3D3D3; --border-strong: #4D4D4D; --border-light: #EBEBEB;
+    --header-bg: #E6E6E6;
+    --ok: #1e7d4f; --warn: #b56a00;
+    /* status chip colors from Figma */
+    --chip-accepted-bg: #EAF0E9; --chip-draft-bg: #FFF4D6; --chip-revision-bg: #FDF0F2;
+    --chip-review-bg: #E8F0F8; --chip-rejected-bg: #f3e8e8; --chip-inactive-bg: #EBEBEB;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Open Sans', "Segoe UI", Arial, sans-serif; background: #f4f6f8; color: #222; font-size: 14px; line-height: 1.5; }
+
+  /* ═══ TOP NAV ═══ */
+  .topbar { display:flex; align-items:center; height:52px; background:#fff; border-bottom:1px solid #dce1e7; padding:0 28px; position:sticky; top:0; z-index:40; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand-svg { display:flex; align-items:center; }
+  .brand-sep { width:2px; height:26px; background:#D3D3D3; margin:0 10px; }
+  .brand-app { font-family:'Poppins',sans-serif; font-weight:500; font-size:18px; color:var(--brand-red); }
+  .topbar-spacer { flex:1; }
+  .avatar { width:34px; height:34px; border-radius:4px; background:var(--brand-red-3); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:'Open Sans',sans-serif; cursor:pointer; }
+
+  /* ═══ TAB NAV ═══ */
+  .tabnav { display:flex; align-items:stretch; border-bottom:1px solid #dce1e7; background:#fff; padding:0 28px; height:38px; position:sticky; top:52px; z-index:39; }
+  .tabnav-sep-top { height:1px; background:var(--border-light); position:absolute; top:0; left:0; right:0; }
+  .tab-item { position:relative; display:flex; align-items:center; padding:0 14px; font-size:14px; color:#444; cursor:pointer; white-space:nowrap; user-select:none; }
+  .tab-item::after { content:""; position:absolute; left:0; right:0; bottom:0; height:6px; background:linear-gradient(180deg, rgba(255,255,255,0) 0%, #EBEBEB 92.5%, #EBEBEB 100%); }
+  .tab-item.active::after { background:linear-gradient(180deg, rgba(255,255,255,0) 0%, #0057b8 92.3%, #0057b8 100%); }
+  .tab-item:hover:not(.active) { color:#0057b8; }
+
+  /* ═══ ROLE BAR (prototype control) ═══ */
+  .role-bar { background:#fff3cd; border-bottom:1px solid #f0d6a2; padding:6px 28px; display:flex; align-items:center; gap:10px; font-size:12px; color:#6b4900; flex-wrap:wrap; }
+  .role-bar label { font-weight:700; }
+  .role-btn { padding:2px 10px; border-radius:999px; border:1px solid #e6b800; background:#fff; font-size:12px; font-weight:600; cursor:pointer; color:#6b4900; transition:background .15s; }
+  .role-btn.active { background:#e6a000; color:#fff; border-color:#c88e00; }
+  .role-bar .note { color:#8a6400; }
+
+  /* ═══ SHELL ═══ */
+  .shell { max-width:1800px; margin:0 auto; padding:0 28px 60px; }
+
+  /* ═══ PAGE HEADER ROW ═══ */
+  .page-hd { display:flex; align-items:center; justify-content:space-between; padding:24px 0 20px; gap:12px; flex-wrap:wrap; }
+  .page-hd h1 { font-family:'Open Sans',sans-serif; font-size:16px; font-weight:700; color:#222; }
+  .page-hd .sub { font-size:13px; color:#999; margin-top:3px; }
+
+  /* ═══ BUTTONS ═══ */
+  .btn { padding:8px 18px; font-family:'Open Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; border:1px solid #ccc; background:#fff; color:#333; transition:background .15s,opacity .15s; display:inline-flex; align-items:center; gap:6px; line-height:20px; white-space:nowrap; border-radius:4px; }
+  .btn-primary { background:var(--blue); color:#fff; }
+  .btn-primary:hover { background:var(--blue-dark); }
+  .btn-secondary { background:var(--header-bg); color:#000; }
+  .btn-secondary:hover { background:#d4d4d4; }
+  .btn-success { background:var(--ok); color:#fff; font-size:14px; }
+  .btn-success:hover { background:#155f3a; }
+  .btn-warn { background:var(--warn); color:#fff; font-size:14px; }
+  .btn-warn:hover { background:#8a5000; }
+  .btn-danger-outline { background:#fff; color:var(--brand-red); border:1px solid var(--brand-red); font-size:14px; }
+  .btn-danger-outline:hover { background:#fff0f2; }
+  .btn-ghost { background:transparent; color:var(--blue); border:none; padding:5px 8px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Open Sans',sans-serif; }
+  .btn[disabled], .btn.disabled { opacity:.42; cursor:not-allowed; pointer-events:none; }
+  .btn-sm { padding:4px 12px; font-size:14px; line-height:1.4; font-weight:600; }
+  .btn-action { display:flex; gap:8px; align-items:center; }
+
+  /* ═══ FILTER SECTION ═══ */
+  .filter-section { padding:0 0 16px; }
+  .filter-row { display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+  .filter-group { display:flex; flex-direction:column; gap:4px; }
+  .filter-label { font-size:16px; color:var(--ink-2); font-weight:400; }
+  .filter-select {
+    padding:6px 32px 6px 10px; border:1px solid var(--border-strong); background:#fff;
+    font-family:'Open Sans',sans-serif; font-size:16px; color:var(--ink-2);
+    min-width:148px; height:36px; cursor:pointer; appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555B60'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 10px center;
+  }
+  .filter-select:focus { outline:none; border-color:var(--blue); }
+  .my-items-group { display:flex; align-items:center; gap:8px; margin-left:8px; padding-bottom:4px; }
+  .my-items-label { font-size:14px; color:var(--ink-3); font-weight:400; }
+  .toggle-track { width:34px; height:16px; border-radius:8px; background:#59595A; position:relative; cursor:pointer; flex-shrink:0; }
+  .toggle-thumb { width:12px; height:12px; border-radius:50%; background:#fff; position:absolute; top:2px; left:2px; transition:left .2s; }
+  .toggle-track.on { background:var(--blue); }
+  .toggle-track.on .toggle-thumb { left:20px; }
+
+  /* ═══ SEARCH BAR ═══ */
+  .search-bar-wrap { border:1px solid var(--muted-2); background:#fff; display:flex; align-items:center; padding:0; height:48px; margin-bottom:0; }
+  .search-bar-tag { padding:0 14px; font-size:14px; color:var(--ink-2); border-right:1px solid var(--muted-2); height:100%; display:flex; align-items:center; }
+  .search-bar-icon { padding:0 10px 0 14px; color:var(--ink-2); display:flex; align-items:center; }
+  .search-bar-input { flex:1; border:none; outline:none; font-family:'Open Sans',sans-serif; font-size:14px; color:var(--ink-2); background:transparent; padding:0 10px; }
+  .search-bar-input::placeholder { color:var(--ink-2); }
+  .search-bar-sep { width:1px; height:100%; background:var(--muted-2); }
+
+  /* ═══ NEWS TABLE ═══ */
+  .news-table-wrap { border:1px solid #dce1e7; overflow-x:auto; }
+  .news-table { width:100%; border-collapse:collapse; font-family:'Open Sans',sans-serif; }
+  /* Header */
+  .news-table thead tr th { background:#f4f6f8; font-size:14px; font-weight:700; color:#222; padding:10px 13px; text-align:left; border-right:1px solid #dce1e7; white-space:nowrap; }
+  .news-table thead tr th:last-child { border-right:none; }
+  /* Column widths matching Figma proportions */
+  .col-id     { width:7.5%; }
+  .col-title  { width:44%; }
+  .col-level  { width:9%; }
+  .col-orig   { width:10.5%; }
+  .col-date   { width:10%; }
+  .col-status { width:11%; }
+  .col-action { width:3%; min-width:36px; }
+  /* Rows */
+  .news-table tbody tr { cursor:pointer; }
+  .news-table tbody tr td { font-size:14px; font-weight:400; color:#222; padding:10px 13px; border-right:1px solid #e8e8e8; vertical-align:middle; }
+  .news-table tbody tr td:last-child { border-right:none; }
+  .news-table tbody tr:nth-child(odd)  td { background:#fff; }
+  .news-table tbody tr:nth-child(even) td { background:var(--bg-alt); }
+  .news-table tbody tr:hover td { filter:brightness(.96); }
+  /* Status chip */
+  .status-chip { display:inline-block; padding:2px 10px; font-size:13px; font-weight:400; font-family:'Open Sans',sans-serif; line-height:20px; white-space:nowrap; }
+  .chip-accepted  { background:var(--chip-accepted-bg);  color:#000001; }
+  .chip-draft     { background:var(--chip-draft-bg);     color:#000001; }
+  .chip-revision  { background:var(--chip-revision-bg);  color:#000001; }
+  .chip-review    { background:var(--chip-review-bg);    color:#000001; }
+  .chip-rejected  { background:var(--chip-rejected-bg);  color:#8b2020; }
+  .chip-inactive  { background:var(--chip-inactive-bg);  color:#555; }
+  /* More vert */
+  .more-btn { background:none; border:none; cursor:pointer; font-size:18px; color:var(--ink-2); line-height:1; padding:4px 8px; display:flex; align-items:center; justify-content:center; }
+  .more-btn:hover { background:#f0f0f0; }
+  .empty-row td { text-align:center; color:#999; padding:40px; font-size:16px; background:#fff !important; }
+
+  /* ═══ PAGINATION ═══ */
+  .pagination-bar { display:flex; align-items:center; height:56px; border-top:1px solid var(--border); background:#fff; padding:0 12px; gap:0; }
+  .pag-left { display:flex; align-items:center; gap:10px; border-right:1px solid var(--border); padding-right:16px; flex:0 0 auto; }
+  .pag-label { font-size:14px; color:#000001; }
+  .pag-select { border:1px solid var(--border-strong); background:#fff; font-family:'Open Sans',sans-serif; font-size:16px; color:var(--ink-2); padding:3px 24px 3px 8px; height:30px; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555B60' opacity='.5'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 6px center; cursor:pointer; }
+  .pag-count { font-size:14px; color:#000001; border-left:1px solid var(--border); padding-left:16px; }
+  .pag-right { display:flex; align-items:center; gap:4px; margin-left:auto; border-left:1px solid var(--border); padding-left:16px; }
+  .pag-btn { width:30px; height:30px; background:var(--header-bg); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; color:#000001; }
+  .pag-btn:hover { background:#d4d4d4; }
+  .pag-input { border:1px solid var(--border-strong); background:#fff; font-family:'Open Sans',sans-serif; font-size:16px; color:#999; text-align:center; width:48px; height:30px; }
+  .pag-of { font-size:14px; color:#3E3E3E; margin:0 6px; white-space:nowrap; }
+
+  /* ═══ PANEL (detail / queue / audit views) ═══ */
+  .panel { background:#fff; border:1px solid #dde0e3; border-radius:8px; padding:16px; margin-bottom:14px; }
+  .panel-title { font-size:15px; font-weight:700; margin-bottom:12px; }
+  .section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#6b7480; }
+
+  /* ═══ DETAIL / QUEUE / AUDIT BADGES (small, used inside detail views) ═══ */
+  .badge { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:600; line-height:17px; white-space:nowrap; }
+  .badge-draft       { background:#fff3e0; color:#a85b00; }
+  .badge-review      { background:#fff8d4; color:#7a6300; }
+  .badge-approved    { background:#e3f4ea; color:var(--ok); }
+  .badge-changes     { background:#fde8ea; color:#a30f22; }
+  .badge-rejected    { background:#f3e8e8; color:#8b2020; }
+  .badge-active      { background:#e3f4ea; color:var(--ok); }
+  .badge-inactive    { background:#eceef1; color:#555; }
+  .badge-version     { background:#eef2f7; color:#222; border:1px solid #dde2e7; }
+  .badge-outline     { background:#fff; color:#344050; border:1px solid #c5c9cc; }
+  .badge-nl-notification   { background:#e8f0f8; color:#0b4f8a; }
+  .badge-nl-draft          { background:#fff8d4; color:#7a6300; }
+  .badge-nl-finalized      { background:#e3f4ea; color:var(--ok); }
+  .badge-nl-new-service    { background:#f5e8ff; color:#6a2c8a; }
+  .badge-nl-in-development { background:#fff3e0; color:#a85b00; }
+
+  /* ═══ RELATIONSHIP PILLS ═══ */
+  .rel-pill { font-size:11px; padding:2px 9px; border-radius:999px; font-weight:600; white-space:nowrap; }
+  .rel-supersedes   { background:#f1e6f6; color:#6a2c8a; }
+  .rel-correction   { background:#fde8ea; color:#a30f22; }
+  .rel-related      { background:#e8f0f8; color:#0b4f8a; }
+  .rel-consolidates { background:#fff3e0; color:#a85b00; }
+  .rel-references   { background:#eef2f5; color:#344050; }
+
+  /* ═══ DETAIL ═══ */
+  .back-link { margin-bottom:10px; display:inline-flex; align-items:center; gap:4px; }
+  .meta-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:16px; }
+  .mi-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#6b7480; margin-bottom:3px; }
+  .mi-value { font-size:13px; font-weight:600; }
+  .hr { height:1px; background:#dde0e3; margin:14px 0; }
+  .action-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .summary-text { font-size:13px; color:#344050; line-height:1.65; }
+
+  /* ═══ REL ROWS ═══ */
+  .rel-list { display:flex; flex-direction:column; gap:8px; }
+  .rel-row { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid #dde0e3; border-radius:6px; background:#fff; }
+  .rel-row-content { flex:1; min-width:0; }
+  .rel-row-title { font-weight:600; font-size:13px; }
+  .rel-row-meta { font-size:12px; color:#6b7480; margin-top:2px; }
+
+  /* ═══ HISTORY TIMELINE ═══ */
+  .timeline { display:flex; flex-direction:column; gap:0; padding-left:20px; }
+  .tl-item { position:relative; padding:10px 12px 10px 16px; border-left:2px solid #c5c9cc; }
+  .tl-item::before { content:""; position:absolute; left:-6px; top:15px; width:10px; height:10px; border-radius:50%; background:#fff; border:2px solid #c5c9cc; }
+  .tl-item.tl-first::before { border-color:var(--blue); background:var(--blue); }
+  .tl-action { font-weight:600; font-size:13px; }
+  .tl-meta { font-size:12px; color:#6b7480; }
+  .tl-detail { font-size:12px; color:#344050; margin-top:2px; }
+
+  /* ═══ MY QUEUE ═══ */
+  .queue-panel { background:#fff; border:1px solid #dde0e3; border-radius:8px; margin-top:14px; overflow:hidden; }
+  .queue-panel-header { padding:13px 16px; background:#fafbfc; border-bottom:1px solid #dde0e3; display:flex; justify-content:space-between; align-items:center; }
+  .queue-panel-header h3 { font-size:14px; font-weight:700; }
+  .queue-panel-body { padding:16px; }
+  .events-list { display:flex; flex-direction:column; gap:6px; }
+  .event-row { display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border:1px solid #dde0e3; border-radius:6px; font-size:12px; }
+  .event-code { font-family:monospace; background:#f0f3f6; padding:2px 7px; border-radius:4px; font-size:11px; color:#0b4f8a; white-space:nowrap; }
+
+  /* ═══ MODALS ═══ */
+  .modal-backdrop { position:fixed; inset:0; background:rgba(15,23,32,.45); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:4vh 16px; overflow-y:auto; }
+  .modal-backdrop.show { display:flex; }
+  .modal { background:#fff; border-radius:10px; width:100%; max-width:860px; box-shadow:0 18px 50px rgba(0,0,0,.25); }
+  .modal-lg { max-width:1060px; }
+  .modal-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid #dde0e3; }
+  .modal-header h2 { font-size:16px; font-weight:700; }
+  .modal-body { padding:18px; }
+  .modal-footer { display:flex; justify-content:flex-end; gap:8px; padding:12px 18px; border-top:1px solid #dde0e3; background:#fafbfc; border-radius:0 0 10px 10px; }
+  .icon-x { background:none; border:none; font-size:20px; cursor:pointer; color:#6b7480; line-height:1; }
+
+  /* ── STEPPER ── */
+  .stepper { display:flex; align-items:center; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
+  .step-item { display:flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; color:var(--ink-2); background:#f0f3f6; white-space:nowrap; }
+  .step-item.active { background:var(--blue); color:#fff; }
+  .step-item.done { background:var(--ok); color:#fff; }
+  .step-num { width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,.12); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+  .step-div { color:var(--muted); font-size:16px; }
+
+  /* ── FORM ── */
+  .field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+  .field label { font-size:12px; font-weight:600; color:var(--ink-2); }
+  .field input[type=text], .field input[type=date], .field textarea, .field select { padding:8px 10px; border:1px solid #4D4D4D; border-radius:0; font-size:14px; font-family:inherit; color:#222; background:#fff; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 2px rgba(1,81,138,.12); }
+  .field textarea { min-height:80px; resize:vertical; }
+  .field .help { font-size:11px; color:var(--muted); }
+  .req { color:var(--brand-red); }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+  /* ── SEARCH LIST ── */
+  .search-list { border:1px solid var(--border); border-radius:6px; max-height:200px; overflow-y:auto; margin-bottom:12px; }
+  .search-item { padding:10px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .search-item:last-child { border-bottom:none; }
+  .search-item:hover { background:#f7faff; }
+  .search-item-info { flex:1; min-width:0; }
+  .search-item-title { font-weight:600; font-size:13px; }
+  .search-item-meta { font-size:12px; color:var(--muted); }
+
+  /* ── LINEAGE ── */
+  .lineage { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px; background:#fafbfc; border:1px dashed var(--border-strong); border-radius:8px; min-height:56px; }
+  .lineage-node { background:#fff; border:1px solid var(--border-strong); border-radius:6px; padding:8px 10px; font-size:12px; max-width:220px; }
+  .lineage-node.current { border-color:var(--blue); background:#f3f8ff; }
+  .lineage-node-title { font-weight:600; }
+  .lineage-node-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+  .lineage-arrow { color:var(--muted); font-size:20px; flex-shrink:0; }
+
+  /* ── BOXES ── */
+  .info-box  { background:#f3f8ff; border:1px solid #c8dcf2; color:#0b4f8a; border-radius:6px; padding:10px 12px; font-size:12px; line-height:1.55; }
+  .warn-box  { background:#fff7e6; border:1px solid #f0d6a2; color:#7a4d00; border-radius:6px; padding:10px 12px; font-size:12px; line-height:1.55; }
+  .ok-box    { background:#e3f4ea; border:1px solid #a8d8b8; color:#155f3a; border-radius:6px; padding:10px 12px; font-size:12px; line-height:1.55; }
+  .danger-box { background:#fff0f2; border:1px solid #f5bcc2; color:#a30f22; border-radius:6px; padding:10px 12px; font-size:12px; line-height:1.55; }
+
+  /* ── TOAST ── */
+  .toast-wrap { position:fixed; right:18px; bottom:18px; display:flex; flex-direction:column; gap:8px; z-index:200; }
+  .toast { background:var(--ink-3); color:#fff; padding:10px 16px; border-radius:6px; font-size:13px; box-shadow:0 6px 16px rgba(0,0,0,.18); animation:slideUp .2s ease; max-width:400px; line-height:1.4; }
+  .toast.success { background:var(--ok); }
+  .toast.warn    { background:var(--warn); }
+  .toast.error   { background:var(--brand-red); }
+  @keyframes slideUp { from { transform:translateY(8px); opacity:0; } to { transform:none; opacity:1; } }
+
+  /* ── UTIL ── */
+  .spacer { flex:1; }
+  .row-flex { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .mt-4  { margin-top:4px; }
+  .mt-8  { margin-top:8px; }
+  .mt-12 { margin-top:12px; }
+  .mt-16 { margin-top:16px; }
+  .mb-8  { margin-bottom:8px; }
+  .mb-12 { margin-bottom:12px; }
+
+  /* ── SUB-NAV ── */
+  .subnav { display:flex; align-items:center; gap:0; border-bottom:2px solid var(--border-light); margin-bottom:20px; }
+  .subnav-item { padding:8px 18px; font-size:14px; font-weight:600; color:#666; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
+  .subnav-item.active { color:var(--blue); border-bottom-color:var(--blue); }
+  .subnav-item:hover:not(.active) { color:var(--ink); }
+  .subnav-item.queue-tab { display:none; }
+  body[data-role="reviewer"] .subnav-item.queue-tab,
+  body[data-role="admin"]    .subnav-item.queue-tab { display:inline-flex; }
+
+  /* ═══ RESPONSIVE ═══ */
+
+  /* ── Large desktop (1200px+): no changes, full layout ── */
+
+  /* ── Medium / tablet landscape (max 1024px) ── */
+  @media (max-width: 1024px) {
+    .shell { padding:0 20px 48px; }
+    .topbar { padding:0 20px; }
+    .tabnav { padding:0 20px; }
+    .role-bar { padding:6px 20px; }
+    .modal { max-width:96vw; }
+    .modal-lg { max-width:96vw; }
+    /* Narrow less-important table columns */
+    .col-id   { width:10%; }
+    .col-level { display:none; }
+    .col-orig  { display:none; }
+    .col-date  { width:14%; }
+  }
+
+  /* ── Tablet portrait (max 768px) ── */
+  @media (max-width: 768px) {
+    .shell { padding:0 16px 40px; }
+    .topbar { padding:0 16px; }
+    .tabnav { padding:0 16px; overflow-x:auto; }
+    .role-bar { padding:6px 16px; }
+    .brand-app { font-size:15px; }
+
+    /* Page header stacks */
+    .page-hd { flex-direction:column; align-items:flex-start; gap:10px; padding:16px 0 14px; }
+    .btn-action { width:100%; }
+
+    /* Filter row wraps tightly */
+    .filter-row { gap:8px; }
+    .filter-group { flex:1 1 calc(50% - 8px); }
+    .filter-select { min-width:unset; width:100%; }
+    .my-items-group { margin-left:0; }
+
+    /* Search bar */
+    .search-bar-wrap { height:42px; }
+    .search-bar-tag { display:none; } /* hide "News" label on small screens */
+
+    /* Hide secondary table columns */
+    .col-id     { display:none; }
+    .col-date   { display:none; }
+    .col-status { width:18%; }
+    .col-action { width:8%; }
+
+    /* Pagination condenses */
+    .pag-left   { display:none; }
+    .pag-count  { display:none; }
+    .pagination-bar { justify-content:flex-end; }
+
+    /* Detail meta-grid: 2 columns */
+    .meta-grid { grid-template-columns:1fr 1fr; }
+
+    /* Action bar wraps */
+    .action-bar { gap:6px; }
+    .action-bar .btn { font-size:13px; padding:6px 12px; }
+
+    /* Grid forms collapse to 1 col */
+    .grid-2 { grid-template-columns:1fr; }
+    .grid-3 { grid-template-columns:1fr; }
+
+    /* Modals fill screen */
+    .modal-backdrop { padding:2vh 8px; }
+    .modal, .modal-lg { max-width:100%; border-radius:8px; }
+    .modal-body { padding:14px; }
+
+    /* Stepper wraps */
+    .stepper { gap:4px; }
+    .step-item { font-size:11px; padding:5px 10px; }
+  }
+
+  /* ── Mobile (max 480px) ── */
+  @media (max-width: 480px) {
+    body { font-size:13px; }
+    .shell { padding:0 12px 32px; }
+    .topbar { padding:0 12px; height:48px; }
+    .tabnav { padding:0 12px; top:48px; }
+    .role-bar { padding:6px 12px; flex-direction:column; align-items:flex-start; gap:6px; }
+    .brand-sep { display:none; }
+    .brand-app { font-size:14px; }
+
+    /* Table: only title + status + action */
+    .col-level  { display:none; }
+    .col-orig   { display:none; }
+    .col-id     { display:none; }
+    .col-date   { display:none; }
+    .col-title  { width:70%; }
+    .col-status { width:22%; }
+    .col-action { width:8%; }
+    .news-table thead tr th,
+    .news-table tbody tr td { padding:8px 10px; }
+
+    /* Meta grid: single column */
+    .meta-grid { grid-template-columns:1fr; }
+
+    /* Buttons smaller */
+    .btn { font-size:13px; padding:7px 12px; }
+    .btn-sm { font-size:12px; padding:4px 10px; }
+
+    /* Queue panel compact */
+    .queue-panel-body { padding:10px; }
+
+    /* Modals full width, minimal padding */
+    .modal-backdrop { padding:0; align-items:flex-end; }
+    .modal, .modal-lg { border-radius:12px 12px 0 0; max-height:92vh; overflow-y:auto; }
+    .modal-body { padding:12px; }
+    .modal-footer { padding:10px 12px; }
+
+    /* Lineage nodes stack */
+    .lineage { flex-direction:column; align-items:flex-start; }
+    .lineage-arrow { transform:rotate(90deg); }
+
+    /* Subnav scrolls */
+    .subnav { overflow-x:auto; }
+    .subnav-item { padding:8px 12px; font-size:13px; }
+
+    /* Filter: single column */
+    .filter-group { flex:1 1 100%; }
+
+    /* Role bar buttons wrap */
+    .role-btn { font-size:11px; }
+
+    /* Toast full-width */
+    .toast-wrap { right:8px; left:8px; bottom:8px; }
+    .toast { max-width:100%; }
+  }
+</style>
+</head>
+<body data-role="originator">
+
+<!-- ═══ TOP NAV ═══ -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-svg">
+      <!-- UL Solutions logo (simplified red mark + wordmark) -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ulGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#e8001d"/>
+            <stop offset="100%" stop-color="#9e0019"/>
+          </linearGradient>
+        </defs>
+        <rect width="32" height="32" rx="4" fill="url(#ulGrad)"/>
+        <text x="5" y="23" font-family="Arial,sans-serif" font-weight="800" font-size="18" fill="#fff" letter-spacing="1">UL</text>
+      </svg>
+    </div>
+    <span class="brand-sep"></span>
+    <span class="brand-app">Admin Workbench</span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="avatar" id="user-avatar" title="Maria Lopez — Originator">ML</div>
+</header>
+
+<!-- ═══ TAB NAV ═══ -->
+<nav class="tabnav">
+  <div class="tab-item" data-tabnav="scheme">Scheme Master</div>
+  <div class="tab-item" data-tabnav="product">Product</div>
+  <div class="tab-item active" data-tabnav="news" data-view="list">News</div>
+</nav>
+
+<!-- ROLE BAR (prototype control) -->
+<div class="role-bar">
+  <label>Prototype role:</label>
+  <button class="role-btn active" data-role="originator">Originator</button>
+  <button class="role-btn"        data-role="reviewer">Reviewer</button>
+  <button class="role-btn"        data-role="admin">Admin</button>
+  <button class="role-btn"        data-role="reader">Reader</button>
+  <span class="note">Switching roles changes available actions and the active user.</span>
+</div>
+
+<main class="shell">
+
+  <!-- Secondary sub-navigation (prototype) -->
+  <nav class="subnav" style="padding-top:12px;">
+    <div class="subnav-item active" data-view="list">All Articles</div>
+    <div class="subnav-item queue-tab" data-view="queue">My Queue <span id="queue-badge" class="badge badge-review" style="display:none;font-size:11px;"></span></div>
+    <div class="subnav-item" data-view="audit">Audit Log</div>
+  </nav>
+
+  <!-- ═══ LIST VIEW ═══ -->
+  <section id="view-list">
+    <!-- Page header -->
+    <div class="page-hd">
+      <div>
+        <h1>Manage news</h1>
+      </div>
+      <div class="btn-action">
+        <button class="btn btn-secondary show-originator" style="display:none;">Add standard or regulation</button>
+        <button class="btn btn-primary show-originator" id="btn-new" style="display:none;">+ Add news</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label class="filter-label">Article status</label>
+          <select class="filter-select" id="f-state">
+            <option value="">Select an item</option>
+            <option value="Draft">Draft</option>
+            <option value="In Review">In Review</option>
+            <option value="Approved">Approved</option>
+            <option value="Changes Requested">Revision needed</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">News level</label>
+          <select class="filter-select" id="f-level">
+            <option value="">Select an item</option>
+            <option value="Notification">Notification</option>
+            <option value="Draft Standard">Draft Standard</option>
+            <option value="Finalized">Finalized</option>
+            <option value="New Service">New Service</option>
+            <option value="In Development">In Development</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Created after</label>
+          <select class="filter-select">
+            <option value="">Select an item</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Approved from</label>
+          <select class="filter-select">
+            <option value="">Select an item</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">To</label>
+          <select class="filter-select">
+            <option value="">Select an item</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">GMA expert</label>
+          <select class="filter-select">
+            <option value="">Select an item</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">News originator</label>
+          <select class="filter-select" id="f-active">
+            <option value="">Select an item</option>
+            <option value="active">Active only</option>
+            <option value="inactive">Inactive only</option>
+          </select>
+        </div>
+        <div class="my-items-group">
+          <div class="toggle-track" id="my-items-toggle" title="Toggle My Items">
+            <div class="toggle-thumb"></div>
+          </div>
+          <span class="my-items-label">My items</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar-wrap" style="margin-bottom:0;">
+      <span class="search-bar-tag" id="list-count"></span>
+      <span class="search-bar-sep"></span>
+      <span class="search-bar-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="#4D4D4D" stroke-width="1.5"/><line x1="11.7" y1="11.7" x2="16" y2="16" stroke="#4D4D4D" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </span>
+      <input class="search-bar-input" type="search" id="f-search" placeholder="Search news items" />
+    </div>
+
+    <!-- Table -->
+    <div class="news-table-wrap">
+      <table class="news-table">
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th class="col-title">Title</th>
+            <th class="col-level">News level</th>
+            <th class="col-orig">Originator</th>
+            <th class="col-date">Updated date</th>
+            <th class="col-status">Status</th>
+            <th class="col-action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="article-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar">
+      <div class="pag-left">
+        <span class="pag-label">Items per page</span>
+        <select class="pag-select">
+          <option>14</option>
+          <option>25</option>
+          <option>50</option>
+        </select>
+      </div>
+      <span class="pag-count">1–14 of 2429</span>
+      <div class="pag-right">
+        <button class="pag-btn" title="First page">&#8810;</button>
+        <button class="pag-btn" title="Previous page">&#8249;</button>
+        <input class="pag-input" type="text" value="1" />
+        <span class="pag-of">of 9 pages</span>
+        <button class="pag-btn" title="Next page">&#8250;</button>
+        <button class="pag-btn" title="Last page">&#8811;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ DETAIL VIEW ═══ -->
+  <section id="view-detail" style="display:none;">
+    <button class="btn btn-ghost back-link" id="btn-back">← Back to News</button>
+    <div class="page-hd">
+      <div style="max-width:700px;">
+        <h1 id="det-title"></h1>
+        <div class="sub" id="det-sub"></div>
+      </div>
+      <div class="action-bar" id="det-actions"></div>
+    </div>
+
+    <div class="panel">
+      <div class="meta-grid" id="det-meta"></div>
+      <div class="hr"></div>
+      <div class="section-label mb-8">Summary</div>
+      <p class="summary-text" id="det-summary"></p>
+      <div id="det-feedback-box"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row-flex mb-12">
+        <div class="panel-title" style="margin:0;">Relationships</div>
+        <span class="spacer"></span>
+        <button class="btn btn-secondary btn-sm show-originator" id="btn-manage-rels" style="display:none;">Manage Relationships</button>
+      </div>
+      <div id="det-relationships"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Article History</div>
+      <div id="det-history"></div>
+    </div>
+  </section>
+
+  <!-- ═══ MY QUEUE VIEW ═══ -->
+  <section id="view-queue" style="display:none;">
+    <div class="page-hd">
+      <div>
+        <h1>My Queue</h1>
+        <div class="sub">Articles awaiting your review and approval decision.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40%;">Title</th>
+            <th>News ID</th>
+            <th>News Level</th>
+            <th>Submitted by</th>
+            <th>Submitted</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="queue-tbody"></tbody>
+      </table>
+    </div>
+    <div id="queue-detail-wrap"></div>
+  </section>
+
+  <!-- ═══ AUDIT LOG VIEW ═══ -->
+  <section id="view-audit" style="display:none;">
+    <div class="page-hd">
+      <div>
+        <h1>Audit Log</h1>
+        <div class="sub">Append-only record of all article state changes, relationship edits, and approval decisions.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:140px;">When</th>
+            <th style="width:130px;">Actor</th>
+            <th>Article</th>
+            <th>Action</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="audit-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════════
+     MODAL: NEW ARTICLE (3 steps)
+═══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-new">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2>New Article</h2>
+      <button class="icon-x" data-close="modal-new">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="stepper" id="new-stepper">
+        <div class="step-item active" data-ns="1"><span class="step-num">1</span> Article Content</div>
+        <span class="step-div">›</span>
+        <div class="step-item" data-ns="2"><span class="step-num">2</span> Relationships</div>
+        <span class="step-div">›</span>
+        <div class="step-item" data-ns="3"><span class="step-num">3</span> Review &amp; Submit</div>
+      </div>
+
+      <!-- Step 1: Content -->
+      <div id="new-s1">
+        <div class="grid-2">
+          <div class="field"><label>Title <span class="req">*</span></label><input type="text" id="n-title" placeholder="Article title" /></div>
+          <div class="field"><label>Issuer <span class="req">*</span></label><input type="text" id="n-issuer" placeholder="e.g., SABS, European Commission, FCC" /></div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label>News Level</label>
+            <select id="n-level">
+              <option>Notification</option>
+              <option>Draft Standard</option>
+              <option>Finalized</option>
+              <option>New Service</option>
+              <option>In Development</option>
+            </select>
+          </div>
+          <div class="field"><label>Effective Date</label><input type="date" id="n-date" /></div>
+          <div class="field"><label>Markets</label><input type="text" id="n-markets" placeholder="e.g., South Africa, EU" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Product Categories</label><input type="text" id="n-products" placeholder="e.g., Wire &amp; Cable, Appliances" /></div>
+          <div class="field"><label>Regulatory Categories</label><input type="text" id="n-reg" placeholder="e.g., Safety, EMC, Energy Efficiency" /></div>
+        </div>
+        <div class="field">
+          <label>Summary <span class="req">*</span></label>
+          <textarea id="n-summary" rows="4" placeholder="Describe the regulatory event, its significance, and any key dates or obligations."></textarea>
+        </div>
+      </div>
+
+      <!-- Step 2: Relationships -->
+      <div id="new-s2" style="display:none;">
+        <div class="info-box mb-12">Relationships are <strong>optional</strong> at creation. They connect this article to previously published articles. You can also add or edit relationships from the article detail view later.</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Relationship type</label>
+            <select id="n-rel-type">
+              <option value="supersedes">Supersedes — this article replaces another</option>
+              <option value="correction">Correction to — this article corrects another</option>
+              <option value="consolidates">Consolidates — merges multiple prior articles</option>
+              <option value="related">Related coverage — peer, non-directional</option>
+              <option value="references">References / Cited by — informational</option>
+            </select>
+            <div class="help" id="n-rel-type-help">Marks predecessor inactive on approval. Requires a "What changed" summary.</div>
+          </div>
+          <div class="field">
+            <label>Search articles to link</label>
+            <input type="search" id="n-rel-search" placeholder="Search title, news ID, issuer…" />
+          </div>
+        </div>
+        <div class="search-list" id="n-rel-results"></div>
+        <div id="n-rel-extra" class="field">
+          <label>"What changed" summary <span class="req">*</span></label>
+          <textarea id="n-rel-summary" rows="2" placeholder="Briefly describe what changed between the predecessor and this article. Visible to customers in RI."></textarea>
+          <div class="help">Required for Supersedes and Consolidates relationship types.</div>
+        </div>
+        <div class="hr"></div>
+        <div class="section-label mb-8">Staged relationships</div>
+        <div id="n-rel-pending"></div>
+        <div class="hr"></div>
+        <div class="section-label mb-8">Lineage preview</div>
+        <div class="lineage" id="n-rel-lineage"></div>
+      </div>
+
+      <!-- Step 3: Review -->
+      <div id="new-s3" style="display:none;">
+        <div class="info-box mb-12">Review the article before submitting. Submitting will place it in <strong>In Review</strong> state for Reviewer approval before it is published.</div>
+        <div id="new-review-body"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="modal-new">Cancel</button>
+      <button class="btn btn-secondary" id="new-btn-back" style="display:none;">← Back</button>
+      <button class="btn btn-primary"   id="new-btn-next">Next: Relationships →</button>
+      <button class="btn btn-primary"   id="new-btn-submit" style="display:none;">Submit for Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: MANAGE RELATIONSHIPS (detail view)
+═══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-rels">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2>Manage Relationships</h2>
+      <button class="icon-x" data-close="modal-rels">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="stepper" id="rel-stepper">
+        <div class="step-item active" data-rs="1"><span class="step-num">1</span> Add Relationship</div>
+        <span class="step-div">›</span>
+        <div class="step-item" data-rs="2"><span class="step-num">2</span> Lineage Preview</div>
+        <span class="step-div">›</span>
+        <div class="step-item" data-rs="3"><span class="step-num">3</span> Review &amp; Save</div>
+      </div>
+
+      <!-- R-Step 1 -->
+      <div id="rel-s1">
+        <div class="grid-2">
+          <div class="field">
+            <label>Relationship type</label>
+            <select id="r-type">
+              <option value="supersedes">Supersedes — this article replaces another</option>
+              <option value="correction">Correction to — this article corrects another</option>
+              <option value="consolidates">Consolidates — merges multiple prior articles</option>
+              <option value="related">Related coverage — peer, non-directional</option>
+              <option value="references">References / Cited by — informational</option>
+            </select>
+            <div class="help" id="r-type-help">Marks predecessor inactive on approval. Requires a "What changed" summary.</div>
+          </div>
+          <div class="field">
+            <label>Search articles to link</label>
+            <input type="search" id="r-search" placeholder="Search title, news ID, issuer…" />
+          </div>
+        </div>
+        <div class="search-list" id="r-results"></div>
+        <div id="r-extra" class="field">
+          <label>"What changed" summary <span class="req">*</span></label>
+          <textarea id="r-change-summary" rows="2" placeholder="Briefly describe the regulatory difference between the predecessor and this article."></textarea>
+          <div class="help">Required for Supersedes and Consolidates. Surfaced to customers in RI.</div>
+        </div>
+        <div class="hr"></div>
+        <div class="section-label mb-8">Staged relationships</div>
+        <div id="r-pending"></div>
+      </div>
+
+      <!-- R-Step 2 -->
+      <div id="rel-s2" style="display:none;">
+        <div class="info-box mb-12">Lineage preview shows predecessor → this article chains for <strong>Supersedes</strong> and <strong>Consolidates</strong> relationships. Other types do not affect article lineage.</div>
+        <div class="lineage" id="r-lineage"></div>
+        <div class="hr"></div>
+        <div class="section-label mb-8">Validation</div>
+        <ul id="r-validation" style="font-size:13px; padding-left:18px;"></ul>
+      </div>
+
+      <!-- R-Step 3 -->
+      <div id="rel-s3" style="display:none;">
+        <div class="info-box mb-12">On save: relationships are applied to this article. Inverse relationships (e.g. "Superseded by") are auto-applied to target articles. If this article is already <strong>Approved</strong>, predecessors are marked Inactive immediately and lineage events are emitted to RI and DCS.</div>
+        <div class="section-label mb-8">Summary</div>
+        <div id="r-final-list" class="rel-list"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="modal-rels">Cancel</button>
+      <button class="btn btn-secondary" id="r-btn-back"  style="display:none;">← Back</button>
+      <button class="btn btn-primary"   id="r-btn-next">Next: Lineage Preview →</button>
+      <button class="btn btn-success"   id="r-btn-save"  style="display:none;">Save Relationships</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: REQUEST CHANGES
+═══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-rc">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Request Changes</h2>
+      <button class="icon-x" data-close="modal-rc">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="warn-box mb-12">The article will be returned to <strong>Changes Requested</strong> state. The Originator will see your feedback and must resubmit before the article can be approved.</div>
+      <div class="field">
+        <label>Feedback / reason <span class="req">*</span></label>
+        <textarea id="rc-feedback" rows="4" placeholder="Describe what needs to be corrected or clarified before this article can be approved."></textarea>
+        <div class="help">Recorded in the audit log and visible to the Originator.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="modal-rc">Cancel</button>
+      <button class="btn btn-warn" id="rc-send">Send to Originator</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+const ACTORS = {
+  originator: { name: 'Maria Lopez',  initials: 'ML' },
+  reviewer:   { name: 'Riley Chen',   initials: 'RC' },
+  admin:      { name: 'Devon Pratt',  initials: 'DP' },
+  reader:     { name: 'Sam Okafor',   initials: 'SO' }
+};
+
+let currentRole = 'originator';
+let currentView = 'list';
+let selectedId   = null;   // detail view
+let rcTarget     = null;   // request-changes target
+let pendingRels  = [];     // manage-rels modal
+let newPendingRels = [];   // new-article modal
+let relStep = 1;
+let newStep = 1;
+let queueOpenId = null;
+
+const articles = [
+  {
+    id: 'A-1024', newsId: 'NEWS-2025-0412',
+    title: 'South Africa SABS Published Revised Standard SANS 60332-3-24',
+    issuer: 'SABS', markets: 'South Africa', products: 'Wire & Cable', reg: 'Safety',
+    level: 'Finalized', effectiveDate: '2027-04-01',
+    state: 'Approved', isActive: true, submittedBy: 'Maria Lopez', submittedDate: '2026-01-07',
+    summary: 'SABS published a revised SANS 60332-3-24 standard with updated flame propagation requirements and a revised mandatory compliance date. Testing facilities must be accredited to the new version by 2027-04-01.',
+    relationships: [{ type: 'supersedes', targetId: 'A-1011', changeSummary: 'Updates flame propagation thresholds and revises the mandatory compliance date from 2027-01-01 to 2027-04-01 per SABS errata.' }],
+    history: [
+      { when: '2026-01-08 11:02', actor: 'Riley Chen',  action: 'Article approved', detail: 'Predecessor A-1011 marked Inactive (Supersedes). article.approved + article.superseded emitted to RI and DCS.' },
+      { when: '2026-01-07 14:30', actor: 'Maria Lopez', action: 'Submitted for review', detail: 'Initial submission.' }
+    ]
+  },
+  {
+    id: 'A-1011', newsId: 'NEWS-2024-1188',
+    title: 'South Africa SABS Draft SANS 60332-3-24 Open for Comment',
+    issuer: 'SABS', markets: 'South Africa', products: 'Wire & Cable', reg: 'Safety',
+    level: 'Draft Standard', effectiveDate: '',
+    state: 'Approved', isActive: false, submittedBy: 'Maria Lopez', submittedDate: '2024-11-01',
+    summary: 'SABS opened the draft of SANS 60332-3-24 for public comment. This article has been superseded by the finalized standard.',
+    relationships: [],
+    history: [
+      { when: '2026-01-08 11:02', actor: 'system',      action: 'Marked Inactive', detail: 'Superseded by A-1024. article.superseded emitted to RI and DCS.' },
+      { when: '2024-11-02 15:30', actor: 'Riley Chen',  action: 'Article approved', detail: 'article.approved emitted to RI and DCS.' },
+      { when: '2024-11-01 10:00', actor: 'Maria Lopez', action: 'Submitted for review', detail: 'Initial submission.' }
+    ]
+  },
+  {
+    id: 'A-1052', newsId: 'NEWS-2026-0033',
+    title: 'European Commission Workshop on External Power Supplies Efficiency Tier',
+    issuer: 'European Commission', markets: 'European Union', products: 'Power Supplies', reg: 'Energy Efficiency',
+    level: 'In Development', effectiveDate: '',
+    state: 'Approved', isActive: true, submittedBy: 'Devon Pratt', submittedDate: '2026-04-11',
+    summary: 'The European Commission held a stakeholder workshop signalling a likely revision to external power supply efficiency tier requirements. Formal rulemaking expected Q3 2026.',
+    relationships: [{ type: 'related', targetId: 'A-1024', changeSummary: '' }],
+    history: [
+      { when: '2026-04-12 09:30', actor: 'Riley Chen',  action: 'Article approved', detail: 'article.approved emitted to RI and DCS.' },
+      { when: '2026-04-11 16:00', actor: 'Devon Pratt', action: 'Submitted for review', detail: 'Initial submission.' }
+    ]
+  },
+  {
+    id: 'A-1058', newsId: 'NEWS-2026-0041',
+    title: 'Cameroon TRB Participated in Mobile World Congress 2026',
+    issuer: 'Cameroon TRB', markets: 'Cameroon', products: 'Wireless / Telecom', reg: 'Wireless',
+    level: 'Notification', effectiveDate: '',
+    state: 'In Review', isActive: true, submittedBy: 'Maria Lopez', submittedDate: '2026-04-22',
+    summary: 'TRB representatives attended MWC 2026, signalling intent to align homologation rules with regional partners. No formal rulemaking has been initiated.',
+    relationships: [],
+    history: [
+      { when: '2026-04-22 11:15', actor: 'Maria Lopez', action: 'Submitted for review', detail: 'Initial submission.' }
+    ]
+  },
+  {
+    id: 'A-1061', newsId: 'NEWS-2026-0058',
+    title: 'South Africa DTIC Published Notice 3800 – List of Draft Standards',
+    issuer: 'South Africa DTIC', markets: 'South Africa', products: 'EMC', reg: 'EMC',
+    level: 'Notification', effectiveDate: '2026-06-30',
+    state: 'Draft', isActive: true, submittedBy: 'Maria Lopez', submittedDate: '',
+    summary: 'DTIC published Notice 3800 enumerating draft standards under consideration for mandatory adoption. The public comment period closes on 2026-06-30.',
+    relationships: [],
+    history: []
+  },
+  {
+    id: 'A-1065', newsId: 'NEWS-2026-0072',
+    title: 'FCC Proposes Revisions to Part 15 Unintentional Radiator Rules',
+    issuer: 'FCC', markets: 'United States', products: 'Electronics', reg: 'EMC',
+    level: 'Draft Standard', effectiveDate: '',
+    state: 'Changes Requested', isActive: true, submittedBy: 'Maria Lopez', submittedDate: '2026-05-02',
+    reviewFeedback: 'Summary needs to specifically state the proposed dB change. Please also include the FCC docket number (ET Docket No. 26-112) in the summary or as a dedicated field.',
+    summary: 'The FCC released an NPRM proposing changes to Part 15 rules for unintentional radiators to improve spectrum sharing and reduce interference.',
+    relationships: [],
+    history: [
+      { when: '2026-05-05 14:20', actor: 'Riley Chen',  action: 'Changes requested', detail: 'Summary needs specific dB value and FCC docket number.' },
+      { when: '2026-05-02 10:00', actor: 'Maria Lopez', action: 'Submitted for review', detail: 'Initial submission.' }
+    ]
+  }
+];
+
+const auditLog = [
+  { when: '2026-05-05 14:20', actor: 'Riley Chen',  articleId: 'A-1065', action: 'Changes requested', detail: 'Feedback sent to originator Maria Lopez.' },
+  { when: '2026-05-02 10:00', actor: 'Maria Lopez', articleId: 'A-1065', action: 'Submitted for review', detail: 'Initial submission.' },
+  { when: '2026-04-22 11:15', actor: 'Maria Lopez', articleId: 'A-1058', action: 'Submitted for review', detail: 'Initial submission.' },
+  { when: '2026-04-12 09:30', actor: 'Riley Chen',  articleId: 'A-1052', action: 'Article approved', detail: 'article.approved emitted to RI and DCS.' },
+  { when: '2026-04-11 16:00', actor: 'Devon Pratt', articleId: 'A-1052', action: 'Submitted for review', detail: 'Initial submission.' },
+  { when: '2026-01-08 11:02', actor: 'Riley Chen',  articleId: 'A-1024', action: 'Article approved', detail: 'Predecessor A-1011 marked Inactive. article.approved + article.superseded emitted to RI and DCS.' },
+  { when: '2026-01-08 11:02', actor: 'system',      articleId: 'A-1011', action: 'Marked Inactive', detail: 'Superseded by A-1024. article.superseded emitted to RI and DCS.' },
+  { when: '2026-01-07 14:30', actor: 'Maria Lopez', articleId: 'A-1024', action: 'Submitted for review', detail: 'Initial submission.' },
+  { when: '2024-11-02 15:30', actor: 'Riley Chen',  articleId: 'A-1011', action: 'Article approved', detail: 'article.approved emitted to RI and DCS.' }
+];
+
+// ═══════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const byId = id => articles.find(a => a.id === id);
+const fmtNow = () => {
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+
+function toast(msg, kind = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast ${kind}`;
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+function stateBadge(s) {
+  const map = { 'Draft':'badge-draft', 'In Review':'badge-review', 'Approved':'badge-approved', 'Changes Requested':'badge-changes', 'Rejected':'badge-rejected' };
+  return `<span class="badge ${map[s]||'badge-outline'}">${s}</span>`;
+}
+function stateChip(s) {
+  const map = { 'Draft':'chip-draft', 'In Review':'chip-review', 'Approved':'chip-accepted', 'Changes Requested':'chip-revision', 'Rejected':'chip-rejected' };
+  const label = { 'Draft':'Draft', 'In Review':'In Review', 'Approved':'Accepted', 'Changes Requested':'Revision needed', 'Rejected':'Rejected' };
+  return `<span class="status-chip ${map[s]||'chip-inactive'}">${label[s]||s}</span>`;
+}
+function levelBadge(l) {
+  const map = { 'Notification':'badge-nl-notification', 'Draft Standard':'badge-nl-draft', 'Finalized':'badge-nl-finalized', 'New Service':'badge-nl-new-service', 'In Development':'badge-nl-in-development' };
+  return `<span class="badge ${map[l]||'badge-outline'}">${l}</span>`;
+}
+const relLabel  = t => ({ supersedes:'Supersedes', correction:'Correction to', consolidates:'Consolidates', related:'Related coverage', references:'References' })[t]||t;
+const invLabel  = t => ({ supersedes:'Superseded by', correction:'Corrected by', consolidates:'Consolidated into', related:'Related coverage', references:'Cited by' })[t]||t;
+const needsSummary = t => t === 'supersedes' || t === 'consolidates';
+
+// ═══════════════════════════════════════════════════
+// VIEW ROUTING
+// ═══════════════════════════════════════════════════
+function setView(name) {
+  currentView = name;
+  ['list','detail','queue','audit'].forEach(v => { $('#view-'+v).style.display = v===name ? '' : 'none'; });
+  // update secondary sub-nav
+  $$('.subnav-item').forEach(p => p.classList.toggle('active', p.dataset.view === (name==='detail'?'list':name)));
+  if (name==='list')  renderList();
+  if (name==='queue') renderQueue();
+  if (name==='audit') renderAudit();
+}
+
+// ═══════════════════════════════════════════════════
+// LIST VIEW
+// ═══════════════════════════════════════════════════
+function renderList() {
+  const q  = ($('#f-search').value||'').toLowerCase();
+  const st = $('#f-state').value;
+  const lv = $('#f-level').value;
+  const ac = $('#f-active').value;
+  const rows = articles.filter(a => {
+    if (st && a.state !== st)           return false;
+    if (lv && a.level !== lv)           return false;
+    if (ac==='active'   && !a.isActive) return false;
+    if (ac==='inactive' &&  a.isActive) return false;
+    if (q && !`${a.title} ${a.newsId} ${a.issuer}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const countEl = $('#list-count');
+  if (countEl) countEl.textContent = `${rows.length} of ${articles.length}`;
+  $('#article-tbody').innerHTML = rows.length
+    ? rows.map(a => `<tr class="clickable" data-aid="${a.id}">
+        <td>${a.newsId}</td>
+        <td>${a.title}</td>
+        <td>${a.level}</td>
+        <td>${a.submittedBy||'—'}</td>
+        <td>${a.submittedDate||'—'}</td>
+        <td>${stateChip(a.state)}</td>
+        <td><button class="more-btn" title="Actions">⋮</button></td>
+      </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="7">No articles match your filters.</td></tr>`;
+  $$('#article-tbody tr.clickable').forEach(r => r.addEventListener('click', e => {
+    if (e.target.closest('.more-btn')) return;
+    openDetail(r.dataset.aid);
+  }));
+  updateQueueBadge();
+}
+
+// ═══════════════════════════════════════════════════
+// DETAIL VIEW
+// ═══════════════════════════════════════════════════
+function openDetail(id) {
+  selectedId = id;
+  const a = byId(id); if (!a) return;
+
+  $('#det-title').textContent = a.title;
+  $('#det-sub').textContent   = `${a.newsId} · ${a.issuer}`;
+
+  const meta = [
+    ['News ID',               a.newsId],
+    ['Issuer',                a.issuer],
+    ['Markets',               a.markets],
+    ['Product Categories',    a.products],
+    ['Regulatory Categories', a.reg],
+    ['News Level',            levelBadge(a.level)],
+    ['Effective Date',        a.effectiveDate||'—'],
+    ['State',                 stateBadge(a.state)],
+    ['Status',                a.isActive ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-inactive">Inactive</span>'],
+    ['Submitted by',          a.submittedBy||'—'],
+  ];
+  $('#det-meta').innerHTML = meta.map(([l,v]) =>
+    `<div class="meta-item"><div class="mi-label">${l}</div><div class="mi-value">${v}</div></div>`).join('');
+
+  $('#det-summary').textContent = a.summary;
+
+  // Feedback box
+  const fb = $('#det-feedback-box');
+  fb.innerHTML = (a.state==='Changes Requested' && a.reviewFeedback)
+    ? `<div class="warn-box mt-8"><strong>Changes requested:</strong> ${a.reviewFeedback}</div>` : '';
+
+  // Relationships
+  const out = a.relationships;
+  const inv = articles.flatMap(o => o.relationships.filter(r => r.targetId===a.id).map(r => ({...r, sourceId:o.id})));
+  if (!out.length && !inv.length) {
+    $('#det-relationships').innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">No relationships defined.</div>`;
+  } else {
+    let h = '';
+    if (out.length) {
+      h += `<div class="section-label mb-8">Outbound</div><div class="rel-list">` +
+        out.map(r => { const t=byId(r.targetId); return `
+          <div class="rel-row">
+            <span class="rel-pill rel-${r.type}">${relLabel(r.type)}</span>
+            <div class="rel-row-content">
+              <div class="rel-row-title">${t?t.title:r.targetId}</div>
+              <div class="rel-row-meta">${t?`${t.newsId} · ${t.isActive?'Active':'Inactive'}`:''}</div>
+              ${r.changeSummary?`<div class="rel-row-meta mt-4"><strong>What changed:</strong> ${r.changeSummary}</div>`:''}
+            </div>
+          </div>`; }).join('') + `</div>`;
+    }
+    if (inv.length) {
+      h += `<div class="section-label ${out.length?'mt-16':''} mb-8">Inbound (auto-generated)</div><div class="rel-list">` +
+        inv.map(r => { const s=byId(r.sourceId); return `
+          <div class="rel-row">
+            <span class="rel-pill rel-${r.type}">${invLabel(r.type)}</span>
+            <div class="rel-row-content">
+              <div class="rel-row-title">${s?s.title:r.sourceId}</div>
+              <div class="rel-row-meta">${s?s.newsId:''}</div>
+            </div>
+          </div>`; }).join('') + `</div>`;
+    }
+    $('#det-relationships').innerHTML = h;
+  }
+
+  // History
+  const hist = a.history;
+  $('#det-history').innerHTML = hist.length
+    ? `<div class="timeline">` + hist.map((h,i) => `
+        <div class="tl-item ${i===0?'tl-first':''}">
+          <div class="row-flex"><span class="tl-action">${h.action}</span><span class="spacer"></span><span class="tl-meta">${h.actor} · ${h.when}</span></div>
+          <div class="tl-detail">${h.detail}</div>
+        </div>`).join('') + `</div>`
+    : `<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">No history yet.</div>`;
+
+  // Action bar
+  buildDetailActions(a);
+  setView('detail');
+}
+
+function buildDetailActions(a) {
+  const bar = $('#det-actions');
+  const role = currentRole;
+  let html = '';
+  if ((role==='originator'||role==='admin') && (a.state==='Draft'||a.state==='Changes Requested')) {
+    html += `<button class="btn btn-primary" id="da-submit">Submit for Review</button>`;
+  }
+  if (role==='originator'||role==='admin') {
+    html += `<button class="btn btn-secondary" id="da-rels">Manage Relationships</button>`;
+  }
+  if ((role==='reviewer'||role==='admin') && a.state==='In Review') {
+    html += `<button class="btn btn-success" id="da-approve">Approve &amp; Publish</button>`;
+    html += `<button class="btn btn-warn"    id="da-rc">Request Changes</button>`;
+    html += `<button class="btn btn-secondary" id="da-reject">Reject</button>`;
+  }
+  if (role==='admin' && a.state!=='Approved') {
+    html += `<button class="btn btn-danger-outline" id="da-force" title="Admin override — approve regardless of state">Force Approve</button>`;
+  }
+  bar.innerHTML = html;
+
+  const btn = id => $('#'+id);
+  if (btn('da-submit')) btn('da-submit').addEventListener('click', () => submitForReview(a.id));
+  if (btn('da-rels'))   btn('da-rels').addEventListener('click', () => openRelModal(a.id));
+  if (btn('da-approve'))btn('da-approve').addEventListener('click', () => doApprove(a.id, false));
+  if (btn('da-rc'))     btn('da-rc').addEventListener('click', () => openRC(a.id));
+  if (btn('da-reject')) btn('da-reject').addEventListener('click', () => doReject(a.id));
+  if (btn('da-force'))  btn('da-force').addEventListener('click', () => doApprove(a.id, true));
+}
+
+// ═══════════════════════════════════════════════════
+// STATE TRANSITIONS
+// ═══════════════════════════════════════════════════
+function submitForReview(id) {
+  const a = byId(id);
+  a.state = 'In Review';
+  a.submittedBy   = ACTORS[currentRole].name;
+  a.submittedDate = fmtNow().split(' ')[0];
+  delete a.reviewFeedback;
+  const entry = { when:fmtNow(), actor:ACTORS[currentRole].name, articleId:id, action:'Submitted for review', detail:'Pending Reviewer approval.' };
+  auditLog.unshift(entry);
+  a.history.unshift({...entry});
+  toast('Article submitted for review.');
+  openDetail(id);
+  updateQueueBadge();
+}
+
+function doApprove(id, force = false) {
+  const a = byId(id);
+  a.state = 'Approved'; a.isActive = true;
+  const actor  = ACTORS[currentRole].name;
+  const action = force ? 'Force approved (Admin override)' : 'Approved & published';
+  const events = ['article.approved'];
+  a.relationships.forEach(r => {
+    const t = byId(r.targetId);
+    if ((r.type==='supersedes'||r.type==='consolidates') && t && t.isActive) {
+      t.isActive = false;
+      const ev = r.type==='supersedes' ? 'article.superseded' : 'article.consolidated';
+      events.push(ev);
+      const sysEntry = { when:fmtNow(), actor:'system', articleId:t.id, action:'Marked Inactive', detail:`${relLabel(r.type)} by ${id}. ${ev} emitted to RI and DCS.` };
+      auditLog.unshift(sysEntry); t.history.unshift({...sysEntry});
+    }
+    if (r.type==='correction') events.push('article.corrected');
+  });
+  const detail = `Events emitted: ${events.join(', ')}.`;
+  const entry  = { when:fmtNow(), actor, articleId:id, action, detail };
+  auditLog.unshift(entry); a.history.unshift({...entry});
+  toast(`Published. Events: ${events.join(', ')}.`);
+  openDetail(id); updateQueueBadge();
+}
+
+function doReject(id) {
+  const a     = byId(id);
+  a.state     = 'Rejected';
+  const actor = ACTORS[currentRole].name;
+  const entry = { when:fmtNow(), actor, articleId:id, action:'Article rejected', detail:'Rejected by reviewer.' };
+  auditLog.unshift(entry); a.history.unshift({...entry});
+  toast('Article rejected.', 'warn');
+  openDetail(id); updateQueueBadge();
+}
+
+function openRC(id) {
+  rcTarget = id;
+  $('#rc-feedback').value = '';
+  openModal('modal-rc');
+}
+$('#rc-send').addEventListener('click', () => {
+  const fb = $('#rc-feedback').value.trim();
+  if (!fb) { toast('Feedback is required.', 'warn'); return; }
+  const a = byId(rcTarget);
+  a.state = 'Changes Requested'; a.reviewFeedback = fb;
+  const actor = ACTORS[currentRole].name;
+  const entry = { when:fmtNow(), actor, articleId:rcTarget, action:'Changes requested', detail:fb };
+  auditLog.unshift(entry); a.history.unshift({...entry});
+  closeModal('modal-rc');
+  toast('Changes requested sent to originator.', 'warn');
+  if (currentView==='detail') openDetail(rcTarget);
+  else { queueOpenId=null; $('#queue-detail-wrap').innerHTML=''; renderQueue(); }
+  updateQueueBadge();
+});
+
+// ═══════════════════════════════════════════════════
+// MY QUEUE
+// ═══════════════════════════════════════════════════
+function updateQueueBadge() {
+  const n = articles.filter(a => a.state==='In Review').length;
+  const b = $('#queue-badge');
+  b.textContent = n; b.style.display = n>0?'':'none';
+}
+
+function renderQueue() {
+  const pending = articles.filter(a => a.state==='In Review');
+  $('#queue-tbody').innerHTML = pending.length
+    ? pending.map(a => `
+        <tr class="clickable" data-qid="${a.id}">
+          <td class="td-title">${a.title}<div class="meta">${a.issuer} · ${a.markets}</div></td>
+          <td>${a.newsId}</td>
+          <td>${levelBadge(a.level)}</td>
+          <td>${a.submittedBy||'—'}</td>
+          <td>${a.submittedDate||'—'}</td>
+          <td><button class="btn btn-primary btn-sm" data-qrev="${a.id}">Review</button></td>
+        </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="6">No articles pending review.</td></tr>`;
+  $$('#queue-tbody tr.clickable').forEach(r => r.addEventListener('click', () => openQueuePanel(r.dataset.qid)));
+  $$('#queue-tbody [data-qrev]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openQueuePanel(b.dataset.qrev); }));
+  if (queueOpenId) openQueuePanel(queueOpenId);
+}
+
+function openQueuePanel(id) {
+  queueOpenId = id;
+  const a = byId(id); if (!a) return;
+
+  // Outbound events
+  const events = [{ code:'article.approved', desc:'Emitted to RI and DCS on publish.' }];
+  a.relationships.forEach(r => {
+    if (r.type==='supersedes')   events.push({ code:'article.superseded',   desc:`Predecessor ${r.targetId} will be marked Inactive.` });
+    if (r.type==='consolidates') events.push({ code:'article.consolidated', desc:`Predecessor ${r.targetId} will be marked Inactive.` });
+    if (r.type==='correction')   events.push({ code:'article.corrected',    desc:`Predecessor ${r.targetId} remains Active.` });
+  });
+
+  const relsHtml = a.relationships.length
+    ? `<div class="section-label mb-8 mt-12">Relationships</div>
+       <div class="rel-list">` + a.relationships.map(r => {
+         const t = byId(r.targetId);
+         return `<div class="rel-row"><span class="rel-pill rel-${r.type}">${relLabel(r.type)}</span>
+           <div class="rel-row-content">
+             <div class="rel-row-title">${t?t.title:r.targetId}</div>
+             <div class="rel-row-meta">${t?`${t.newsId} · ${t.isActive?'Active':'Inactive'}`:''}</div>
+             ${r.changeSummary?`<div class="rel-row-meta mt-4"><strong>What changed:</strong> ${r.changeSummary}</div>`:''}
+           </div></div>`; }).join('') + `</div>` : '';
+
+  const isApprover = currentRole==='reviewer'||currentRole==='admin';
+
+  $('#queue-detail-wrap').innerHTML = `
+    <div class="queue-panel">
+      <div class="queue-panel-header">
+        <div>
+          <h3>${a.title}</h3>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">${a.newsId} · ${a.issuer} · ${a.markets} · Submitted ${a.submittedDate||'—'} by ${a.submittedBy||'—'}</div>
+        </div>
+        <button class="btn btn-ghost" id="q-close">✕ Close</button>
+      </div>
+      <div class="queue-panel-body">
+        <div class="grid-2" style="gap:20px;">
+          <div>
+            <div class="section-label mb-8">Article Summary</div>
+            <p class="summary-text">${a.summary}</p>
+            ${relsHtml}
+          </div>
+          <div>
+            <div class="section-label mb-8">Metadata</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:14px;">
+              ${[['News Level',levelBadge(a.level)],['Markets',a.markets],['Products',a.products],['Reg. Category',a.reg],['Effective Date',a.effectiveDate||'—']].map(([l,v])=>
+                `<div><div class="mi-label">${l}</div><div>${v}</div></div>`).join('')}
+            </div>
+            <div class="section-label mb-8">Events emitted on approval</div>
+            <div class="events-list">
+              ${events.map(e=>`<div class="event-row"><span class="event-code">${e.code}</span><span style="color:var(--ink-2);">${e.desc}</span></div>`).join('')}
+            </div>
+          </div>
+        </div>
+        ${isApprover ? `
+          <div class="hr"></div>
+          <div class="action-bar">
+            <button class="btn btn-success"        id="qa-approve">Approve &amp; Publish</button>
+            <button class="btn btn-warn"            id="qa-rc">Request Changes</button>
+            <button class="btn btn-secondary"       id="qa-reject">Reject</button>
+            ${currentRole==='admin'?`<button class="btn btn-danger-outline" id="qa-force">Force Approve (Admin)</button>`:''}
+          </div>` : `<div class="info-box mt-12">You don't have permission to approve articles as <strong>${currentRole}</strong>.</div>`}
+      </div>
+    </div>`;
+
+  $('#q-close').addEventListener('click', () => { queueOpenId=null; $('#queue-detail-wrap').innerHTML=''; });
+  if (isApprover) {
+    $('#qa-approve').addEventListener('click', () => { queueOpenId=null; $('#queue-detail-wrap').innerHTML=''; doApprove(id,false); setView('queue'); });
+    $('#qa-rc').addEventListener('click', () => openRC(id));
+    $('#qa-reject').addEventListener('click', () => { queueOpenId=null; $('#queue-detail-wrap').innerHTML=''; doReject(id); setView('queue'); });
+    if (currentRole==='admin') {
+      $('#qa-force').addEventListener('click', () => { queueOpenId=null; $('#queue-detail-wrap').innerHTML=''; doApprove(id,true); setView('queue'); });
+    }
+  }
+  setTimeout(() => $('#queue-detail-wrap').scrollIntoView({behavior:'smooth',block:'start'}), 80);
+}
+
+// ═══════════════════════════════════════════════════
+// AUDIT LOG
+// ═══════════════════════════════════════════════════
+function renderAudit() {
+  $('#audit-tbody').innerHTML = auditLog.length
+    ? auditLog.map(e => {
+        const a = byId(e.articleId);
+        return `<tr>
+          <td style="white-space:nowrap;font-size:12px;">${e.when}</td>
+          <td>${e.actor}</td>
+          <td><strong>${a?a.newsId:e.articleId}</strong><div class="meta">${a?a.title.substring(0,55)+(a.title.length>55?'…':''):''}</div></td>
+          <td style="font-weight:600;">${e.action}</td>
+          <td style="font-size:12px;color:var(--ink-2);">${e.detail}</td>
+        </tr>`;}).join('')
+    : `<tr class="empty-row"><td colspan="5">No audit entries yet.</td></tr>`;
+}
+
+// ═══════════════════════════════════════════════════
+// NEW ARTICLE MODAL (3-step)
+// ═══════════════════════════════════════════════════
+$('#btn-new').addEventListener('click', openNewModal);
+
+function openNewModal() {
+  newPendingRels = []; newStep = 1;
+  ['n-title','n-issuer','n-markets','n-products','n-reg','n-summary','n-date','n-rel-search','n-rel-summary'].forEach(id => { const el=$('#'+id); if(el) el.value=''; });
+  $('#n-level').value = 'Notification';
+  goNewStep(1);
+  updateNRelTypeHelp();
+  renderNRelSearch('');
+  renderNRelPending();
+  renderNRelLineage();
+  openModal('modal-new');
+}
+
+function goNewStep(n) {
+  newStep = n;
+  for (let i=1;i<=3;i++) {
+    $('#new-s'+i).style.display = i===n ? '' : 'none';
+    $$('#new-stepper .step-item')[i-1].classList.toggle('active', i===n);
+    $$('#new-stepper .step-item')[i-1].classList.toggle('done', i<n);
+  }
+  $('#new-btn-back').style.display   = n>1 ? '' : 'none';
+  $('#new-btn-next').style.display   = n<3 ? '' : 'none';
+  $('#new-btn-submit').style.display = n===3 ? '' : 'none';
+  if (n===2) { updateNRelTypeHelp(); renderNRelSearch(''); }
+  if (n===3) buildNewReview();
+}
+
+$('#new-btn-next').addEventListener('click', () => {
+  if (newStep===1) {
+    if (!$('#n-title').value.trim())   { toast('Title is required.', 'warn');   return; }
+    if (!$('#n-issuer').value.trim())  { toast('Issuer is required.', 'warn');  return; }
+    if (!$('#n-summary').value.trim()) { toast('Summary is required.', 'warn'); return; }
+  }
+  goNewStep(newStep+1);
+});
+$('#new-btn-back').addEventListener('click', () => goNewStep(newStep-1));
+
+$('#new-btn-submit').addEventListener('click', () => {
+  const actor  = ACTORS[currentRole].name;
+  const id     = 'A-' + (1100 + articles.length);
+  const newsId = 'NEWS-2026-' + String(200 + articles.length).padStart(4,'0');
+  const article = {
+    id, newsId,
+    title:   $('#n-title').value.trim(),
+    issuer:  $('#n-issuer').value.trim(),
+    markets: $('#n-markets').value.trim()||'—',
+    products:$('#n-products').value.trim()||'—',
+    reg:     $('#n-reg').value.trim()||'—',
+    level:   $('#n-level').value,
+    effectiveDate: $('#n-date').value||'',
+    state: 'In Review', isActive: true,
+    submittedBy: actor, submittedDate: fmtNow().split(' ')[0],
+    summary: $('#n-summary').value.trim(),
+    relationships: [...newPendingRels],
+    history: [{ when:fmtNow(), actor, action:'Submitted for review', detail:'Initial submission.' }],
+    reviewFeedback: ''
+  };
+  articles.unshift(article);
+  auditLog.unshift({ when:fmtNow(), actor, articleId:id, action:'Submitted for review', detail:'New article. Pending Reviewer approval.' });
+  closeModal('modal-new');
+  toast('Article created and submitted for review.');
+  updateQueueBadge();
+  openDetail(id);
+});
+
+function updateNRelTypeHelp() {
+  const t = $('#n-rel-type').value;
+  const msgs = {
+    supersedes:   'Marks predecessor inactive on approval. Requires a "What changed" summary.',
+    correction:   'Predecessor remains active. article.corrected event emitted downstream.',
+    consolidates: 'Marks all predecessors inactive on approval. Requires a "What changed" summary.',
+    related:      'Peer link, non-directional. No state changes to either article.',
+    references:   'Informational citation. No state changes to either article.'
+  };
+  $('#n-rel-type-help').textContent = msgs[t]||'';
+  $('#n-rel-extra').style.display = needsSummary(t) ? '' : 'none';
+}
+$('#n-rel-type').addEventListener('change', updateNRelTypeHelp);
+$('#n-rel-search').addEventListener('input', e => renderNRelSearch(e.target.value));
+
+function renderNRelSearch(q) {
+  const query = (q||'').toLowerCase();
+  const items = articles.filter(a => !query || `${a.title} ${a.newsId} ${a.issuer}`.toLowerCase().includes(query));
+  $('#n-rel-results').innerHTML = items.length
+    ? items.map(a => `<div class="search-item"><div class="search-item-info">
+        <div class="search-item-title">${a.title}</div>
+        <div class="search-item-meta">${a.newsId} · ${a.issuer} · ${a.isActive?'Active':'Inactive'}</div>
+      </div><button class="btn btn-secondary btn-sm" data-nadd="${a.id}">Add</button></div>`).join('')
+    : `<div style="padding:12px;text-align:center;color:var(--muted);font-size:13px;">No articles found.</div>`;
+  $$('#n-rel-results [data-nadd]').forEach(b => b.addEventListener('click', () => addNRel(b.dataset.nadd)));
+}
+
+function addNRel(targetId) {
+  const t = $('#n-rel-type').value;
+  const summary = $('#n-rel-summary').value.trim();
+  if (needsSummary(t) && !summary) { toast('"What changed" summary is required.', 'warn'); return; }
+  if (newPendingRels.some(r => r.targetId===targetId && r.type===t)) { toast('This relationship already exists.', 'warn'); return; }
+  newPendingRels.push({ type:t, targetId, changeSummary: needsSummary(t)?summary:'' });
+  $('#n-rel-summary').value = '';
+  toast(`Relationship staged: ${relLabel(t)} → ${byId(targetId).newsId}`);
+  renderNRelPending(); renderNRelLineage();
+}
+
+function renderNRelPending() {
+  $('#n-rel-pending').innerHTML = newPendingRels.length
+    ? `<div class="rel-list">` + newPendingRels.map((r,i) => {
+        const t = byId(r.targetId);
+        return `<div class="rel-row"><span class="rel-pill rel-${r.type}">${relLabel(r.type)}</span>
+          <div class="rel-row-content">
+            <div class="rel-row-title">${t?t.title:r.targetId}</div>
+            <div class="rel-row-meta">${t?t.newsId:''}</div>
+            ${r.changeSummary?`<div class="rel-row-meta mt-4"><strong>What changed:</strong> ${r.changeSummary}</div>`:''}
+          </div>
+          <button class="btn btn-danger-outline btn-sm" data-nrm="${i}">Remove</button>
+        </div>`;}).join('') + `</div>`
+    : `<div style="padding:10px;text-align:center;color:var(--muted);font-size:13px;">No relationships staged.</div>`;
+  $$('[data-nrm]').forEach(b => b.addEventListener('click', () => { newPendingRels.splice(+b.dataset.nrm,1); renderNRelPending(); renderNRelLineage(); }));
+}
+
+function renderNRelLineage() {
+  const chains = newPendingRels.filter(r => r.type==='supersedes'||r.type==='consolidates');
+  if (!chains.length) {
+    $('#n-rel-lineage').innerHTML = `<span style="color:var(--muted);font-size:12px;">No lineage impact. Add a Supersedes or Consolidates relationship to preview the lineage chain.</span>`;
+    return;
+  }
+  const nodes = chains.map(r => { const t=byId(r.targetId); return { title:t?t.title:r.targetId, meta:`${t?t.newsId:''} · will become Inactive`, current:false }; });
+  nodes.push({ title:$('#n-title').value.trim()||'(This article)', meta:'v1 · will be Active', current:true });
+  $('#n-rel-lineage').innerHTML = nodes.map((n,i) =>
+    `<div class="lineage-node ${n.current?'current':''}"><div class="lineage-node-title">${n.title}</div><div class="lineage-node-meta">${n.meta}</div></div>${i<nodes.length-1?'<div class="lineage-arrow">→</div>':''}`
+  ).join('');
+}
+
+function buildNewReview() {
+  const v = id => ($('#'+id)?$('#'+id).value:'')||'—';
+  const rels = newPendingRels;
+  $('#new-review-body').innerHTML = `
+    <div class="grid-2" style="gap:16px;margin-bottom:14px;">
+      <div><div class="section-label">Title</div><div style="font-size:13px;font-weight:600;margin-top:4px;">${v('n-title')}</div></div>
+      <div><div class="section-label">Issuer</div><div style="font-size:13px;margin-top:4px;">${v('n-issuer')}</div></div>
+      <div><div class="section-label">News Level</div><div style="margin-top:4px;">${levelBadge(v('n-level'))}</div></div>
+      <div><div class="section-label">Effective Date</div><div style="font-size:13px;margin-top:4px;">${v('n-date')||'—'}</div></div>
+      <div><div class="section-label">Markets</div><div style="font-size:13px;margin-top:4px;">${v('n-markets')}</div></div>
+      <div><div class="section-label">Product Categories</div><div style="font-size:13px;margin-top:4px;">${v('n-products')}</div></div>
+      <div><div class="section-label">Regulatory Categories</div><div style="font-size:13px;margin-top:4px;">${v('n-reg')}</div></div>
+    </div>
+    <div class="section-label">Summary</div>
+    <p class="summary-text" style="margin-top:4px;">${v('n-summary')}</p>
+    ${rels.length ? `<div class="hr"></div><div class="section-label mb-8">Relationships (${rels.length})</div>
+      <div class="rel-list">` + rels.map(r=>{const t=byId(r.targetId);return `
+        <div class="rel-row"><span class="rel-pill rel-${r.type}">${relLabel(r.type)}</span>
+          <div class="rel-row-content"><div class="rel-row-title">${t?t.title:r.targetId}</div><div class="rel-row-meta">${t?t.newsId:''}</div></div>
+        </div>`;}).join('') + `</div>` : ''}
+    <div class="hr"></div>
+    <div class="warn-box">Submitting places this article in <strong>In Review</strong> state. A Reviewer must approve before it is distributed to RI and DCS.</div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// MANAGE RELATIONSHIPS MODAL (detail view)
+// ═══════════════════════════════════════════════════
+function openRelModal(id) {
+  selectedId = id;
+  pendingRels = []; relStep = 1;
+  $('#r-type').value = 'supersedes';
+  $('#r-search').value = ''; $('#r-change-summary').value = '';
+  updateRTypeHelp(); renderRSearch(''); renderRPending();
+  goRelStep(1);
+  openModal('modal-rels');
+}
+
+function updateRTypeHelp() {
+  const t = $('#r-type').value;
+  const msgs = { supersedes:'Marks predecessor inactive on approval. Requires a "What changed" summary.', correction:'Predecessor remains active. article.corrected event emitted.', consolidates:'Marks all predecessors inactive on approval. Requires a "What changed" summary.', related:'Peer link, non-directional. No state changes.', references:'Informational citation. No state changes.' };
+  $('#r-type-help').textContent = msgs[t]||'';
+  $('#r-extra').style.display = needsSummary(t) ? '' : 'none';
+}
+$('#r-type').addEventListener('change', updateRTypeHelp);
+$('#r-search').addEventListener('input', e => renderRSearch(e.target.value));
+
+function renderRSearch(q) {
+  const query = (q||'').toLowerCase();
+  const items = articles.filter(a => a.id!==selectedId && (!query||`${a.title} ${a.newsId} ${a.issuer}`.toLowerCase().includes(query)));
+  $('#r-results').innerHTML = items.length
+    ? items.map(a => `<div class="search-item"><div class="search-item-info">
+        <div class="search-item-title">${a.title}</div>
+        <div class="search-item-meta">${a.newsId} · ${a.issuer} · ${a.isActive?'Active':'Inactive'}</div>
+      </div><button class="btn btn-secondary btn-sm" data-radd="${a.id}">Add</button></div>`).join('')
+    : `<div style="padding:12px;text-align:center;color:var(--muted);font-size:13px;">No articles found.</div>`;
+  $$('#r-results [data-radd]').forEach(b => b.addEventListener('click', () => addRel(b.dataset.radd)));
+}
+
+function addRel(targetId) {
+  const t = $('#r-type').value;
+  const summary = $('#r-change-summary').value.trim();
+  if (needsSummary(t) && !summary) { toast('"What changed" summary is required.', 'warn'); return; }
+  if (pendingRels.some(r => r.targetId===targetId && r.type===t)) { toast('This relationship already exists.', 'warn'); return; }
+  if (t==='supersedes') {
+    const tgt = byId(targetId);
+    if (tgt && tgt.relationships.some(r => r.type==='supersedes' && r.targetId===selectedId)) { toast('Cycle prevented: target already supersedes this article.', 'error'); return; }
+  }
+  pendingRels.push({ type:t, targetId, changeSummary: needsSummary(t)?summary:'' });
+  $('#r-change-summary').value = '';
+  toast(`Relationship staged: ${relLabel(t)} → ${byId(targetId).newsId}`);
+  renderRPending();
+}
+
+function renderRPending() {
+  $('#r-pending').innerHTML = pendingRels.length
+    ? `<div class="rel-list mt-8">` + pendingRels.map((r,i) => {
+        const t = byId(r.targetId);
+        return `<div class="rel-row"><span class="rel-pill rel-${r.type}">${relLabel(r.type)}</span>
+          <div class="rel-row-content">
+            <div class="rel-row-title">${t?t.title:r.targetId}</div>
+            <div class="rel-row-meta">${t?t.newsId:''}</div>
+            ${r.changeSummary?`<div class="rel-row-meta mt-4"><strong>What changed:</strong> ${r.changeSummary}</div>`:''}
+          </div>
+          <button class="btn btn-danger-outline btn-sm" data-rrm="${i}">Remove</button>
+        </div>`;}).join('') + `</div>`
+    : `<div style="padding:10px;text-align:center;color:var(--muted);font-size:13px;">No relationships staged.</div>`;
+  $$('[data-rrm]').forEach(b => b.addEventListener('click', () => { pendingRels.splice(+b.dataset.rrm,1); renderRPending(); }));
+}
+
+function goRelStep(n) {
+  relStep = n;
+  for (let i=1;i<=3;i++) {
+    $('#rel-s'+i).style.display = i===n ? '' : 'none';
+    $$('#rel-stepper .step-item')[i-1].classList.toggle('active', i===n);
+    $$('#rel-stepper .step-item')[i-1].classList.toggle('done', i<n);
+  }
+  $('#r-btn-back').style.display = n>1 ? '' : 'none';
+  $('#r-btn-next').style.display = n<3 ? '' : 'none';
+  $('#r-btn-save').style.display = n===3 ? '' : 'none';
+  if (n===2) buildRelLineage();
+  if (n===3) buildRelFinal();
+}
+
+$('#r-btn-next').addEventListener('click', () => {
+  if (relStep===1 && pendingRels.length===0) { toast('Add at least one relationship to continue.', 'warn'); return; }
+  goRelStep(relStep+1);
+});
+$('#r-btn-back').addEventListener('click', () => goRelStep(relStep-1));
+
+function buildRelLineage() {
+  const chains = pendingRels.filter(r => r.type==='supersedes'||r.type==='consolidates');
+  if (!chains.length) {
+    $('#r-lineage').innerHTML = `<span style="color:var(--muted);font-size:12px;">No lineage impact from staged relationships.</span>`;
+  } else {
+    const a = byId(selectedId);
+    const nodes = chains.map(r => { const t=byId(r.targetId); return { title:t?t.title:r.targetId, meta:`${t?t.newsId:''} · will become Inactive`, current:false }; });
+    nodes.push({ title:a.title, meta:`${a.newsId} (this article)`, current:true });
+    $('#r-lineage').innerHTML = nodes.map((n,i) =>
+      `<div class="lineage-node ${n.current?'current':''}"><div class="lineage-node-title">${n.title}</div><div class="lineage-node-meta">${n.meta}</div></div>${i<nodes.length-1?'<div class="lineage-arrow">→</div>':''}`
+    ).join('');
+  }
+  const dup = pendingRels.some((r,i) => pendingRels.some((r2,j) => i!==j && r.targetId===r2.targetId && r.type===r2.type));
+  const checks = [
+    { ok:true, msg:'No self-references.' },
+    { ok:!dup, msg:'No duplicate relationships.' },
+    { ok:true, msg:'Inverse relationships are auto-applied to target articles on save.' },
+    ...( chains.length ? [{ ok:chains.every(r=>r.changeSummary), msg:'"What changed" summary present on all Supersedes / Consolidates relationships.' }] : [] )
+  ];
+  $('#r-validation').innerHTML = checks.map(c =>
+    `<li style="color:${c.ok?'var(--ok)':'var(--brand-red)'};margin-bottom:4px;">${c.ok?'✓':'✗'} ${c.msg}</li>`).join('');
+}
+
+function buildRelFinal() {
+  $('#r-final-list').innerHTML = `<div class="rel-list">` + pendingRels.map(r => {
+    const t = byId(r.targetId);
+    return `<div class="rel-row"><span class="rel-pill rel-${r.type}">${relLabel(r.type)}</span>
+      <div class="rel-row-content">
+        <div class="rel-row-title">${t?t.title:r.targetId}</div>
+        <div class="rel-row-meta">${t?t.newsId:''}</div>
+        ${r.changeSummary?`<div class="rel-row-meta mt-4"><strong>What changed:</strong> ${r.changeSummary}</div>`:''}
+      </div></div>`;}).join('') + `</div>`;
+}
+
+$('#r-btn-save').addEventListener('click', () => {
+  const a = byId(selectedId);
+  pendingRels.forEach(r => {
+    a.relationships = a.relationships.filter(x => !(x.targetId===r.targetId && x.type===r.type));
+    a.relationships.push(r);
+  });
+  if (a.state==='Approved') {
+    pendingRels.forEach(r => {
+      const t = byId(r.targetId);
+      if ((r.type==='supersedes'||r.type==='consolidates') && t && t.isActive) {
+        t.isActive = false;
+        const ev = r.type==='supersedes'?'article.superseded':'article.consolidated';
+        const se = { when:fmtNow(), actor:'system', articleId:t.id, action:'Marked Inactive', detail:`${relLabel(r.type)} by ${a.id}. ${ev} emitted to RI and DCS.` };
+        auditLog.unshift(se); t.history.unshift({...se});
+      }
+    });
+  }
+  const actor = ACTORS[currentRole].name;
+  const detail = pendingRels.map(r=>`${relLabel(r.type)} → ${r.targetId}`).join('; ');
+  const entry = { when:fmtNow(), actor, articleId:a.id, action:'Relationships saved', detail };
+  auditLog.unshift(entry); a.history.unshift({...entry});
+  closeModal('modal-rels');
+  toast('Relationships saved.');
+  openDetail(a.id);
+});
+
+// ═══════════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════════
+function openModal(id)  { $('#'+id).classList.add('show'); }
+function closeModal(id) { $('#'+id).classList.remove('show'); }
+$$('.modal-backdrop').forEach(bd => bd.addEventListener('click', e => { if(e.target===bd) bd.classList.remove('show'); }));
+$$('[data-close]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.close)));
+
+// ═══════════════════════════════════════════════════
+// ROLE SWITCHER
+// ═══════════════════════════════════════════════════
+$$('.role-btn').forEach(btn => btn.addEventListener('click', () => {
+  currentRole = btn.dataset.role;
+  document.body.dataset.role = currentRole;
+  $$('.role-btn').forEach(b => b.classList.toggle('active', b.dataset.role===currentRole));
+  const actor = ACTORS[currentRole];
+  if ($('#user-name')) $('#user-name').textContent = actor.name;
+  $('#user-avatar').textContent = actor.initials;
+  updateQueueBadge();
+  if (currentView==='detail' && selectedId) openDetail(selectedId);
+  else if (currentView==='list')  renderList();
+  else if (currentView==='queue') renderQueue();
+}));
+
+// ═══════════════════════════════════════════════════
+// NAV + FILTERS + INIT
+// ═══════════════════════════════════════════════════
+// Tab nav — Scheme Master / Product are placeholders in this prototype
+$$('.tab-item[data-tabnav]').forEach(t => {
+  t.addEventListener('click', () => {
+    const nav = t.dataset.tabnav;
+    if (nav === 'news') { setView('list'); $$('.tab-item').forEach(x => x.classList.toggle('active', x===t)); }
+    else { alert(`"${t.textContent.trim()}" section is not part of this News prototype.`); }
+  });
+});
+// Secondary sub-nav (queue/audit)
+$$('.subnav-item').forEach(p => p.addEventListener('click', () => setView(p.dataset.view)));
+$('#btn-back').addEventListener('click', () => setView('list'));
+['f-search','f-state','f-level','f-active'].forEach(id => {
+  const el = $('#'+id); if (el) el.addEventListener('input', renderList);
+});
+// My items toggle
+const myItemsToggle = $('#my-items-toggle');
+if (myItemsToggle) myItemsToggle.addEventListener('click', () => {
+  myItemsToggle.classList.toggle('on');
+  renderList();
+});
+
+document.body.dataset.role = 'originator';
+updateRTypeHelp();
+updateNRelTypeHelp();
+updateQueueBadge();
+setView('list');
+</script>
+</body>
+</html>

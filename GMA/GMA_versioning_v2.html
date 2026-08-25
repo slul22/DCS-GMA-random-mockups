@@ -299,6 +299,16 @@
     .empty-rel { font-size: 13px; color: #9CA3AF; font-style: italic; padding: 8px 0; }
     .success-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #15803D; color: #fff; font-size: 13px; font-weight: 600; padding: 12px 22px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.2); z-index: 700; display: none; white-space: nowrap; }
     .success-toast.show { display: block; }
+
+    /* ── GOSP TOGGLE ── */
+    .gosp-row { display: inline-flex; align-items: center; gap: 7px; margin-top: 7px; cursor: pointer; }
+    .gosp-lbl { font-size: 11px; color: #6B7280; font-weight: 500; user-select: none; }
+    .sw { position: relative; display: inline-flex; width: 28px; height: 16px; flex-shrink: 0; }
+    .sw input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .sw-track { position: absolute; cursor: pointer; inset: 0; background: #D1D5DB; border-radius: 16px; transition: background .18s; }
+    .sw-track::before { content: ''; position: absolute; width: 12px; height: 12px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: transform .18s; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+    .sw input:checked + .sw-track { background: #CC0000; }
+    .sw input:checked + .sw-track::before { transform: translateX(12px); }
   </style>
 </head>
 <body>
@@ -1174,6 +1184,19 @@ function renderForm() {
         <div class="fg ${isRevise ? 'editable-fg' : ''}">
           <label class="fl">Mandatory Date</label>
           ${editField('mandatoryDate', wv.mandatoryDate, 'date', 'fi-date')}
+          <label class="gosp-row"><span class="sw"><input type="checkbox" id="gosp-mandatoryDate"><span class="sw-track"></span></span><span class="gosp-lbl">Don't copy to GOSP</span></label>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg ${isRevise ? 'editable-fg' : ''}">
+          <label class="fl">Withdrawal Date</label>
+          ${editField('withdrawalDate', wv.withdrawalDate || '', 'date', 'fi-date')}
+          <label class="gosp-row"><span class="sw"><input type="checkbox" id="gosp-withdrawalDate"><span class="sw-track"></span></span><span class="gosp-lbl">Don't copy to GOSP</span></label>
+        </div>
+        <div class="fg ${isRevise ? 'editable-fg' : ''}">
+          <label class="fl">Inactivation Date</label>
+          ${editField('inactivationDate', wv.inactivationDate || '', 'date', 'fi-date')}
+          <label class="gosp-row"><span class="sw"><input type="checkbox" id="gosp-inactivationDate"><span class="sw-track"></span></span><span class="gosp-lbl">Don't copy to GOSP</span></label>
         </div>
       </div>
     </div>

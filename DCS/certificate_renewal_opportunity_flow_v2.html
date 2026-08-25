@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Certificate Renewal → Sales Opportunity Flow</title>
+<style>
+  :root {
+    --ul-red: #DA291C;
+    --ul-red-dark: #A31710;
+    --navy: #0D2340;
+    --navy-2: #1B3A5C;
+    --steel: #5B7290;
+    --ink: #1F2933;
+    --muted: #6B7686;
+    --line: #D9DEE4;
+    --bg: #F5F6F8;
+    --card-bg: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0 0 60px;
+    background: var(--bg);
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: var(--ink);
+  }
+
+  /* ---------- Header banner ---------- */
+  .banner {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+    padding: 38px 32px 32px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .banner::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 220px;
+    height: 220px;
+    background: var(--ul-red);
+    opacity: 0.15;
+    border-radius: 50%;
+  }
+  .banner-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(218,41,28,0.16);
+    border: 1px solid rgba(218,41,28,0.5);
+    color: #ff8a7f;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .eyebrow .sq { width: 7px; height: 7px; background: var(--ul-red); border-radius: 2px; display: inline-block; }
+  .banner h1 {
+    font-size: 27px;
+    margin: 0 0 8px;
+    font-weight: 700;
+  }
+  .banner p {
+    margin: 0;
+    color: #C4CEDA;
+    font-size: 14.5px;
+    max-width: 720px;
+    line-height: 1.5;
+  }
+
+  /* ---------- Flow section ---------- */
+  .flow-section {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 44px 32px 0;
+  }
+
+  .flow-track {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .connector {
+    position: absolute;
+    top: 34px;
+    left: 62px;
+    right: 62px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 14px);
+    z-index: 0;
+  }
+
+  .step {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 10px;
+  }
+
+  .step-num {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--accent, var(--steel));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px rgba(13,35,64,0.10);
+    margin-bottom: 16px;
+  }
+  .step-num svg { width: 30px; height: 30px; }
+
+  .step-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent, var(--steel));
+    margin-bottom: 6px;
+  }
+
+  .step-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .step-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent, var(--steel));
+    border-radius: 8px;
+    padding: 14px 15px 16px;
+    width: 100%;
+    max-width: 205px;
+    min-height: 128px;
+    box-shadow: 0 2px 6px rgba(13,35,64,0.05);
+  }
+  .step-card p {
+    margin: 0 0 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .step-card ul {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 11.8px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .step-card ul li { margin-bottom: 2px; }
+
+  .pill {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ul-red-dark);
+    background: #FDEAE8;
+    border: 1px solid #F6C6C1;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+
+  /* accent per step */
+  .step--dcs   { --accent: var(--navy-2); }
+  .step--oic   { --accent: var(--ul-red); }
+  .step--sf    { --accent: #0E7C4A; }
+  .step--rep   { --accent: #0E7C4A; }
+  .step--cust  { --accent: var(--steel); }
+
+  /* ---------- Value strip ---------- */
+  .value-strip {
+    max-width: 1240px;
+    margin: 46px auto 0;
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .value-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .value-card .icon {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .value-card .icon svg { width: 18px; height: 18px; }
+  .value-card h3 {
+    margin: 0 0 4px;
+    font-size: 13.5px;
+    color: var(--navy);
+  }
+  .value-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ---------- Legend / footnote ---------- */
+  .legend {
+    max-width: 1240px;
+    margin: 40px auto 0;
+    padding: 0 32px;
+    display: flex;
+    gap: 26px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+</style>
+</head>
+<body>
+
+  <div class="banner">
+    <div class="banner-inner">
+      <div class="eyebrow"><span class="sq"></span> DCS &nbsp;→&nbsp; OIC &nbsp;→&nbsp; Salesforce</div>
+      <h1>Certificate Renewal → Sales Opportunity Flow</h1>
+      <p>How a certificate expiration in DCS becomes a single, consolidated renewal opportunity — routed to the right account owner in Salesforce.</p>
+    </div>
+  </div>
+
+  <div class="flow-section">
+    <div class="flow-track">
+      <div class="connector"></div>
+
+      <!-- Step 1 -->
+      <div class="step step--dcs">
+        <div class="step-num">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="1.8"><path d="M6 3h9l3 3v15H6V3z"/><path d="M15 3v3h3"/><path d="M9 12h6M9 15h6M9 9h3"/></svg>
+        </div>
+        <div class="step-tag">Step 1 · System</div>
+        <div class="step-title">DCS</div>
+        <div class="step-card">
+          <p>Detects a certificate approaching expiration and generates a renewal notice.</p>
+          <ul>
+            <li>Certificate &amp; product data</li>
+            <li>Expiration date identified</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step step--oic">
+        <div class="step-num">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#DA291C" stroke-width="1.8"><path d="M4 12a8 8 0 0 1 13.66-5.66L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-13.66 5.66L4 16"/><path d="M4 20v-4h4"/></svg>
+        </div>
+        <div class="step-tag">Step 2 · Integration</div>
+        <div class="step-title">OIC</div>
+        <div class="step-card">
+          <p>Applies business logic to consolidate and enrich the alert.</p>
+          <ul>
+            <li>Combines multiple certs per account</li>
+            <li>Maps Account Owner &amp; COU</li>
+            <li>Populates custom cert field</li>
+          </ul>
+          <span class="pill">BUSINESS LOGIC</span>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step step--sf">
+        <div class="step-num">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0E7C4A" stroke-width="1.8"><path d="M7 17a4 4 0 0 1-1-7.9 5 5 0 0 1 9.6-1.8A4.5 4.5 0 0 1 17 17H7z"/><path d="M9.5 14.5l2 2 3-3.5"/></svg>
+        </div>
+        <div class="step-tag">Step 3 · CRM</div>
+        <div class="step-title">Salesforce</div>
+        <div class="step-card">
+          <p>Creates one consolidated opportunity with certificate details attached.</p>
+          <ul>
+            <li>One opportunity per account</li>
+            <li>Custom field carries cert detail</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step step--rep">
+        <div class="step-num">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0E7C4A" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4.2-6 7-6s5.8 2 7 6"/></svg>
+        </div>
+        <div class="step-tag">Step 4 · Person</div>
+        <div class="step-title">Account Owner</div>
+        <div class="step-card">
+          <p>Reviews the opportunity and reaches out proactively before expiration.</p>
+          <ul>
+            <li>Sees all expiring certs at once</li>
+            <li>Initiates renewal conversation</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step step--cust">
+        <div class="step-num">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5B7290" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4.2-6 7-6s5.8 2 7 6"/><path d="M17 3.5c1 .4 1.7 1.4 1.7 2.5s-.7 2.1-1.7 2.5"/></svg>
+        </div>
+        <div class="step-tag">Step 5 · Customer</div>
+        <div class="step-title">Customer</div>
+        <div class="step-card">
+          <p>Receives one timely, consolidated renewal conversation instead of scattered notices.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="value-strip">
+    <div class="value-card">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
+      <div>
+        <h3>Fewer duplicate opportunities</h3>
+        <p>Consolidation logic merges related certificate expirations into a single opportunity per account.</p>
+      </div>
+    </div>
+    <div class="value-card">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></div>
+      <div>
+        <h3>Faster renewal outreach</h3>
+        <p>Account owners are notified automatically, ahead of expiration, with full certificate context.</p>
+      </div>
+    </div>
+    <div class="value-card">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 19V9l8-5 8 5v10"/><path d="M9 19v-6h6v6"/></svg></div>
+      <div>
+        <h3>Accurate ownership routing</h3>
+        <p>OIC maps Account Owner and COU so the right rep engages the right customer, every time.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:#1B3A5C;"></span> DCS — Certification System</div>
+    <div class="legend-item"><span class="dot" style="background:#DA291C;"></span> OIC — Integration &amp; Business Logic</div>
+    <div class="legend-item"><span class="dot" style="background:#0E7C4A;"></span> Salesforce &amp; Sales Team</div>
+    <div class="legend-item"><span class="dot" style="background:#5B7290;"></span> Customer</div>
+  </div>
+
+</body>
+</html>

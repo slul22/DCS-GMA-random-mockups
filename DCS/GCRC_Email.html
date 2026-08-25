@@ -25,7 +25,6 @@
       padding: 20px 30px 10px 30px;
       border-bottom: 2px solid #eeeeee;
       display: flex;
-      justify-content: space-between;
       align-items: center;
     }
     .email-header .brand {
@@ -37,19 +36,7 @@
       font-size: 14px;
       vertical-align: super;
     }
-    .ul-logo {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-color: #cc0000;
-      color: white;
-      font-weight: bold;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
+
     .email-body {
       padding: 30px;
     }
@@ -73,45 +60,97 @@
       font-size: 13px;
     }
     table thead tr {
-      background-color: #4a4a4a;
-      color: #ffffff;
+      background-color: #E6E6E6;
+      color: #000000;
     }
     table thead th {
-      padding: 10px 12px;
+      padding: 12px 8px;
       text-align: left;
-      font-weight: normal;
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 19px;
       white-space: nowrap;
+      color: #000000;
     }
     table tbody tr {
-      border-bottom: 1px solid #dddddd;
+      border-bottom: 1px solid #D6DBE1;
     }
     table tbody tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #F8F8F8;
+    }
+    table tbody tr:nth-child(odd) {
+      background-color: #FFFFFF;
     }
     table tbody td {
-      padding: 10px 12px;
-      color: #333333;
+      padding: 12px 8px;
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-size: 14px;
+      line-height: 19px;
+      color: #000000;
       vertical-align: top;
     }
     table tbody td a {
-      color: #0066cc;
-      text-decoration: none;
+      color: #005999;
+      text-decoration: underline;
       white-space: nowrap;
     }
     table tbody td a:hover {
-      text-decoration: underline;
+      text-decoration: none;
     }
     .email-footer {
-      padding: 20px 30px;
-      border-top: 1px solid #eeeeee;
-      font-size: 13px;
-      color: #555555;
+      padding: 0px 30px 30px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 36px;
     }
-    .email-footer a {
-      color: #0066cc;
+    .footer-frame {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 32px;
+      width: 100%;
     }
-    .email-footer p {
-      margin: 6px 0;
+    .footer-top {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 48px;
+      width: 100%;
+    }
+    .footer-no-reply {
+      font-family: 'Inter', Arial, sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 17px;
+      color: #303741;
+      margin: 0;
+    }
+    .footer-trademark {
+      font-family: 'Inter', Arial, sans-serif;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 15px;
+      color: #303741;
+      margin: 0;
+      width: 100%;
+    }
+    .footer-disclaimer {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    .footer-disclaimer p {
+      font-family: 'Inter', Arial, sans-serif;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 15px;
+      color: #303741;
+      margin: 0;
+      width: 100%;
     }
 
     /* Tablet */
@@ -156,8 +195,8 @@
         position: absolute;
         left: 12px;
         width: 42%;
-        font-weight: bold;
-        color: #4a4a4a;
+        font-weight: 600;
+        color: #303741;
         font-size: 12px;
         top: 8px;
       }
@@ -175,7 +214,6 @@
     <!-- Header -->
     <div class="email-header">
       <div class="brand">myUL<span>®</span></div>
-      <div class="ul-logo">UL</div>
     </div>
 
     <!-- Body -->
@@ -183,8 +221,8 @@
       <p>Dear Sharvanika Lakshminarayanan,</p>
 
       <p>
-        Information to review about a Global certification requirement changes are available in GCM.
-        This information requires prompt attention to ensure the continuity of product certification.
+        Recent global certification requirement changes are available for review in the Global Compliance Management section of myUL.
+        Please review promptly to ensure the continuity of your product certifications.
       </p>
 
       <!-- Data Table -->
@@ -192,7 +230,8 @@
         <table>
           <thead>
             <tr>
-              <th>News Name</th>
+              <th>Severity</th>
+              <th>News</th>
               <th>Scheme</th>
               <th>Impact to Current Certifications</th>
               <th>Impact to Future Certifications</th>
@@ -202,7 +241,8 @@
           </thead>
           <tbody>
             <tr>
-              <td data-label="News Name">European Union - CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 - Safety Requirements for Audio/Video, Information and Communication Technology Equipment</td>
+              <td data-label="Severity">High</td>
+              <td data-label="News">European Union - CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 - Safety Requirements for Audio/Video, Information and Communication Technology Equipment</td>
               <td data-label="Scheme">
                 <ul style="margin: 0; padding-left: 18px; line-height: 2;">
                   <li>D-Mark scheme</li>
@@ -220,7 +260,8 @@
               <td data-label="View News"><a href="{{CertificatePortalLink}}" target="_blank">View News</a></td>
             </tr>
             <tr>
-              <td data-label="News Name">North American Union - CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 - Safety Requirements, Information and Communication Technology Equipment</td>
+              <td data-label="Severity">Medium</td>
+              <td data-label="News">North American Union - CENELEC Published Amended Standard EN IEC 62368-1:2024/A11:2024 - Safety Requirements, Information and Communication Technology Equipment</td>
               <td data-label="Scheme">
                 <ul style="margin: 0; padding-left: 18px; line-height: 2;">
                   <li>D-Mark scheme</li>
@@ -243,25 +284,26 @@
 
       <p>
         <strong>Best Regards,</strong><br/>
-        GCM Support Team<br/>
+        Global Compliance Management Support Team<br/>
         UL Solutions
       </p>
     </div>
 
     <!-- Footer -->
     <div class="email-footer">
-      <p>
-        Please do not reply to this message. This email is generated automatically. If you have any questions,
-        please <a href="{{ContactUsLink}}"><strong>Contact Us</strong></a>.
-      </p>
-      <p>UL and the UL logo are trademarks of UL LLC &copy; 2020 All Rights Reserved.</p>
-      <p style="margin-top: 14px; font-size: 12px; color: #777777; border-top: 1px solid #eeeeee; padding-top: 12px;">
-        This e-mail may contain privileged or confidential information. If you are not the intended recipient:
-        (1) you may not disclose, use, distribute, copy, or rely upon this message or attachment(s); and
-        (2) please notify the sender by reply e-mail and then delete this message and its attachment(s).
-        Underwriters Laboratories Inc. and its affiliates disclaim all liability for any errors, omissions,
-        corruption, or virus in this message or any attachments.
-      </p>
+      <div class="footer-frame">
+        <div class="footer-top">
+          <p class="footer-no-reply">Please do not reply to this message. This email is generated automatically.</p>
+          <p class="footer-trademark">UL LLC &copy; 2024 All Rights Reserved.</p>
+        </div>
+        <div class="footer-disclaimer">
+          <p>This e-mail may contain confidential information. If you are not the intended recipient:
+          (1) you may not disclose, use, distribute, copy or rely upon this message or attachment(s); and
+          (2) please notify the sender by reply e-mail, and then delete this message and its attachment(s).
+          UL Solutions Inc. and its affiliates disclaim all liability for any errors, omissions, corruption or virus in this
+          message or any attachments.</p>
+        </div>
+      </div>
     </div>
 
   </div>

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Standards – DCS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans','Segoe UI',Arial,sans-serif; font-size: 14px; background: #f4f6f8; color: #222; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ── NAVBAR ── */
+    .navbar { display:flex; align-items:center; justify-content:space-between; background:#C02032; height:56px; flex-shrink:0; z-index:200; padding:0; }
+    .navbar-left { display:flex; align-items:center; height:100%; }
+    .nav-hamburger { width:56px; height:56px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; border:none; background:none; gap:0; }
+    .nav-hamburger:hover { background:rgba(255,255,255,.1); }
+    .ham-lines { display:flex; flex-direction:column; gap:5px; }
+    .ham-lines span { display:block; width:20px; height:2px; background:#fff; border-radius:1px; }
+    .nav-divider { width:1px; height:36px; background:rgba(255,255,255,.35); flex-shrink:0; }
+    .logo-wrap { display:flex; align-items:center; padding:0 20px; height:56px; gap:10px; }
+    .logo-mark { font-weight:700; font-size:22px; color:#fff; letter-spacing:-1px; }
+    .logo-text { font-size:12px; font-weight:600; color:#fff; padding-left:10px; border-left:1px solid rgba(255,255,255,.4); margin-left:2px; line-height:1.3; white-space:nowrap; }
+    .logo-text small { display:block; font-weight:400; font-size:10px; opacity:.8; }
+    .nav-links { display:flex; align-items:center; height:100%; padding-left:4px; }
+    .nav-link { padding:0 16px; height:56px; display:flex; align-items:center; font-size:13px; font-weight:600; color:#fff; cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap; }
+    .nav-link:hover { background:rgba(255,255,255,.1); }
+    .nav-link.active { border-bottom-color:#fff; }
+    .navbar-right { display:flex; align-items:center; height:100%; padding-right:0; gap:0; }
+    .nav-icon-btn { width:48px; height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; position:relative; border:none; background:none; }
+    .nav-icon-btn:hover { background:rgba(255,255,255,.1); }
+    .nav-icon-btn svg { flex-shrink:0; }
+    .nav-icon-label { font-size:10px; color:#fff; font-weight:600; margin-top:2px; }
+    .notif-dot { position:absolute; top:10px; right:9px; width:14px; height:14px; background:#FFA700; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#303741; }
+    .nav-avatar-wrap { display:flex; align-items:center; gap:0; padding:0 16px; height:56px; border-left:1px solid rgba(255,255,255,.25); cursor:pointer; }
+    .nav-avatar-wrap:hover { background:rgba(255,255,255,.08); }
+    .avatar { width:34px; height:34px; background:#F5F5F5; color:#3E3E3E; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb { padding:7px 24px; font-size:12px; color:#888; background:#fff; border-bottom:1px solid #eef0f3; flex-shrink:0; }
+    .breadcrumb a { color:#01518A; text-decoration:none; cursor:pointer; }
+    .breadcrumb a:hover { text-decoration:underline; }
+    .breadcrumb span { margin:0 5px; }
+
+    /* ── SHELL ── */
+    .page-shell { display:flex; flex:1; overflow:hidden; }
+    .left-nav { width:210px; flex-shrink:0; background:#fff; border-right:1px solid #dce1e7; overflow-y:auto; padding:14px 0; transition:width .2s; }
+    .left-nav.collapsed { width:0; overflow:hidden; padding:0; }
+    .lnav-section { padding:5px 16px 3px; font-size:10px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+    .lnav-item { display:flex; align-items:center; gap:9px; padding:7px 16px 7px 20px; font-size:13px; color:#555; cursor:pointer; border-left:3px solid transparent; white-space:nowrap; }
+    .lnav-item:hover { background:#f0f6ff; color:#01518A; }
+    .lnav-item.active { color:#01518A; background:#e8f2fb; border-left-color:#01518A; font-weight:600; }
+    .lnav-sep { height:1px; background:#eef0f3; margin:8px 0; }
+
+    /* ── MAIN ── */
+    .main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; padding:14px 24px 12px; background:#fff; border-bottom:1px solid #dce1e7; flex-shrink:0; }
+    .page-title { font-size:20px; font-weight:700; color:#111; }
+    .page-header-right { display:flex; gap:8px; }
+
+    /* ── BUTTONS ── */
+    .btn { padding:7px 16px; border-radius:2px; font-size:13px; font-family:inherit; cursor:pointer; border:1px solid #BBC1C8; background:#fff; color:#333; white-space:nowrap; transition:background .12s; display:inline-flex; align-items:center; gap:5px; }
+    .btn:hover { background:#f0f2f5; }
+    .btn-primary { background:#01518A; color:#fff; border-color:#01518A; font-weight:600; }
+    .btn-primary:hover { background:#013f6e; }
+    .btn-sm { padding:5px 12px; font-size:12px; }
+
+    /* ── TOOLBAR ── */
+    .toolbar { display:flex; align-items:center; justify-content:space-between; padding:9px 24px; background:#fff; border-bottom:1px solid #dce1e7; flex-shrink:0; gap:10px; flex-wrap:wrap; }
+    .toolbar-left { display:flex; align-items:center; gap:8px; }
+    .toolbar-right { display:flex; align-items:center; gap:8px; }
+    .search-box { display:flex; align-items:center; border:1px solid #BBC1C8; border-radius:2px; padding:5px 10px; gap:6px; background:#fff; width:240px; }
+    .search-box input { border:none; outline:none; font-size:13px; font-family:inherit; width:100%; background:transparent; color:#333; }
+    .filter-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid #BBC1C8; background:#fff; color:#555; white-space:nowrap; }
+    .filter-chip.on { background:#e8f2fb; border-color:#01518A; color:#01518A; }
+    .filter-chip:hover:not(.on) { background:#f5f7fa; }
+    .count-lbl { font-size:12px; color:#888; }
+
+    /* ── TABS ── */
+    .tabs-bar { display:flex; align-items:center; padding:0 24px; background:#fff; border-bottom:1px solid #dce1e7; flex-shrink:0; gap:0; }
+    .tab { padding:10px 14px; font-size:13px; color:#666; cursor:pointer; border-bottom:2.5px solid transparent; margin-bottom:-1px; white-space:nowrap; font-weight:500; }
+    .tab.active { color:#01518A; border-bottom-color:#01518A; font-weight:700; }
+    .tab:hover:not(.active) { color:#333; }
+    .tab-count { font-size:10px; background:#e8f2fb; color:#01518A; border-radius:10px; padding:1px 6px; margin-left:4px; font-weight:700; }
+
+    /* ── TABLE AREA ── */
+    .table-area { flex:1; overflow:auto; background:#FAFAF9; }
+    table.stbl { width:100%; border-collapse:collapse; min-width:900px; }
+    table.stbl thead th { background:#fff; text-align:left; padding:9px 14px; font-size:11px; font-weight:700; color:#555; border-bottom:2px solid #dce1e7; white-space:nowrap; position:sticky; top:0; z-index:5; user-select:none; cursor:pointer; }
+    table.stbl thead th:hover { color:#01518A; }
+    table.stbl thead th .sort-icon { font-size:9px; color:#bbb; margin-left:3px; }
+    tr.srow { cursor:pointer; border-bottom:1px solid #eef0f3; }
+    tr.srow:hover td { background:#f3f7fb; }
+    tr.srow.expanded td { background:#eaf2fb; border-bottom:none; }
+    tr.srow td { padding:10px 14px; font-size:13px; color:#333; vertical-align:middle; background:#fff; }
+    .xbtn { background:none; border:1px solid #BBC1C8; border-radius:2px; width:22px; height:22px; cursor:pointer; font-size:12px; color:#555; display:inline-flex; align-items:center; justify-content:center; margin-right:6px; flex-shrink:0; transition:all .1s; font-family:monospace; line-height:1; }
+    .xbtn:hover { background:#e8f0fb; border-color:#01518A; color:#01518A; }
+    tr.srow.expanded .xbtn { background:#01518A; border-color:#01518A; color:#fff; }
+    .std-num { color:#01518A; font-weight:700; }
+    .std-title { font-size:12px; color:#555; margin-top:2px; max-width:380px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* ── STATUS / SYNC PILLS ── */
+    .pill { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 9px; border-radius:10px; white-space:nowrap; }
+    .pill::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+    .pill-active   { color:#15803D; background:#DCFCE7; } .pill-active::before   { background:#15803D; }
+    .pill-inactive { color:#6B7280; background:#F3F4F6; } .pill-inactive::before { background:#9CA3AF; }
+    .pill-draft    { color:#856404; background:#FEF9C3; } .pill-draft::before    { background:#CA8A04; }
+    .pill-synced   { color:#15803D; background:#F0FDF4; border:1px solid #BBF7D0; font-size:11px; }
+    .pill-synced::before { background:#15803D; }
+    .pill-pending  { color:#856404; background:#FFFBEB; border:1px solid #FDE68A; }
+    .pill-pending::before { background:#CA8A04; }
+    .pill-error    { color:#842029; background:#FEF2F2; border:1px solid #FECACA; }
+    .pill-error::before { background:#DC2626; }
+    .type-badge { display:inline-flex; align-items:center; font-size:11px; font-weight:600; padding:2px 8px; border-radius:3px; background:#F3F4F6; color:#374151; white-space:nowrap; }
+
+    /* ── EXPANSION ROW ── */
+    tr.exprow { display:none; }
+    tr.exprow.open { display:table-row; }
+    tr.exprow > td { padding:0; border-bottom:2px solid #01518A; background:#f0f6ff; }
+    .exp-inner { display:flex; min-height:300px; max-height:480px; }
+
+    /* LEFT – standard metadata */
+    .exp-left { width:340px; flex-shrink:0; padding:20px 22px; border-right:1px solid #c8dcee; background:#fff; overflow-y:auto; }
+    .exp-left-hdr { margin-bottom:14px; }
+    .exp-std-num  { font-size:14px; font-weight:700; color:#01518A; }
+    .exp-std-title { font-size:13px; font-weight:600; color:#111; line-height:1.45; margin-top:4px; padding-bottom:12px; border-bottom:1px solid #eef0f3; }
+    .meta-table { width:100%; border-collapse:collapse; margin-top:4px; }
+    .meta-table tr td { padding:5px 0; font-size:12.5px; vertical-align:top; }
+    .meta-table tr td:first-child { color:#6B7280; width:44%; padding-right:10px; white-space:nowrap; }
+    .meta-table tr td:last-child  { color:#111; font-weight:500; }
+    .meta-table tr td.dash        { color:#BBC1C8; }
+    .meta-sep { border:none; border-top:1px solid #F3F4F6; margin:6px 0; }
+
+    /* RIGHT – linked GMA records */
+    .exp-right { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; background:#F9FAFB; }
+    .exp-right-hdr { padding:12px 18px; border-bottom:1px solid #dce1e7; background:#F0F5FA; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; }
+    .exp-right-title { font-size:12px; font-weight:700; color:#01518A; display:flex; align-items:center; gap:7px; }
+    .record-count-badge { background:#01518A; color:#fff; font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; }
+    .exp-right-scroll { flex:1; overflow-y:auto; }
+
+    /* Collapsible GMA record block */
+    .gma-block { border-bottom:1px solid #e0e8f0; }
+    .gma-block-hdr { display:flex; align-items:center; gap:10px; padding:10px 18px; cursor:pointer; background:#fff; transition:background .1s; user-select:none; }
+    .gma-block-hdr:hover { background:#f0f6ff; }
+    .gma-block-hdr.open { background:#EFF6FF; border-bottom:1px solid #BFDBFE; }
+    .gma-toggle-btn { width:20px; height:20px; border:1px solid #BBC1C8; border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:12px; color:#555; font-family:monospace; flex-shrink:0; background:#fff; transition:all .12s; }
+    .gma-block-hdr.open .gma-toggle-btn { background:#01518A; border-color:#01518A; color:#fff; }
+    .gma-block-id { font-size:13px; font-weight:700; color:#01518A; }
+    .gma-block-meta { display:flex; align-items:center; gap:8px; }
+    .gma-body { display:none; padding:0 18px 14px; background:#FAFCFF; }
+    .gma-body.open { display:block; }
+
+    /* Inner standards table */
+    table.itbl { width:100%; border-collapse:collapse; margin-top:10px; }
+    table.itbl thead th { background:#F0F5FA; text-align:left; padding:7px 12px; font-size:10.5px; font-weight:700; color:#555; border-bottom:1px solid #dce1e7; white-space:nowrap; }
+    table.itbl tbody tr { border-bottom:1px solid #eef0f3; }
+    table.itbl tbody tr:hover td { background:#f3f7fb; }
+    table.itbl tbody td { padding:8px 12px; font-size:12px; color:#333; vertical-align:middle; }
+    .itbl-link { color:#01518A; font-weight:600; }
+    .itbl-dash { color:#BBC1C8; }
+
+    /* ── PAGINATION ── */
+    .pagination-bar { display:flex; align-items:center; justify-content:space-between; padding:8px 20px; background:#fff; border-top:1px solid #dce1e7; flex-shrink:0; font-size:12px; color:#555; }
+    .pag-controls { display:flex; align-items:center; gap:5px; }
+    .pag-btn { width:26px; height:26px; border:1px solid #dce1e7; background:#fff; border-radius:2px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; color:#555; }
+    .pag-btn:hover:not(:disabled) { background:#f0f2f5; }
+    .pag-btn:disabled { opacity:.35; cursor:default; }
+    .pag-btn.active { background:#01518A; color:#fff; border-color:#01518A; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
+
+    /* ── DO NOT COPY TO GOSP TOGGLE ── */
+    .gosp-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:7px 0 5px; }
+    .gosp-toggle-label { font-size:12px; font-weight:700; color:#374151; }
+    .toggle-switch { position:relative; display:inline-block; width:36px; height:20px; flex-shrink:0; }
+    .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+    .toggle-slider { position:absolute; inset:0; background:#D1D5DB; border-radius:20px; cursor:pointer; transition:background .2s; }
+    .toggle-slider:before { content:''; position:absolute; width:14px; height:14px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+    .toggle-switch input:checked + .toggle-slider { background:#C02032; }
+    .toggle-switch input:checked + .toggle-slider:before { transform:translateX(16px); }
+    .gosp-badge { font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; white-space:nowrap; }
+    .gosp-badge-on  { background:#FEF2F2; color:#C02032; border:1px solid #FECACA; }
+    .gosp-badge-off { background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB; }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="nav-hamburger" id="lnavToggle" onclick="toggleLnav()">
+      <div class="ham-lines"><span></span><span></span><span></span></div>
+    </button>
+    <div class="nav-divider"></div>
+    <div class="logo-wrap">
+      <span class="logo-mark">UL</span>
+      <span class="logo-text">Solutions<small>myUL Portal</small></span>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link">Dashboard</div>
+      <div class="nav-link active">DCS</div>
+      <div class="nav-link">GMA</div>
+      <div class="nav-link">Reports</div>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <button class="nav-icon-btn">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V4a1 1 0 00-2 0v1.083A6 6 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-icon-label">Alerts</span>
+      <span class="notif-dot">3</span>
+    </button>
+    <button class="nav-icon-btn">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="1.8"/><path d="M20 20l-3-3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span class="nav-icon-label">Search</span>
+    </button>
+    <div class="nav-avatar-wrap">
+      <div class="avatar">JD</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ BREADCRUMB ══ -->
+<div class="breadcrumb">
+  <a>Home</a><span>›</span><a>DCS</a><span>›</span><span style="color:#333;">Standards</span>
+</div>
+
+<!-- ══ PAGE SHELL ══ -->
+<div class="page-shell">
+
+  <!-- LEFT NAV -->
+  <nav class="left-nav" id="leftNav">
+    <div class="lnav-section">Standards</div>
+    <div class="lnav-item active">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#01518A" stroke-width="1.8"/><path d="M7 8h10M7 12h10M7 16h6" stroke="#01518A" stroke-width="1.8" stroke-linecap="round"/></svg>
+      All Standards
+    </div>
+    <div class="lnav-item">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 8v4l3 3" stroke="#555" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="#555" stroke-width="1.8"/></svg>
+      Pending Sync
+    </div>
+    <div class="lnav-item">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="#555" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Sync Errors
+    </div>
+    <div class="lnav-sep"></div>
+    <div class="lnav-section">Manage</div>
+    <div class="lnav-item">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="#555" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Mapping Rules
+    </div>
+    <div class="lnav-item">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="#555" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="#555" stroke-width="1.8"/></svg>
+      Settings
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Standards</div>
+        <div style="font-size:12px;color:#888;margin-top:2px;">GOSP-linked standards management</div>
+      </div>
+      <div class="page-header-right">
+        <button class="btn">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export
+        </button>
+        <button class="btn btn-primary">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M4 4v16h16M4 4l16 16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Sync All
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <div class="tab active" onclick="switchTab(this)">All Standards <span class="tab-count">48</span></div>
+      <div class="tab" onclick="switchTab(this)">Active <span class="tab-count">31</span></div>
+      <div class="tab" onclick="switchTab(this)">Modified/Superseded <span class="tab-count">11</span></div>
+      <div class="tab" onclick="switchTab(this)">Withdrawn <span class="tab-count">4</span></div>
+      <div class="tab" onclick="switchTab(this)">Sync Issues <span class="tab-count" style="background:#FEF2F2;color:#DC2626;">2</span></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke="#9CA3AF" stroke-width="1.8"/><path d="M20 20l-3-3" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" id="searchInput" placeholder="Search standard number, title, SDO…" oninput="filterTable()"/>
+        </div>
+        <div class="filter-chip" onclick="this.classList.toggle('on')">SDO ▾</div>
+        <div class="filter-chip" onclick="this.classList.toggle('on')">Status ▾</div>
+        <div class="filter-chip" onclick="this.classList.toggle('on')">Sync Status ▾</div>
+      </div>
+      <div class="toolbar-right">
+        <span class="count-lbl" id="countLbl">Showing 48 standards</span>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-area">
+      <table class="stbl" id="mainTable">
+        <thead>
+          <tr>
+            <th style="width:34px;"></th>
+            <th>Standard Number <span class="sort-icon">⇅</span></th>
+            <th>Title <span class="sort-icon">⇅</span></th>
+            <th>SDO <span class="sort-icon">⇅</span></th>
+            <th>Status <span class="sort-icon">⇅</span></th>
+            <th>Sync Status <span class="sort-icon">⇅</span></th>
+            <th>Mandatory Date <span class="sort-icon">⇅</span></th>
+            <th>Linked Records <span class="sort-icon">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody id="tablebody">
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar">
+      <span>Showing <strong>1–15</strong> of <strong>48</strong> standards</span>
+      <div class="pag-controls">
+        <button class="pag-btn" disabled>&#8249;</button>
+        <button class="pag-btn active">1</button>
+        <button class="pag-btn">2</button>
+        <button class="pag-btn">3</button>
+        <button class="pag-btn">4</button>
+        <span style="padding:0 4px;color:#aaa;">…</span>
+        <button class="pag-btn">&#8250;</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#555;">
+        Rows per page:
+        <select style="padding:3px 6px;border:1px solid #dce1e7;border-radius:2px;font-size:12px;font-family:inherit;">
+          <option>15</option><option>25</option><option>50</option>
+        </select>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /page-shell -->
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const STANDARDS = [
+  {
+    id: 'std-1',
+    number: 'AS/NZS 60335.2.15',
+    title: 'Household and similar electrical appliances - Safety, Part 2.15: Particular requirements for appliances for heating liquids',
+    sdo: 'Standards New Zealand',
+    sdoAbbr: 'SNZ',
+    status: 'active',
+    syncStatus: 'synced',
+    mandatoryDate: '2028-11-27',
+    linkedRecords: 1,
+    edition: '--',
+    version: '--',
+    amendment: '--',
+    issuedDate: '2025-11-27',
+    effectiveDate: '2028-11-27T00:00:00',
+    revisedDate: '--',
+    corrigendumDate: '--',
+    corrigendumFlag: '--',
+    withdrawalDate: '--',
+    inactivationDate: '--',
+    doNotCopyToGOSP: false,
+    gmaRecords: [
+      {
+        id: '19791',
+        type: 'Standard',
+        changeStatus: 'Modified/Superseded',
+        syncStatus: 'Synced',
+        rows: [
+          { number: 'AS/NZS 60335.2.15', version: '--', edition: '--', amendment: '--', replacedBy: 'AS/NZS 60335.2.15:2025' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'std-2',
+    number: 'IEC 61010-1',
+    title: 'Safety requirements for electrical equipment for measurement, control, and laboratory use – Part 1: General requirements',
+    sdo: 'IEC',
+    sdoAbbr: 'IEC',
+    status: 'active',
+    syncStatus: 'synced',
+    mandatoryDate: '2027-06-01',
+    linkedRecords: 2,
+    edition: '3.1',
+    version: '--',
+    amendment: 'Am1',
+    issuedDate: '2024-05-10',
+    effectiveDate: '2027-06-01T00:00:00',
+    revisedDate: '--',
+    corrigendumDate: '--',
+    corrigendumFlag: '--',
+    withdrawalDate: '--',
+    inactivationDate: '--',
+    doNotCopyToGOSP: false,
+    gmaRecords: [
+      {
+        id: '18342',
+        type: 'Standard',
+        changeStatus: 'Active',
+        syncStatus: 'Synced',
+        rows: [
+          { number: 'IEC 61010-1 Ed.3.1', version: '3.1', edition: '3', amendment: 'Am1', replacedBy: '--' }
+        ]
+      },
+      {
+        id: '18343',
+        type: 'Amendment',
+        changeStatus: 'Active',
+        syncStatus: 'Synced',
+        rows: [
+          { number: 'IEC 61010-1 Am1', version: '--', edition: '3', amendment: '1', replacedBy: '--' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'std-3',
+    number: 'EN 50065-1',
+    title: 'Signalling on low-voltage electrical installations in the frequency range 3 kHz to 148.5 kHz',
+    sdo: 'CENELEC',
+    sdoAbbr: 'CLC',
+    status: 'active',
+    syncStatus: 'pending',
+    mandatoryDate: '2026-09-01',
+    linkedRecords: 1,
+    edition: '2',
+    version: '--',
+    amendment: '--',
+    issuedDate: '2023-11-01',
+    effectiveDate: '2026-09-01T00:00:00',
+    revisedDate: '--',
+    corrigendumDate: '--',
+    corrigendumFlag: '--',
+    withdrawalDate: '--',
+    inactivationDate: '--',
+    doNotCopyToGOSP: false,
+    gmaRecords: [
+      {
+        id: '17890',
+        type: 'Standard',
+        changeStatus: 'Active',
+        syncStatus: 'Pending',
+        rows: [
+          { number: 'EN 50065-1:2023', version: '--', edition: '2', amendment: '--', replacedBy: '--' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'std-4',
+    number: 'UL 60730-1',
+    title: 'Automatic Electrical Controls – Part 1: General Requirements',
+    sdo: 'UL Standards & Engagement',
+    sdoAbbr: 'ULSE',
+    status: 'active',
+    syncStatus: 'error',
+    mandatoryDate: '2026-03-15',
+    linkedRecords: 0,
+    edition: '4',
+    version: '--',
+    amendment: '--',
+    issuedDate: '2022-08-20',
+    effectiveDate: '2026-03-15T00:00:00',
+    revisedDate: '2024-01-10',
+    corrigendumDate: '--',
+    corrigendumFlag: '--',
+    withdrawalDate: '--',
+    inactivationDate: '--',
+    doNotCopyToGOSP: false,
+    gmaRecords: []
+  },
+  {
+    id: 'std-5',
+    number: 'SANS 60332-3-24',
+    title: 'Tests on electric and optical fibre cables under fire conditions – Part 3-24: Vertical spread of flame on vertically-mounted bunched wires or cables',
+    sdo: 'SABS',
+    sdoAbbr: 'SABS',
+    status: 'active',
+    syncStatus: 'synced',
+    mandatoryDate: '2027-04-01',
+    linkedRecords: 1,
+    edition: '2',
+    version: '--',
+    amendment: '--',
+    issuedDate: '2025-06-15',
+    effectiveDate: '2027-04-01T00:00:00',
+    revisedDate: '--',
+    corrigendumDate: '--',
+    corrigendumFlag: '--',
+    withdrawalDate: '--',
+    inactivationDate: '--',
+    doNotCopyToGOSP: false,
+    gmaRecords: [
+      {
+        id: '20105',
+        type: 'Standard',
+        changeStatus: 'Active',
+        syncStatus: 'Synced',
+        rows: [
+          { number: 'SANS 60332-3-24 Ed.2', version: '--', edition: '2', amendment: '--', replacedBy: '--' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'std-6',
+    number: 'IS 302',
+    title: 'Safety of Household and Similar Electrical Appliances',
+    sdo: 'Bureau of Indian Standards',
+    sdoAbbr: 'BIS',
+    status: 'inactive',
+    syncStatus: 'synced',
+    mandatoryDate: '2025-06-30',
+    linkedRecords: 1,
+    edition: '--',
+    version: '2.1',
+    amendment: '--',
+    issuedDate: '2022-03-01',
+    effectiveDate: '2025-06-30T00:00:00',
+    revisedDate: '--',
+    corrigendumDate: '--',
+    corrigendumFlag: '--',
+    withdrawalDate: '2025-07-01',
+    inactivationDate: '2025-08-01',
+    doNotCopyToGOSP: false,
+    gmaRecords: [
+      {
+        id: '16004',
+        type: 'Standard',
+        changeStatus: 'Modified/Superseded',
+        syncStatus: 'Synced',
+        rows: [
+          { number: 'IS 302:2022', version: '2.1', edition: '--', amendment: '--', replacedBy: 'IS 302:2025' }
+        ]
+      }
+    ]
+  },
+];
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function syncPill(s) {
+  const map = {
+    synced:  `<span class="pill pill-synced">Synced</span>`,
+    pending: `<span class="pill pill-pending">Pending</span>`,
+    error:   `<span class="pill pill-error">Sync Error</span>`
+  };
+  return map[s] || '';
+}
+function statusPill(s) {
+  return s === 'active'
+    ? `<span class="pill pill-active">Active</span>`
+    : `<span class="pill pill-inactive">Inactive</span>`;
+}
+function fmtDate(d) { return d && d !== '--' ? d.replace('T00:00:00','') : '--'; }
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderTable() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const rows = STANDARDS.filter(s =>
+    !q ||
+    s.number.toLowerCase().includes(q) ||
+    s.title.toLowerCase().includes(q) ||
+    s.sdo.toLowerCase().includes(q) ||
+    s.sdoAbbr.toLowerCase().includes(q)
+  );
+
+  document.getElementById('countLbl').textContent = `Showing ${rows.length} standard${rows.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('tablebody');
+  tbody.innerHTML = '';
+
+  rows.forEach(std => {
+    // Main row
+    const tr = document.createElement('tr');
+    tr.className = 'srow';
+    tr.id = `row-${std.id}`;
+    tr.onclick = () => toggleExp(std.id);
+    tr.innerHTML = `
+      <td><button class="xbtn" id="xbtn-${std.id}">+</button></td>
+      <td>
+        <span class="std-num">${std.number}</span>
+        <div class="std-title">${std.title}</div>
+      </td>
+      <td style="white-space:nowrap;">
+        <div style="font-weight:600;font-size:13px;">${std.sdoAbbr}</div>
+        <div style="font-size:11px;color:#888;">${std.sdo}</div>
+      </td>
+      <td>${statusPill(std.status)}</td>
+      <td>${syncPill(std.syncStatus)}</td>
+      <td style="font-size:12.5px;">${fmtDate(std.mandatoryDate)}</td>
+      <td>
+        ${std.linkedRecords > 0
+          ? `<span style="font-size:12px;font-weight:700;color:#01518A;">${std.linkedRecords}</span> <span style="font-size:11px;color:#888;">record${std.linkedRecords !== 1 ? 's' : ''}</span>`
+          : `<span style="font-size:11px;color:#BBC1C8;">none</span>`}
+      </td>`;
+
+    // Expansion row
+    const expTr = document.createElement('tr');
+    expTr.className = 'exprow';
+    expTr.id = `exp-${std.id}`;
+    expTr.innerHTML = `<td colspan="8">
+      <div class="exp-inner">
+
+        <!-- LEFT: metadata -->
+        <div class="exp-left">
+          <div class="exp-left-hdr">
+            <div class="exp-std-num">${std.number}</div>
+            <div class="exp-std-title">${std.title}</div>
+          </div>
+          <table class="meta-table">
+            <tr><td>Status:</td><td>${statusPill(std.status)}</td></tr>
+            <tr><td>SDO:</td><td>${std.sdo}</td></tr>
+            <tr><td>SDO Abbreviation:</td><td>${std.sdoAbbr}</td></tr>
+            <tr><td colspan="2"><hr class="meta-sep"/></td></tr>
+            <tr><td>Edition:</td><td class="${std.edition === '--' ? 'dash' : ''}">${std.edition}</td></tr>
+            <tr><td>Version:</td><td class="${std.version === '--' ? 'dash' : ''}">${std.version}</td></tr>
+            <tr><td>Amendment:</td><td class="${std.amendment === '--' ? 'dash' : ''}">${std.amendment}</td></tr>
+            <tr><td colspan="2"><hr class="meta-sep"/></td></tr>
+            <tr><td>Issued date:</td><td>${fmtDate(std.issuedDate)}</td></tr>
+            <tr><td>Effective date:</td><td>${fmtDate(std.effectiveDate)}</td></tr>
+            <tr><td>Revised date:</td><td class="${std.revisedDate === '--' ? 'dash' : ''}">${std.revisedDate}</td></tr>
+            <tr><td>Corrigendum date:</td><td class="${std.corrigendumDate === '--' ? 'dash' : ''}">${std.corrigendumDate}</td></tr>
+            <tr><td>Corrigendum flag:</td><td class="${std.corrigendumFlag === '--' ? 'dash' : ''}">${std.corrigendumFlag}</td></tr>
+            <tr><td colspan="2"><hr class="meta-sep"/></td></tr>
+            <tr>
+              <td colspan="2">
+                <div class="gosp-toggle-row">
+                  <span class="gosp-toggle-label">Do not copy to GOSP</span>
+                  <div style="display:flex;align-items:center;gap:7px;">
+                    <span class="gosp-badge ${std.doNotCopyToGOSP ? 'gosp-badge-on' : 'gosp-badge-off'}" id="gosp-badge-${std.id}">${std.doNotCopyToGOSP ? 'Excluded' : 'Included'}</span>
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                      <input type="checkbox" id="gosp-chk-${std.id}" ${std.doNotCopyToGOSP ? 'checked' : ''} onchange="toggleGosp('${std.id}', this.checked)">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr><td>Mandatory date:</td><td>${fmtDate(std.mandatoryDate)}</td></tr>
+            <tr><td>Withdrawal date:</td><td class="${std.withdrawalDate === '--' ? 'dash' : ''}">${std.withdrawalDate}</td></tr>
+            <tr><td>Inactivation date:</td><td class="${std.inactivationDate === '--' ? 'dash' : ''}">${std.inactivationDate}</td></tr>
+          </table>
+        </div>
+
+        <!-- RIGHT: linked GMA records -->
+        <div class="exp-right">
+          <div class="exp-right-hdr">
+            <div class="exp-right-title">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="#01518A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Linked GMA Records
+              <span class="record-count-badge">${std.linkedRecords}</span>
+            </div>
+            <button class="btn btn-sm">+ Link Record</button>
+          </div>
+          <div class="exp-right-scroll">
+            ${std.gmaRecords.length === 0
+              ? `<div style="padding:32px;text-align:center;color:#aaa;font-size:13px;">No linked GMA records for this standard.</div>`
+              : std.gmaRecords.map((rec, ri) => `
+                <div class="gma-block">
+                  <div class="gma-block-hdr open" id="gmahdr-${std.id}-${ri}" onclick="toggleGma('${std.id}',${ri})">
+                    <div class="gma-toggle-btn" id="gmatgl-${std.id}-${ri}">−</div>
+                    <span class="gma-block-id">${rec.id}</span>
+                    <div class="gma-block-meta">
+                      <span class="type-badge">${rec.type}</span>
+                      <span class="pill pill-inactive chip-noicon">${rec.changeStatus}</span>
+                      ${rec.syncStatus === 'Synced'
+                        ? `<span class="pill pill-synced">Synced</span>`
+                        : rec.syncStatus === 'Pending'
+                          ? `<span class="pill pill-pending">Pending</span>`
+                          : `<span class="pill pill-error">Error</span>`}
+                    </div>
+                  </div>
+                  <div class="gma-body open" id="gmabody-${std.id}-${ri}">
+                    <table class="itbl">
+                      <thead>
+                        <tr>
+                          <th>Number</th>
+                          <th>Version</th>
+                          <th>Edition</th>
+                          <th>Amendment</th>
+                          <th>Replaced By</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${rec.rows.map(r => `
+                          <tr>
+                            <td><span class="itbl-link">${r.number}</span></td>
+                            <td class="${r.version === '--' ? 'itbl-dash' : ''}">${r.version}</td>
+                            <td class="${r.edition === '--' ? 'itbl-dash' : ''}">${r.edition}</td>
+                            <td class="${r.amendment === '--' ? 'itbl-dash' : ''}">${r.amendment}</td>
+                            <td class="${r.replacedBy === '--' ? 'itbl-dash' : ''}">${r.replacedBy !== '--' ? `<span class="itbl-link">${r.replacedBy}</span>` : '--'}</td>
+                          </tr>`).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>`).join('')}
+          </div>
+        </div>
+
+      </div>
+    </td>`;
+
+    tbody.appendChild(tr);
+    tbody.appendChild(expTr);
+  });
+}
+
+// ── INTERACTION ───────────────────────────────────────────────────────────────
+function toggleExp(id) {
+  const expRow = document.getElementById(`exp-${id}`);
+  const mainRow = document.getElementById(`row-${id}`);
+  const xbtn = document.getElementById(`xbtn-${id}`);
+  const isOpen = expRow.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.exprow.open').forEach(r => r.classList.remove('open'));
+  document.querySelectorAll('.srow.expanded').forEach(r => r.classList.remove('expanded'));
+  document.querySelectorAll('.xbtn').forEach(b => b.textContent = '+');
+
+  if (!isOpen) {
+    expRow.classList.add('open');
+    mainRow.classList.add('expanded');
+    xbtn.textContent = '−';
+    // Scroll into view gently
+    setTimeout(() => expRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+  }
+}
+
+function toggleGma(stdId, ri) {
+  const hdr  = document.getElementById(`gmahdr-${stdId}-${ri}`);
+  const tgl  = document.getElementById(`gmatgl-${stdId}-${ri}`);
+  const body = document.getElementById(`gmabody-${stdId}-${ri}`);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  hdr.classList.toggle('open', !isOpen);
+  tgl.textContent = isOpen ? '+' : '−';
+}
+
+function toggleGosp(stdId, checked) {
+  const std = STANDARDS.find(s => s.id === stdId);
+  if (!std) return;
+  std.doNotCopyToGOSP = checked;
+  const badge = document.getElementById(`gosp-badge-${stdId}`);
+  if (badge) {
+    badge.textContent = checked ? 'Excluded' : 'Included';
+    badge.className = `gosp-badge ${checked ? 'gosp-badge-on' : 'gosp-badge-off'}`;
+  }
+}
+
+function filterTable() { renderTable(); }
+
+function switchTab(el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleLnav() {
+  document.getElementById('leftNav').classList.toggle('collapsed');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderTable();
+
+// Auto-open the first row (AS/NZS 60335.2.15) to match the screenshot
+setTimeout(() => toggleExp('std-1'), 100);
+</script>
+</body>
+</html>

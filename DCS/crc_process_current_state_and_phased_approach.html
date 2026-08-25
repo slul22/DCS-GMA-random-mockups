@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CRC Process — Current State & Phased Approach</title>
+<style>
+  :root {
+    --ul-red: #DA291C;
+    --ul-red-dark: #A31710;
+    --navy: #0D2340;
+    --navy-2: #1B3A5C;
+    --steel: #5B7290;
+    --ink: #1F2933;
+    --muted: #6B7686;
+    --line: #D9DEE4;
+    --card-bg: #FFFFFF;
+    --amber: #B45309;
+    --amber-bg: #FEF3C7;
+    --amber-line: #FCD34D;
+    --green: #0E7C4A;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: #EDEFF2;
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: var(--ink);
+  }
+
+  .slide {
+    width: 1280px;
+    min-height: 720px;
+    margin: 24px auto;
+    background: #F5F6F8;
+    box-shadow: 0 4px 18px rgba(13,35,64,0.12);
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  /* ---------- Banner ---------- */
+  .banner {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+    padding: 30px 44px 24px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .banner::after {
+    content: "";
+    position: absolute;
+    right: -50px;
+    top: -50px;
+    width: 180px;
+    height: 180px;
+    background: var(--ul-red);
+    opacity: 0.15;
+    border-radius: 50%;
+  }
+  .banner-inner { position: relative; z-index: 1; }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(218,41,28,0.16);
+    border: 1px solid rgba(218,41,28,0.5);
+    color: #ff8a7f;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .eyebrow .sq { width: 7px; height: 7px; background: var(--ul-red); border-radius: 2px; display: inline-block; }
+  .banner h1 {
+    font-size: 25px;
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+  .banner p {
+    margin: 0;
+    color: #C4CEDA;
+    font-size: 13.5px;
+    max-width: 820px;
+    line-height: 1.5;
+  }
+
+  /* ---------- Body content ---------- */
+  .content {
+    padding: 26px 44px 32px;
+  }
+
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--accent, var(--steel));
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .card h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h3 .tag-dot {
+    width: 8px; height: 8px; border-radius: 2px;
+    background: var(--accent, var(--steel));
+    display: inline-block;
+  }
+  .card ul {
+    margin: 0;
+    padding-left: 17px;
+    font-size: 12.3px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .card ul li { margin-bottom: 5px; }
+
+  .card--crc  { --accent: var(--navy-2); }
+  .card--iec  { --accent: var(--ul-red); }
+  .card--end  { --accent: var(--green); }
+
+  .obs-section {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--ul-red);
+    border-radius: 8px;
+    padding: 16px 22px 18px;
+  }
+  .obs-section h3 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: var(--navy);
+  }
+  .obs-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 26px;
+  }
+  .obs-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12.3px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .obs-num {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  /* ---------- Phase slide ---------- */
+  .phase-row {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    align-items: stretch;
+    gap: 0;
+  }
+  .phase-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #b7bec9;
+  }
+  .phase-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 26px 24px;
+    position: relative;
+  }
+  .phase-card.phase-1 { border-top: 5px solid var(--ul-red); }
+  .phase-card.phase-2 { border-top: 5px solid var(--navy-2); }
+
+  .phase-badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .phase-1 .phase-badge { color: var(--ul-red-dark); background: #FDEAE8; border: 1px solid #F6C6C1; }
+  .phase-2 .phase-badge { color: var(--navy); background: #E6ECF3; border: 1px solid #C6D3E2; }
+
+  .phase-card h2 {
+    margin: 0 0 12px;
+    font-size: 19px;
+    color: var(--navy);
+  }
+
+  .phase-card h4 {
+    margin: 14px 0 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .phase-card ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12.5px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .phase-card ul li { margin-bottom: 6px; }
+
+  .callout {
+    margin-top: 16px;
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--amber);
+    line-height: 1.5;
+    display: flex;
+    gap: 9px;
+  }
+  .callout .flag { flex: 0 0 auto; font-weight: 800; }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    left: 44px;
+    bottom: 18px;
+  }
+  .footer .ul-logo-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--ul-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8.5px;
+    font-weight: 800;
+    color: var(--ul-red);
+  }
+  .footer .brand { font-size: 11.5px; font-weight: 700; color: var(--ink); }
+</style>
+</head>
+<body>
+
+  <!-- ================= SLIDE 1 ================= -->
+  <div class="slide" id="slide1">
+    <div class="banner">
+      <div class="banner-inner">
+        <div class="eyebrow"><span class="sq"></span> CRC Process Review</div>
+        <h1>Current State: Observations &amp; Process</h1>
+        <p>Where the CRC process stands today across the NA scheme, IEC assessments, and PrE engagement — and the key gaps driving our next steps.</p>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="grid3">
+        <div class="card card--crc">
+          <h3><span class="tag-dot"></span>Current CRC Process</h3>
+          <ul>
+            <li>Tied to file/volume numbers, not certifications.</li>
+            <li>One file/volume may cover multiple certifications, impacting quotes.</li>
+            <li>Many items are TBD; customers must confirm product impact.</li>
+            <li>Some models may be EOL.</li>
+          </ul>
+        </div>
+
+        <div class="card card--iec">
+          <h3><span class="tag-dot"></span>IEC</h3>
+          <ul>
+            <li>PrE review is inconsistent.</li>
+            <li>Execution varies: some assessments are completed, others are not.</li>
+          </ul>
+        </div>
+
+        <div class="card card--end">
+          <h3><span class="tag-dot"></span>Where We Ended</h3>
+          <ul>
+            <li>Engage PrEs on IEC standard assessments and align with the existing NA scheme process.</li>
+            <li>Revise charter to emphasize business growth/monetization; next step is alignment with Jason and Christian.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="obs-section">
+        <h3>Key Observations</h3>
+        <div class="obs-list">
+          <div class="obs-item"><span class="obs-num">1</span>PrEs view the RMS CRC process as labor intensive and overly complex.</div>
+          <div class="obs-item"><span class="obs-num">2</span>PrE buy-in is needed to support GCRCs.</div>
+          <div class="obs-item"><span class="obs-num">3</span>Several active projects have overlapping scopes.</div>
+          <div class="obs-item"><span class="obs-num">4</span>Report data must reach clause-by-clause detail.</div>
+          <div class="obs-item"><span class="obs-num">5</span>The NA process is tied to volume/section rather than certifications, which affects quote/project routing.</div>
+          <div class="obs-item"><span class="obs-num">6</span>Straight-to-order needs VBP implementation — still in pilot phase and not yet live in all COUs.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="ul-logo-circle">UL</span>
+      <span class="brand">Solutions</span>
+    </div>
+  </div>
+
+  <!-- ================= SLIDE 2 ================= -->
+  <div class="slide" id="slide2">
+    <div class="banner">
+      <div class="banner-inner">
+        <div class="eyebrow"><span class="sq"></span> Path Forward</div>
+        <h1>Phased Approach: From Certificate Expirations to the CRC Process</h1>
+        <p>Sequencing near-term, low-dependency work first, then applying those learnings to modernize the broader CRC process.</p>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="phase-row">
+
+        <!-- Phase 1 -->
+        <div class="phase-card phase-1">
+          <span class="phase-badge">Phase 1 · Start Now</span>
+          <h2>Certificate Expirations</h2>
+
+          <h4>Why Start Here</h4>
+          <ul>
+            <li>Concrete scope with no technical resource dependency.</li>
+            <li>SF team agreement provides a clear path to execute now.</li>
+            <li>Aligns inconsistent CO/COU processes for customers across multiple COs/COUs.</li>
+            <li>Addresses COUs that currently do not send notifications, improving customer focus.</li>
+          </ul>
+
+          <div class="callout">
+            <span class="flag">⚠</span>
+            <span><strong>Gap to flag:</strong> Renewals may be tied to surveillance/annual testing, but current processes aren't linked to surveillance requirements — especially for LATAM schemes.</span>
+          </div>
+        </div>
+
+        <div class="phase-arrow">➜</div>
+
+        <!-- Phase 2 -->
+        <div class="phase-card phase-2">
+          <span class="phase-badge">Phase 2 · Next</span>
+          <h2>Streamlined Quoting &amp; Straight-to-Order</h2>
+
+          <h4>Once the Process Is Aligned &amp; Salesforce Is Integrated</h4>
+          <ul>
+            <li>Align the NA process to certifications rather than file/volume, for accurate quote and project routing.</li>
+            <li>With CRC process alignment and Salesforce integration in place, tackle straight-to-order at scale.</li>
+            <li>Streamline the quoting and ordering process end-to-end using clean, certification-level data.</li>
+            <li>Extend VBP for straight-to-order across all COUs (currently pilot-only).</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="ul-logo-circle">UL</span>
+      <span class="brand">Solutions</span>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -283,7 +283,7 @@
       margin: 0 auto;
       position: relative;
     }
-    .gma-form-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #000; }
+    .gma-form-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #000; display:inline; }
     .form-subtitle { font-size: 13px; color: #595959; margin-bottom: 22px; line-height: 1.55; }
 
     /* Read-only tint overlay on form section */
@@ -299,6 +299,63 @@
 
     /* ── FIELDS ── */
     .field-group { margin-bottom: 17px; }
+
+    /* ── EMERGO NEWS TOGGLE ── */
+    .emergo-toggle-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px; padding: 12px 14px;
+      background: #f0f6ff; border: 1px solid #b8d0ed;
+      border-radius: 4px;
+    }
+    .emergo-toggle-row .toggle-label {
+      font-size: 13px; font-weight: 600; color: #1e3a5f;
+      flex: 1; letter-spacing: 0;
+    }
+    .emergo-toggle-row .toggle-label span {
+      display: block; font-size: 11px; font-weight: 400;
+      color: #767676; margin-top: 2px;
+    }
+    .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #ccc; border-radius: 22px;
+      cursor: pointer; transition: background .2s;
+    }
+    .toggle-track::before {
+      content: ''; position: absolute;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px;
+      transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    }
+    .toggle-switch input:checked + .toggle-track { background: #2e7d32; }
+    .toggle-switch input:checked + .toggle-track::before { transform: translateX(18px); }
+    .toggle-switch input:focus-visible + .toggle-track { outline: 2px solid #2e7d32; outline-offset: 2px; }
+    .emergo-badge {
+      font-size: 11px; font-weight: 700; color: #fff;
+      background: #01518A; border-radius: 3px;
+      padding: 2px 7px; letter-spacing: 0.3px; white-space: nowrap;
+    }
+    .distribution-row {
+      display: flex; align-items: center; gap: 28px;
+      background: #f5f7f9; border: 1px solid #e0e4ea;
+      border-radius: 6px; padding: 10px 14px;
+      margin-bottom: 17px;
+    }
+    .distribution-row .dist-label {
+      font-size: 11px; font-weight: 600; color: #595959;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      min-width: 110px;
+    }
+    .distribution-row .dist-options {
+      display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-left: auto;
+    }
+    .distribution-row .dist-option {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .distribution-row .dist-option-label {
+      font-size: 13px; color: #2d2d2d; white-space: nowrap;
+    }
     .field-row { display: flex; gap: 20px; margin-bottom: 17px; }
     .field-row .field-group { flex: 1; margin-bottom: 0; }
     .field-label {
@@ -533,6 +590,40 @@
     .demo-pill-btn.inactive:hover { background: #2a2a3e; color: #ccc; }
     .demo-pill-btn.is-editor { background: #2e7d32; color: #fff; }
     .demo-pill-btn.is-viewer { background: #b45309; color: #fff; }
+    .demo-pill-btn.is-concurrent { background: #01518A; color: #fff; }
+
+    /* ── CONCURRENT EDIT BANNER ── */
+    .concurrent-banner {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: #f0f7ff;
+      border-bottom: 2px solid #3b82f6;
+      padding: 11px 28px;
+      flex-shrink: 0;
+    }
+    .concurrent-banner.show { display: flex; }
+    .cb-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #c00; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+    .cb-text { flex: 1; min-width: 0; }
+    .cb-title { font-size: 13px; font-weight: 700; color: #1e3a5f; }
+    .cb-sub   { font-size: 12px; color: #2563a8; margin-top: 2px; }
+    .cb-timer {
+      font-size: 13px; font-weight: 700; color: #1d4ed8;
+      background: #dbeafe; border: 1px solid #93c5fd;
+      border-radius: 4px; padding: 4px 11px; white-space: nowrap; flex-shrink: 0;
+    }
+    .save-blocked-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fef2f2; color: #991b1b;
+      border: 1px solid #fca5a5; border-radius: 4px;
+      font-size: 12px; font-weight: 600; padding: 6px 14px;
+      white-space: nowrap; cursor: default;
+    }
   </style>
 </head>
 <body>
@@ -622,6 +713,7 @@
         <button class="btn" style="border-color:#000;font-weight:700;">Close</button>
         <button class="btn btn-next" id="btnNext">Next &nbsp;&#8594;</button>
         <button class="btn btn-save" id="btnSave">Save</button>
+        <span class="save-blocked-badge" id="saveBlockedBadge" style="display:none;">🔒 Save disabled</span>
       </div>
 
       <!-- Viewer topbar actions (hidden by default) -->
@@ -651,10 +743,22 @@
         <div class="vlb-sub">This article is locked. You can view it in read-only mode.</div>
       </div>
       <div class="vlb-timer" id="vlbTimer">⏱ 30m 00s remaining</div>
-      <div class="vlb-actions">
-        <button class="btn btn-sm" onclick="openModal('modalNotify')" style="border-color:#92400e;color:#92400e;font-weight:600;">🔔 Notify me</button>
-        <button class="btn btn-sm btn-amber" onclick="openModal('modalRequest')">📨 Request access</button>
+    </div>
+
+    <!-- ── CONCURRENT: Edit-but-no-save Banner ── -->
+    <div class="concurrent-banner" id="concurrentBanner">
+      <div class="cb-avatar">SL</div>
+      <div class="cb-text">
+        <div class="cb-title">Sharvanika L. is currently editing this article</div>
+        <div class="cb-sub">This article is locked. You cannot edit or save until their session ends.</div>
       </div>
+    </div>
+
+    <!-- ── CONCURRENT: Lock Released Banner ── -->
+    <div class="viewer-expired-banner" id="concurrentExpiredBanner">
+      <span style="font-size:16px;">✅</span>
+      <span style="flex:1;"><strong>Sharvanika's session ended.</strong> You can now save your changes.</span>
+      <button class="btn btn-sm btn-next" onclick="enableConcurrentSave()">Save now</button>
     </div>
 
     <!-- ── VIEWER: Session Ended Banner ── -->
@@ -694,8 +798,29 @@
         <!-- Read-only tint layer for viewer/expired state -->
         <div class="form-readonly-tint" id="formReadonlyTint"></div>
 
-        <h2>Add news contents</h2>
+        <h2 style="margin-bottom:6px;">Add news contents</h2>
         <p class="form-subtitle">Fill out the following fields to add a new news item. Click the question mark icon to find out more about the requirements for each field.</p>
+
+        <!-- Distribution Settings -->
+        <div class="distribution-row">
+          <span class="dist-label">Distribution</span>
+          <div class="dist-options">
+            <div class="dist-option">
+              <span class="dist-option-label">Emergo News</span>
+              <label class="toggle-switch" aria-label="Toggle Emergo News" style="margin:0;">
+                <input type="checkbox" id="emergo-toggle" />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+            <div class="dist-option">
+              <span class="dist-option-label">Notify customers when published</span>
+              <label class="toggle-switch" aria-label="Toggle customer notification" style="margin:0;">
+                <input type="checkbox" id="notify-customers-toggle" />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+          </div>
+        </div>
 
         <!-- Scanned Date -->
         <div class="field-group">
@@ -849,8 +974,9 @@
 <div class="demo-pill">
   <span class="demo-pill-label">Viewing as</span>
   <div class="demo-pill-btns">
-    <button class="demo-pill-btn is-editor" id="pillEditor" onclick="setRole('editor')">✏️ Editor · Sharvanika</button>
-    <button class="demo-pill-btn inactive"  id="pillViewer" onclick="setRole('viewer')">👁 Viewer · John</button>
+    <button class="demo-pill-btn is-editor" id="pillEditor"     onclick="setRole('editor')">✏️ Editor · Sharvanika</button>
+    <button class="demo-pill-btn inactive"  id="pillViewer"     onclick="setRole('viewer')">👁 Viewer · John</button>
+    <button class="demo-pill-btn inactive"  id="pillConcurrent" onclick="setRole('concurrent')">✏️ Concurrent · Alex</button>
   </div>
 </div>
 
@@ -879,46 +1005,7 @@
   </div>
 </div>
 
-<!-- Notify Me -->
-<div class="modal-overlay" id="modalNotify">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-icon blue">🔔</div>
-      <div class="modal-title">Notify me when available</div>
-      <button class="modal-close" onclick="closeModal('modalNotify')">✕</button>
-    </div>
-    <div class="modal-body">
-      <p>You'll receive an in-app notification as soon as <strong>Sharvanika L.</strong> releases the lock or their session expires.</p>
-      <p style="font-size:13px;color:#767676;">The article will remain in read-only mode until then. You can continue browsing other articles in the meantime.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modalNotify')">Cancel</button>
-      <button class="btn btn-next" onclick="confirmNotify()">Notify me</button>
-    </div>
-  </div>
-</div>
 
-<!-- Request Access -->
-<div class="modal-overlay" id="modalRequest">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-icon amber">📨</div>
-      <div class="modal-title">Request editing access</div>
-      <button class="modal-close" onclick="closeModal('modalRequest')">✕</button>
-    </div>
-    <div class="modal-body">
-      <p>A notification will be sent to <strong>Sharvanika L.</strong> asking them to release the lock on this article.</p>
-      <p style="font-size:13px;color:#767676;">They can choose to save and release, or decline your request. You'll be notified of their response.</p>
-      <div class="modal-info amber">
-        ⚠️ Only send if urgent — this will interrupt Sharvanika's current editing session.
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modalRequest')">Cancel</button>
-      <button class="btn btn-amber" onclick="confirmRequest()">Send request</button>
-    </div>
-  </div>
-</div>
 
 <!-- Re-acquire Lock -->
 <div class="modal-overlay" id="modalReacquire">
@@ -1008,6 +1095,8 @@ function triggerExpiry() {
   document.getElementById('lockChipTimer').textContent = 'Expired';
   if (role === 'editor') {
     showEditorExpired();
+  } else if (role === 'concurrent') {
+    showConcurrentExpired();
   } else {
     showViewerExpired();
   }
@@ -1018,25 +1107,40 @@ function triggerExpiry() {
 // ════════════════════════════════════════════════════════
 function setRole(r) {
   role = r;
-  const isEditor = (r === 'editor');
+  const isEditor     = (r === 'editor');
+  const isViewer     = (r === 'viewer');
+  const isConcurrent = (r === 'concurrent');
 
   // Demo pill
-  document.getElementById('pillEditor').className = 'demo-pill-btn ' + (isEditor ? 'is-editor' : 'inactive');
-  document.getElementById('pillViewer').className = 'demo-pill-btn ' + (!isEditor ? 'is-viewer' : 'inactive');
+  document.getElementById('pillEditor').className     = 'demo-pill-btn ' + (isEditor     ? 'is-editor'     : 'inactive');
+  document.getElementById('pillViewer').className     = 'demo-pill-btn ' + (isViewer     ? 'is-viewer'     : 'inactive');
+  document.getElementById('pillConcurrent').className = 'demo-pill-btn ' + (isConcurrent ? 'is-concurrent' : 'inactive');
 
   // Avatar
-  document.getElementById('navAvatar').textContent   = isEditor ? 'SL' : 'JP';
-  document.getElementById('navAvatar').style.background = isEditor ? '#c00' : '#555';
+  const avatarMap = { editor: ['SL','#c00'], viewer: ['JP','#555'], concurrent: ['AK','#01518A'] };
+  document.getElementById('navAvatar').textContent       = avatarMap[r][0];
+  document.getElementById('navAvatar').style.background  = avatarMap[r][1];
 
   // Topbar actions
   document.getElementById('editorLockChip').style.display = isEditor ? '' : 'none';
   document.getElementById('editorActions').style.display  = isEditor ? '' : 'none';
-  document.getElementById('viewerActions').style.display  = isEditor ? 'none' : '';
+  document.getElementById('viewerActions').style.display  = isViewer ? '' : 'none';
+
+  // Concurrent topbar — swap Save for blocked badge, keep Next/Close
+  const btnSave = document.getElementById('btnSave');
+  const saveBlockedBadge = document.getElementById('saveBlockedBadge');
+  if (isConcurrent && !expired) {
+    if (btnSave) btnSave.style.display = 'none';
+    if (saveBlockedBadge) saveBlockedBadge.style.display = '';
+  } else {
+    if (btnSave) btnSave.style.display = '';
+    if (saveBlockedBadge) saveBlockedBadge.style.display = 'none';
+  }
 
   // Viewer banners
   const vl  = document.getElementById('viewerLockBanner');
   const vle = document.getElementById('viewerExpiredBanner');
-  if (!isEditor) {
+  if (isViewer) {
     if (expired) { vl.classList.remove('show'); vle.classList.add('show'); }
     else         { vl.classList.add('show');    vle.classList.remove('show'); }
   } else {
@@ -1044,10 +1148,21 @@ function setRole(r) {
     vle.classList.remove('show');
   }
 
-  // Editor banners — hide/show based on role and state
+  // Concurrent banners
+  const cb  = document.getElementById('concurrentBanner');
+  const cbe = document.getElementById('concurrentExpiredBanner');
+  if (isConcurrent) {
+    if (expired) { cb.classList.remove('show'); cbe.classList.add('show'); }
+    else         { cb.classList.add('show');    cbe.classList.remove('show'); }
+  } else {
+    cb.classList.remove('show');
+    cbe.classList.remove('show');
+  }
+
+  // Editor warning banners
   const warnIds = ['warn5','warn2','warn1'];
   warnIds.forEach(id => {
-    document.getElementById(id).style.display = (isEditor) ? '' : 'none';
+    document.getElementById(id).style.display = isEditor ? '' : 'none';
   });
 
   const expBanner = document.getElementById('editorExpiredBanner');
@@ -1055,8 +1170,22 @@ function setRole(r) {
   if (isEditor && expired) expBanner.classList.add('show');
   else expBanner.classList.remove('show');
 
-  // Form fields
-  setFormReadOnly(!isEditor || expired);
+  // Form fields — read-only for viewer, concurrent, or expired editor
+  setFormReadOnly(isViewer || isConcurrent || (isEditor && expired));
+}
+
+function showConcurrentExpired() {
+  document.getElementById('concurrentBanner').classList.remove('show');
+  document.getElementById('concurrentExpiredBanner').classList.add('show');
+}
+
+function enableConcurrentSave() {
+  document.getElementById('concurrentExpiredBanner').classList.remove('show');
+  const btnSave = document.getElementById('btnSave');
+  const badge   = document.getElementById('saveBlockedBadge');
+  if (btnSave) btnSave.style.display = '';
+  if (badge)   badge.style.display   = 'none';
+  showToast('Save is now available — lock released by Sharvanika', 'green');
 }
 
 function setFormReadOnly(readonly) {
@@ -1153,15 +1282,7 @@ function confirmReacquire() {
   showToast('Lock re-acquired — 30 minutes remaining', 'blue');
 }
 
-function confirmNotify() {
-  closeModal('modalNotify');
-  showToast("You'll be notified when the article is available", 'blue');
-}
 
-function confirmRequest() {
-  closeModal('modalRequest');
-  showToast('Request sent — Sharvanika L. has been notified', 'amber');
-}
 
 function dismissBanner(id) {
   document.getElementById(id).classList.remove('show');
@@ -1227,6 +1348,14 @@ function debugReset() {
 function rteCmd(targetId, cmd) {
   document.getElementById(targetId).focus();
   document.execCommand(cmd, false, null);
+}
+
+// ════════════════════════════════════════════════════════
+//  EMERGO NEWS TOGGLE
+// ════════════════════════════════════════════════════════
+function updateEmergoToggle(checkbox) {
+  const badge = document.getElementById('emergo-badge');
+  badge.style.display = checkbox.checked ? 'inline-block' : 'none';
 }
 
 // ════════════════════════════════════════════════════════

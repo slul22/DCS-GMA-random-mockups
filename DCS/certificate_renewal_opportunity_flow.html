@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Certificate Renewal → Sales Opportunity Flow</title>
+<style>
+  :root {
+    --dcs-color: #2563eb;
+    --oic-color: #f59e0b;
+    --sf-color: #16a34a;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --card-bg: #ffffff;
+    --page-bg: #f4f6f9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 32px;
+    background: var(--page-bg);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  .title {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .title h1 {
+    font-size: 26px;
+    margin: 0 0 6px;
+  }
+  .title p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .flow-wrap {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+
+  .persona {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    background: var(--card-bg);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    border: 3px solid var(--stage-color, #94a3b8);
+    margin-bottom: 12px;
+  }
+
+  .persona-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--stage-color, #6b7280);
+    margin-bottom: 6px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    border-top: 4px solid var(--stage-color, #94a3b8);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 14px 16px;
+    width: 100%;
+    max-width: 210px;
+    min-height: 110px;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+
+  .card strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .card ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    text-align: left;
+    color: var(--muted);
+  }
+  .card ul li { margin-bottom: 3px; }
+
+  .arrow {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 38px;
+    font-size: 26px;
+    color: #b7bec9;
+  }
+
+  /* Stage color assignments */
+  .stage--customer { --stage-color: #64748b; }
+  .stage--dcs      { --stage-color: var(--dcs-color); }
+  .stage--oic      { --stage-color: var(--oic-color); }
+  .stage--sf       { --stage-color: var(--sf-color); }
+  .stage--rep      { --stage-color: var(--sf-color); }
+
+  .legend {
+    max-width: 1200px;
+    margin: 56px auto 0;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .footnote {
+    max-width: 760px;
+    margin: 40px auto 0;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .badge {
+    display: inline-block;
+    background: #eef2ff;
+    color: #4338ca;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="title">
+    <h1>Certificate Renewal → Sales Opportunity Flow</h1>
+    <p>From expiration detection in DCS to a consolidated Salesforce opportunity for the account owner</p>
+  </div>
+
+  <div class="flow-wrap">
+
+    <!-- Stage 1: DCS -->
+    <div class="stage stage--dcs">
+      <div class="persona-label">System</div>
+      <div class="persona">📄</div>
+      <div class="card">
+        <strong>DCS</strong>
+        Detects a certificate approaching expiration and generates a renewal notice.
+        <ul>
+          <li>Certificate + product data</li>
+          <li>Expiration date identified</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="arrow">➜</div>
+
+    <!-- Stage 2: OIC -->
+    <div class="stage stage--oic">
+      <div class="persona-label">Integration</div>
+      <div class="persona">🔄</div>
+      <div class="card">
+        <strong>OIC</strong>
+        Receives the alert, combines related certificates, and maps ownership.
+        <ul>
+          <li>Consolidates multiple certs per account</li>
+          <li>Maps Account Owner &amp; COU</li>
+          <li>Populates custom certificate field</li>
+        </ul>
+        <span class="badge">Business Logic Applied</span>
+      </div>
+    </div>
+
+    <div class="arrow">➜</div>
+
+    <!-- Stage 3: Salesforce -->
+    <div class="stage stage--sf">
+      <div class="persona-label">CRM</div>
+      <div class="persona">💼</div>
+      <div class="card">
+        <strong>Salesforce</strong>
+        Creates one consolidated opportunity with certificate details attached.
+        <ul>
+          <li>One opportunity per account (not per cert)</li>
+          <li>Custom field carries cert details</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="arrow">➜</div>
+
+    <!-- Stage 4: Sales Rep -->
+    <div class="stage stage--rep">
+      <div class="persona-label">Person</div>
+      <div class="persona">🧑‍💼</div>
+      <div class="card">
+        <strong>Account Owner</strong>
+        Reviews the opportunity and reaches out proactively before expiration.
+        <ul>
+          <li>Sees all expiring certs at once</li>
+          <li>Initiates renewal conversation</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="arrow">➜</div>
+
+    <!-- Stage 5: Customer -->
+    <div class="stage stage--customer">
+      <div class="persona-label">Customer</div>
+      <div class="persona">🧑</div>
+      <div class="card">
+        <strong>Customer</strong>
+        Receives a timely, consolidated renewal conversation instead of multiple disconnected notices.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:#2563eb;"></span> DCS (Certification System)</div>
+    <div class="legend-item"><span class="dot" style="background:#f59e0b;"></span> OIC (Integration &amp; Logic)</div>
+    <div class="legend-item"><span class="dot" style="background:#16a34a;"></span> Salesforce &amp; Sales Team</div>
+    <div class="legend-item"><span class="dot" style="background:#64748b;"></span> Customer</div>
+  </div>
+
+  <div class="footnote">
+    Multiple expiring certificates for the same account are consolidated into a single Salesforce opportunity by OIC's
+    business logic, reducing duplicate outreach and giving the account owner one clear, complete view of the renewal need.
+  </div>
+
+</body>
+</html>

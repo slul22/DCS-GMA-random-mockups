@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RI News – Emergo Medical CTA Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Open Sans','Segoe UI', Arial, sans-serif; font-size: 14px; background: #f6f8fa; color: #1d2129; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── TOP BAR ── */
+.topbar {
+  height: 52px; background: #C02032; display: flex; align-items: center;
+  padding: 0 16px; gap: 0; flex-shrink: 0; z-index: 40;
+}
+.topbar-brand { display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255,255,255,.3); }
+.brand-logo { font-weight: 800; font-size: 17px; color: #fff; letter-spacing: .03em; }
+.brand-app { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.9); margin-left: 12px; }
+.topbar-search { flex: 1; max-width: 600px; margin: 0 20px; }
+.topbar-search input {
+  width: 100%; padding: 7px 14px; border-radius: 20px; border: none;
+  background: rgba(255,255,255,.18); color: #fff; font-size: 13px; font-family: inherit; outline: none;
+}
+.topbar-search input::placeholder { color: rgba(255,255,255,.6); }
+.topbar-search input:focus { background: rgba(255,255,255,.28); }
+.topbar-right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.tb-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,.85); font-size: 16px; }
+.tb-icon:hover { background: rgba(255,255,255,.15); }
+.tb-avatar { width: 32px; height: 32px; border-radius: 50%; background: #1a3d6e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; margin-left: 4px; }
+
+/* ── APP SHELL ── */
+.app-shell { display: flex; flex: 1; overflow: hidden; }
+
+/* ── LEFT SIDEBAR ── */
+.sidebar {
+  width: 220px; flex-shrink: 0; background: #fff;
+  border-right: 1px solid #e0e3e7; display: flex; flex-direction: column;
+  overflow-y: auto; padding: 10px 0;
+}
+.sidebar-label { padding: 2px 16px 6px; font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-top: 8px; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px; font-size: 13px; color: #444; cursor: pointer;
+  border-radius: 0 20px 20px 0; margin-right: 12px;
+}
+.sidebar-item:hover { background: #f4f6f8; }
+.sidebar-item.active { background: #fde8ea; color: #C02032; font-weight: 700; }
+.sidebar-item .si-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.sidebar-divider { height: 1px; background: #eee; margin: 8px 0; }
+
+/* ── MAIN CONTENT ── */
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── ARTICLE HEADER ── */
+.article-header {
+  background: #fff; border-bottom: 1px solid #e0e3e7;
+  padding: 20px 32px 16px; flex-shrink: 0;
+}
+.article-breadcrumb { font-size: 12px; color: #888; margin-bottom: 8px; }
+.article-breadcrumb a { color: #01518A; text-decoration: none; }
+.article-breadcrumb a:hover { text-decoration: underline; }
+.article-title { font-size: 22px; font-weight: 700; color: #1d2129; line-height: 1.3; margin-bottom: 10px; }
+.article-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #666; }
+.article-meta .meta-label { font-weight: 700; color: #333; }
+.article-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+.tag-medical { background: #e8f0fe; color: #1a4480; border: 1px solid #adc4ef; }
+.tag-finalized { background: #e3f4ea; color: #1c7a4e; }
+.tag-region { background: #f0f2f5; color: #555; border: 1px solid #dde2e7; }
+
+/* ── ARTICLE BODY ── */
+.article-body { flex: 1; overflow-y: auto; padding: 24px 32px 60px; }
+.article-content { max-width: 760px; }
+.article-content p { font-size: 14px; color: #333; line-height: 1.75; margin-bottom: 14px; }
+.article-content h3 { font-size: 16px; font-weight: 700; color: #1d2129; margin: 22px 0 8px; }
+.article-content ul { margin: 0 0 14px 22px; font-size: 14px; color: #333; line-height: 1.75; }
+.article-content ul li { margin-bottom: 4px; }
+
+/* ══════════════════════════════════════════
+   EMERGO REDIRECT MESSAGE
+   ══════════════════════════════════════════ */
+.emergo-message {
+  margin: 24px 0;
+  padding: 14px 18px;
+  background: #f0f7ff;
+  border: 1px solid #c8ddf0;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.6;
+}
+.emergo-message a {
+  color: #00638e;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.emergo-message a:hover {
+  color: #004d6e;
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <span class="brand-logo">UL Solutions</span>
+    <span class="brand-app">Regulatory Intelligence</span>
+  </div>
+  <div class="topbar-search">
+    <input type="text" placeholder="Search news, regulations, standards..." />
+  </div>
+  <div class="topbar-right">
+    <div class="tb-icon">🔔</div>
+    <div class="tb-icon">⚙️</div>
+    <div class="tb-avatar">RB</div>
+  </div>
+</div>
+
+<!-- ── App Shell ── -->
+<div class="app-shell">
+
+  <!-- Left Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-label">Navigation</div>
+    <div class="sidebar-item active"><span class="si-icon">📰</span> News</div>
+    <div class="sidebar-item"><span class="si-icon">📋</span> Regulations</div>
+    <div class="sidebar-item"><span class="si-icon">📐</span> Standards</div>
+    <div class="sidebar-item"><span class="si-icon">📊</span> Reports</div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">My Items</div>
+    <div class="sidebar-item"><span class="si-icon">⭐</span> Favorites</div>
+    <div class="sidebar-item"><span class="si-icon">🔖</span> Bookmarks</div>
+    <div class="sidebar-item"><span class="si-icon">🔔</span> Alerts</div>
+    <div class="sidebar-divider"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- Article Header -->
+    <div class="article-header">
+      <div class="article-breadcrumb">
+        <a href="#">News</a> &nbsp;/&nbsp; <a href="#">Medical Devices</a> &nbsp;/&nbsp; EU MDR Update
+      </div>
+      <div class="article-title">EU — European Commission Publishes Updated MDCG Guidance on Clinical Evaluation Under MDR 2017/745</div>
+      <div class="article-meta">
+        <span><span class="meta-label">Published:</span> Jun 18, 2026</span>
+        <span><span class="meta-label">Region:</span> Europe</span>
+        <span><span class="meta-label">Issuer:</span> European Commission</span>
+        <span><span class="meta-label">Level:</span> Finalized</span>
+      </div>
+      <div class="article-tags">
+        <span class="tag tag-medical">🏥 Medical Devices</span>
+        <span class="tag tag-finalized">Finalized</span>
+        <span class="tag tag-region">🇪🇺 European Union</span>
+        <span class="tag tag-region">MDR 2017/745</span>
+      </div>
+    </div>
+
+    <!-- Article Body -->
+    <div class="article-body">
+      <div class="article-content">
+
+        <p>The European Commission has published an updated MDCG guidance document (MDCG 2026-3) providing revised recommendations for clinical evaluation under Regulation (EU) 2017/745 on Medical Devices (MDR). This guidance supersedes the previous MDCG 2020-6 and reflects lessons learned from the first years of MDR implementation.</p>
+
+        <h3>Key Changes</h3>
+        <ul>
+          <li>Clarified requirements for demonstrating clinical benefit versus state-of-the-art comparators</li>
+          <li>New section on post-market clinical follow-up (PMCF) study design expectations</li>
+          <li>Updated equivalence pathway requirements, narrowing acceptable device comparison scope</li>
+          <li>Additional guidance on sufficient clinical evidence for Class III and implantable devices</li>
+          <li>Annex with worked examples for common medical device categories</li>
+        </ul>
+
+        <p>Manufacturers placing medical devices on the EU market will need to review their clinical evaluation reports (CERs) against the updated criteria. Notified Bodies have indicated they will begin applying the updated guidance during conformity assessment from Q4 2026.</p>
+
+        <!-- Emergo Redirect Message -->
+        <div class="emergo-message">
+          For more information about this topic, please visit <a href="https://www.emergobyul.com/services/login" target="_blank">Emergo by UL Solutions</a>.
+        </div>
+
+        <h3>Impact Assessment</h3>
+        <p>The revised guidance is expected to affect approximately 4,200 manufacturers currently holding EU Certificates of Conformity for Class IIb, Class III, and implantable devices. Key areas requiring attention include:</p>
+
+        <ul>
+          <li>CER updates to reflect new equivalence criteria (deadline: within next PSUR cycle)</li>
+          <li>PMCF plan revisions to align with updated study design expectations</li>
+          <li>Review of benefit-risk analyses against updated state-of-the-art benchmarks</li>
+          <li>Documentation of any literature search methodology changes</li>
+        </ul>
+
+        <p>Manufacturers are advised to initiate gap analyses promptly to identify areas of their existing clinical evaluation documentation requiring revision before Notified Body review cycles beginning in late 2026.</p>
+
+        <h3>Related Standards & Guidance</h3>
+        <ul>
+          <li>MEDDEV 2.7/1 rev.4 (legacy guidance, now superseded for MDR devices)</li>
+          <li>ISO 14155:2020 — Clinical investigation of medical devices for human subjects</li>
+          <li>MDCG 2020-5 — Clinical evaluation – Equivalence</li>
+          <li>MDCG 2020-7 — Post-market clinical follow-up plan and report</li>
+        </ul>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

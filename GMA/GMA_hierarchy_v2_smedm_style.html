@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GMA News – Market Hierarchy (SME-DM Style)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans','Segoe UI',Arial,sans-serif; font-size: 14px; background: #f4f6f8; color: #222; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ── NAV ── */
+    .navbar { display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #dce1e7; padding: 0; height: 52px; }
+    .navbar-left { display: flex; align-items: center; gap: 0; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: #c00; padding: 0 20px; }
+    .logo svg { width: 36px; height: 36px; }
+    .nav-items { display: flex; align-items: center; gap: 4px; }
+    .nav-item { padding: 0 14px; height: 52px; display: flex; align-items: center; cursor: pointer; font-size: 14px; color: #444; border-bottom: 3px solid transparent; gap: 4px; user-select: none; }
+    .nav-item:hover { color: #0057b8; }
+    .nav-item.active { color: #0057b8; border-bottom-color: #0057b8; font-weight: 600; }
+    .nav-item .chevron { font-size: 10px; }
+    .avatar { width: 34px; height: 34px; background: #c00; color: #fff; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+    /* ── LAYOUT ── */
+    .page-shell { display: flex; flex: 1; overflow: hidden; }
+    .step-sidebar {
+      width: 90px; flex-shrink: 0; background: #fff;
+      border-right: 1px solid #dce1e7;
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 28px; gap: 28px;
+    }
+    .step-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      cursor: pointer; user-select: none;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid #dce1e7; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #666;
+      transition: all .15s;
+    }
+    .step-item.active .step-circle { background: #1b3a5c; border-color: #1b3a5c; color: #fff; }
+    .step-item .step-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: 600; letter-spacing: .3px; }
+    .step-item.active .step-label { color: #1b3a5c; }
+
+    .main-content { flex: 1; overflow-y: auto; padding: 32px 48px; }
+
+    /* ── FORM SECTIONS ── */
+    .section-title {
+      font-size: 15px; font-weight: 700; color: #1b3a5c; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .section-title .req { color: #c00; font-size: 16px; }
+
+    /* ── SELECT FIELD (clickable trigger) ── */
+    .select-field {
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .select-trigger {
+      border: 1px solid #dce1e7; border-radius: 4px;
+      background: #fff; padding: 10px 14px;
+      min-height: 44px; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .select-trigger:hover { border-color: #93b4d4; }
+    .select-trigger.open { border-color: #1b3a5c; box-shadow: 0 0 0 2px rgba(27,58,92,.12); border-radius: 4px 4px 0 0; }
+    .select-trigger .trigger-text { font-size: 14px; color: #999; }
+    .select-trigger .trigger-arrow { font-size: 12px; color: #666; transition: transform .2s; }
+    .select-trigger.open .trigger-arrow { transform: rotate(180deg); }
+
+    /* ── DROPDOWN PANEL ── */
+    .select-dropdown {
+      display: none;
+      position: absolute; top: 100%; left: 0; right: 0;
+      border: 1px solid #1b3a5c; border-top: none;
+      border-radius: 0 0 4px 4px;
+      background: #fff; z-index: 100;
+      max-height: 320px; overflow-y: auto;
+      box-shadow: 0 6px 16px rgba(0,0,0,.1);
+    }
+    .select-dropdown.open { display: block; }
+
+    /* ── TREE NODES INSIDE DROPDOWN ── */
+    .tree-section-hdr {
+      display: flex; align-items: center; gap: 4px;
+      padding: 10px 14px; font-size: 12px; font-weight: 700;
+      color: #666; text-transform: uppercase; letter-spacing: .5px;
+      border-bottom: 1px solid #eef0f3; background: #fafbfc;
+      user-select: none; cursor: pointer;
+    }
+    .tree-section-hdr .chevron { font-size: 10px; transition: transform .15s; }
+    .tree-section-hdr.expanded .chevron { transform: rotate(90deg); }
+    .tree-node {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 14px 7px 20px;
+      font-size: 14px; color: #333;
+      border-bottom: 1px solid #f4f6f8;
+      user-select: none; cursor: pointer;
+    }
+    .tree-node:hover { background: #f0f6ff; }
+    .tree-node.indent-1 { padding-left: 38px; }
+    .tree-node.indent-2 { padding-left: 56px; }
+    .tree-node .node-expand {
+      width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #666; cursor: pointer; flex-shrink: 0;
+    }
+    .tree-node .node-expand.has-children { color: #1b3a5c; font-weight: 700; }
+    .tree-node input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #1b3a5c; flex-shrink: 0; }
+    .tree-hidden { display: none !important; }
+
+    /* ── OPTION LIST (flat list for reg categories) ── */
+    .option-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; font-size: 14px; color: #333;
+      border-bottom: 1px solid #f4f6f8;
+      cursor: pointer; user-select: none;
+    }
+    .option-item:hover { background: #f0f6ff; }
+    .option-item input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #1b3a5c; flex-shrink: 0; }
+
+    /* ── CHIPS AREA ── */
+    .chips-area {
+      border: 1px solid #dce1e7; border-radius: 4px;
+      background: #fff; padding: 10px 12px;
+      margin-bottom: 6px; min-height: 44px;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #e8edf3; border: 1px solid #c5cdd8;
+      border-radius: 4px; padding: 4px 10px;
+      font-size: 13px; color: #1b3a5c; font-weight: 400;
+      white-space: nowrap;
+    }
+    .chip .chip-x {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; color: #666; padding: 0; line-height: 1;
+      font-weight: 700;
+    }
+    .chip .chip-x:hover { color: #c00; }
+    .chip.chip-tg { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+    .chip.chip-region { background: #dcfce7; border-color: #86efac; color: #166534; }
+    .chip.chip-invalid { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+
+    .chip-input-row {
+      border: 1px solid #dce1e7; border-radius: 4px;
+      background: #fff; padding: 0; margin-bottom: 4px;
+    }
+    .chip-input-row input {
+      width: 100%; border: none; outline: none;
+      padding: 10px 12px; font-size: 13px; color: #333;
+      font-family: 'Open Sans', sans-serif; background: transparent;
+    }
+    .chip-input-row input::placeholder { color: #999; }
+    .chip-hint { font-size: 12px; color: #888; margin-bottom: 24px; }
+
+    /* ── FOOTER ── */
+    .page-footer {
+      background: #1A1A1A; color: #fff; padding: 12px 44px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 14px; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="navbar-left" style="display:flex;align-items:center;gap:0;">
+    <div class="logo" style="padding:0 20px;">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="17" stroke="#c00" stroke-width="2"/>
+        <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#c00" font-size="11" font-weight="bold" font-family="Arial">UL</text>
+      </svg>
+      Solutions &nbsp;<span style="color:#999;font-weight:400;">|</span>&nbsp; Workbench Admin – Beta
+    </div>
+    <div class="nav-items">
+      <div class="nav-item">Scheme Master <span class="chevron">▾</span></div>
+      <div class="nav-item">Product <span class="chevron">▾</span></div>
+      <div class="nav-item">AI <span class="chevron">▾</span></div>
+      <div class="nav-item">Capstone UI</div>
+      <div class="nav-item active">GMA News</div>
+    </div>
+  </div>
+  <div class="avatar" style="margin-right:20px;">LS</div>
+</nav>
+
+<!-- ══ PAGE SHELL ══ -->
+<div class="page-shell">
+
+  <!-- Step sidebar -->
+  <div class="step-sidebar">
+    <div class="step-item">
+      <div class="step-circle">1</div>
+      <span class="step-label">Content</span>
+    </div>
+    <div class="step-item active">
+      <div class="step-circle">2</div>
+      <span class="step-label">Taxonomy</span>
+    </div>
+    <div class="step-item">
+      <div class="step-circle">3</div>
+      <span class="step-label">Review</span>
+    </div>
+  </div>
+
+  <!-- Main content area -->
+  <div class="main-content">
+
+    <!-- ═══ MARKET(S) SECTION ═══ -->
+    <div class="section-title">Market(s) <span class="req">*</span></div>
+
+    <!-- Click-to-open select field with tree dropdown -->
+    <div class="select-field" id="market-field">
+      <div class="select-trigger" id="market-trigger">
+        <span class="trigger-text" id="market-trigger-text">Click to select Trade Groups, Regions, or Jurisdictions</span>
+        <span class="trigger-arrow">▾</span>
+      </div>
+      <div class="select-dropdown" id="market-dropdown"></div>
+    </div>
+
+    <!-- Selected chips (shown after selections are made) -->
+    <div class="chips-area" id="market-chips">
+      <!-- chips rendered here dynamically -->
+    </div>
+
+    <!-- Manual type input -->
+    <div class="chip-input-row">
+      <input type="text" id="market-input" placeholder="Type, press Enter/comma, or paste an Excel column" />
+    </div>
+    <p class="chip-hint">Valid values create standard chips. Invalid pasted values appear as red chips.</p>
+
+    <!-- ═══ REGION (AUTO) ═══ -->
+    <div class="section-title">Region <span style="font-size:11px;font-weight:400;color:#888;margin-left:8px;">(auto-derived)</span></div>
+    <div class="chips-area" id="region-chips" style="background:#f9fafb; border-color:#e2e2e2; min-height:38px;">
+      <span style="font-size:13px;color:#999;font-style:italic;" id="region-placeholder">Auto-populated from market selections above</span>
+    </div>
+
+    <div style="height:24px;"></div>
+
+    <!-- ═══ REGULATORY CATEGORY ═══ -->
+    <div class="section-title">Regulatory category <span class="req">*</span></div>
+
+    <!-- Click-to-open select field with flat option list -->
+    <div class="select-field" id="regcat-field">
+      <div class="select-trigger" id="regcat-trigger">
+        <span class="trigger-text" id="regcat-trigger-text">Click to select regulatory categories</span>
+        <span class="trigger-arrow">▾</span>
+      </div>
+      <div class="select-dropdown" id="regcat-dropdown"></div>
+    </div>
+
+    <!-- Selected chips -->
+    <div class="chips-area" id="regcat-chips">
+      <!-- pre-populated example chips -->
+    </div>
+    <div class="chip-input-row">
+      <input type="text" id="regcat-input" placeholder="Type, press Enter/comma, or paste an Excel column" />
+    </div>
+    <p class="chip-hint">Valid values create standard chips. Invalid pasted values appear as red chips.</p>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="page-footer">
+  <span>● UL LLC ©2025. All rights reserved.</span>
+  <span>Online Policies &nbsp;&nbsp; About Cookies &nbsp;&nbsp; Data Subject Access Request Portal</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════
+
+const REGIONS = [
+  { code: 'RGAF',  name: 'Africa' },
+  { code: 'RGAS',  name: 'Asia' },
+  { code: 'RGCA',  name: 'Central America' },
+  { code: 'RGCAR', name: 'Caribbean' },
+  { code: 'RGEUR', name: 'Europe' },
+  { code: 'RGME',  name: 'Middle East' },
+  { code: 'RGNA',  name: 'North America' },
+  { code: 'RGOC',  name: 'Oceania' },
+  { code: 'RGSA',  name: 'South America' },
+];
+
+const TRADE_GROUPS = [
+  { code: 'AFRUN',   name: 'African Union' },
+  { code: 'APEC',    name: 'Asia-Pacific Economic Cooperation' },
+  { code: 'ARABL',   name: 'League of Arab States' },
+  { code: 'ASEAN',   name: 'Association of Southeast Asian Nations' },
+  { code: 'CARICOM', name: 'The Caribbean Community' },
+  { code: 'CBS',     name: 'CB Scheme' },
+  { code: 'CELAC',   name: 'Community of Latin American and Caribbean States' },
+  { code: 'CIS',     name: 'Commonwealth of Independent States' },
+  { code: 'EAC',     name: 'East African Community' },
+  { code: 'EAEU',    name: 'Eurasian Economic Union' },
+  { code: 'ECO',     name: 'Economic Cooperation Organization' },
+  { code: 'EEA',     name: 'European Economic Area' },
+  { code: 'EU',      name: 'European Union' },
+  { code: 'GCC',     name: 'Gulf Cooperation Council' },
+  { code: 'GLO',     name: 'Global' },
+  { code: 'IECEE',   name: 'Certification Body (CB) Scheme' },
+  { code: 'MERCOSUR',name: 'Southern Common Market' },
+  { code: 'SAARC',   name: 'South Asian Association for Regional Cooperation' },
+  { code: 'SICA',    name: 'Central American Integration System' },
+];
+
+const TG_MEMBERS = {
+  EU:       ['AUT','BEL','BGR','HRV','CYP','CZE','DNK','EST','FIN','FRA','DEU','GRC','HUN','IRL','ITA','LVA','LTU','LUX','MLT','NLD','POL','PRT','ROU','SVK','SVN','ESP','SWE'],
+  EEA:      ['AUT','BEL','BGR','HRV','CYP','CZE','DNK','EST','FIN','FRA','DEU','GRC','HUN','IRL','ITA','LVA','LTU','LUX','MLT','NLD','POL','PRT','ROU','SVK','SVN','ESP','SWE','NOR','ISL','LIE'],
+  ASEAN:    ['BRN','KHM','IDN','LAO','MYS','MMR','PHL','SGP','THA','VNM'],
+  GCC:      ['ARE','BHR','KWT','OMN','QAT','SAU'],
+  MERCOSUR: ['ARG','BRA','PRY','URY','BOL','CHL'],
+  SAARC:    ['AFG','BGD','BTN','IND','MDV','NPL','PAK','LKA'],
+  CARICOM:  ['ATG','BHS','BRB','BLZ','DMA','GRD','GUY','HTI','JAM','MSR','KNA','LCA','SUR','TTO','VCT'],
+  CELAC:    ['ARG','BOL','BRA','CHL','COL','CRI','CUB','DOM','ECU','SLV','GTM','GUY','HTI','HND','JAM','MEX','NIC','PAN','PRY','PER','TTO','URY','VEN'],
+  SICA:     ['BLZ','CRI','SLV','GTM','HND','NIC','PAN'],
+  APEC:     ['AUS','BRN','CAN','CHL','CHN','HKG','IDN','JPN','KOR','MYS','MEX','NZL','PNG','PER','PHL','RUS','SGP','TWN','THA','USA','VNM'],
+  EAC:      ['BDI','KEN','RWA','SSD','TZA','UGA'],
+  AFRUN:    ['DZA','AGO','BEN','BWA','BFA','BDI','CMR','CPV','CAF','TCD','COM','COD','COG','CIV','DJI','EGY','ERI','ETH','GAB','GMB','GHA','GIN','GNB','GNQ','KEN','LSO','LBR','LBY','MDG','MWI','MLI','MRT','MUS','MYT','MAR','MOZ','NAM','NER','NGA','RWA','STP','SEN','SLE','SOM','ZAF','SSD','SDN','SWZ','TZA','TGO','TUN','UGA','ZMB','ZWE'],
+  ARABL:    ['DZA','BHR','COM','DJI','EGY','IRQ','JOR','KWT','LBN','LBY','MAR','MRT','OMN','PSE','QAT','SAU','SOM','SDN','SYR','TUN','ARE','YEM'],
+  ECO:      ['AFG','AZE','IRN','KAZ','KGZ','PAK','TJK','TKM','TUR','UZB'],
+  CIS:      ['ARM','AZE','BLR','KAZ','KGZ','MDA','RUS','TJK','TKM','UZB','UKR'],
+  EAEU:     ['ARM','BLR','KAZ','KGZ','RUS'],
+  GLO:      [],
+  IECEE:    [],
+  CBS:      [],
+};
+
+const JURISDICTIONS = [
+  { code:'AGO', name:'Angola', region:'RGAF' },
+  { code:'BDI', name:'Burundi', region:'RGAF' },
+  { code:'BEN', name:'Benin', region:'RGAF' },
+  { code:'BFA', name:'Burkina Faso', region:'RGAF' },
+  { code:'BWA', name:'Botswana', region:'RGAF' },
+  { code:'CAF', name:'Central African Republic', region:'RGAF' },
+  { code:'CIV', name:'Ivory Coast', region:'RGAF' },
+  { code:'CMR', name:'Cameroon', region:'RGAF' },
+  { code:'COD', name:'Democratic Republic Of Congo', region:'RGAF' },
+  { code:'COG', name:'Republic Of Congo', region:'RGAF' },
+  { code:'DZA', name:'Algeria', region:'RGAF' },
+  { code:'EGY', name:'Egypt', region:'RGAF' },
+  { code:'ETH', name:'Ethiopia', region:'RGAF' },
+  { code:'GHA', name:'Ghana', region:'RGAF' },
+  { code:'KEN', name:'Kenya', region:'RGAF' },
+  { code:'MAR', name:'Morocco', region:'RGAF' },
+  { code:'NGA', name:'Nigeria', region:'RGAF' },
+  { code:'SEN', name:'Senegal', region:'RGAF' },
+  { code:'TUN', name:'Tunisia', region:'RGAF' },
+  { code:'TZA', name:'Tanzania', region:'RGAF' },
+  { code:'UGA', name:'Uganda', region:'RGAF' },
+  { code:'ZAF', name:'South Africa', region:'RGAF' },
+  { code:'ZMB', name:'Zambia', region:'RGAF' },
+  { code:'ZWE', name:'Zimbabwe', region:'RGAF' },
+  { code:'AFG', name:'Afghanistan', region:'RGAS' },
+  { code:'ARM', name:'Armenia', region:'RGAS' },
+  { code:'AZE', name:'Azerbaijan', region:'RGAS' },
+  { code:'BGD', name:'Bangladesh', region:'RGAS' },
+  { code:'BRN', name:'Brunei Darussalam', region:'RGAS' },
+  { code:'BTN', name:'Bhutan', region:'RGAS' },
+  { code:'CHN', name:'China', region:'RGAS' },
+  { code:'GEO', name:'Georgia', region:'RGAS' },
+  { code:'HKG', name:'Hong Kong', region:'RGAS' },
+  { code:'IDN', name:'Indonesia', region:'RGAS' },
+  { code:'IND', name:'India', region:'RGAS' },
+  { code:'JPN', name:'Japan', region:'RGAS' },
+  { code:'KAZ', name:'Kazakhstan', region:'RGAS' },
+  { code:'KGZ', name:'Kyrgyzstan', region:'RGAS' },
+  { code:'KHM', name:'Cambodia', region:'RGAS' },
+  { code:'KOR', name:'South Korea', region:'RGAS' },
+  { code:'LAO', name:'Laos', region:'RGAS' },
+  { code:'LKA', name:'Sri Lanka', region:'RGAS' },
+  { code:'MMR', name:'Myanmar', region:'RGAS' },
+  { code:'MNG', name:'Mongolia', region:'RGAS' },
+  { code:'MYS', name:'Malaysia', region:'RGAS' },
+  { code:'NPL', name:'Nepal', region:'RGAS' },
+  { code:'PAK', name:'Pakistan', region:'RGAS' },
+  { code:'PHL', name:'Philippines', region:'RGAS' },
+  { code:'SGP', name:'Singapore', region:'RGAS' },
+  { code:'THA', name:'Thailand', region:'RGAS' },
+  { code:'TJK', name:'Tajikistan', region:'RGAS' },
+  { code:'TKM', name:'Turkmenistan', region:'RGAS' },
+  { code:'TWN', name:'Taiwan', region:'RGAS' },
+  { code:'UZB', name:'Uzbekistan', region:'RGAS' },
+  { code:'VNM', name:'Vietnam', region:'RGAS' },
+  { code:'BLZ', name:'Belize', region:'RGCA' },
+  { code:'CRI', name:'Costa Rica', region:'RGCA' },
+  { code:'GTM', name:'Guatemala', region:'RGCA' },
+  { code:'HND', name:'Honduras', region:'RGCA' },
+  { code:'NIC', name:'Nicaragua', region:'RGCA' },
+  { code:'PAN', name:'Panama', region:'RGCA' },
+  { code:'SLV', name:'El Salvador', region:'RGCA' },
+  { code:'ATG', name:'Antigua and Barbuda', region:'RGCAR' },
+  { code:'BHS', name:'Bahamas', region:'RGCAR' },
+  { code:'BRB', name:'Barbados', region:'RGCAR' },
+  { code:'CUB', name:'Cuba', region:'RGCAR' },
+  { code:'DMA', name:'Dominica', region:'RGCAR' },
+  { code:'DOM', name:'Dominican Republic', region:'RGCAR' },
+  { code:'GRD', name:'Grenada', region:'RGCAR' },
+  { code:'HTI', name:'Haiti', region:'RGCAR' },
+  { code:'JAM', name:'Jamaica', region:'RGCAR' },
+  { code:'KNA', name:'Saint Kitts and Nevis', region:'RGCAR' },
+  { code:'LCA', name:'Saint Lucia', region:'RGCAR' },
+  { code:'TTO', name:'Trinidad and Tobago', region:'RGCAR' },
+  { code:'VCT', name:'Saint Vincent and the Grenadines', region:'RGCAR' },
+  { code:'ALB', name:'Albania', region:'RGEUR' },
+  { code:'AUT', name:'Austria', region:'RGEUR' },
+  { code:'BEL', name:'Belgium', region:'RGEUR' },
+  { code:'BGR', name:'Bulgaria', region:'RGEUR' },
+  { code:'BIH', name:'Bosnia and Herzegovina', region:'RGEUR' },
+  { code:'BLR', name:'Belarus', region:'RGEUR' },
+  { code:'CHE', name:'Switzerland', region:'RGEUR' },
+  { code:'CYP', name:'Cyprus', region:'RGEUR' },
+  { code:'CZE', name:'Czech Republic', region:'RGEUR' },
+  { code:'DEU', name:'Germany', region:'RGEUR' },
+  { code:'DNK', name:'Denmark', region:'RGEUR' },
+  { code:'ESP', name:'Spain', region:'RGEUR' },
+  { code:'EST', name:'Estonia', region:'RGEUR' },
+  { code:'FIN', name:'Finland', region:'RGEUR' },
+  { code:'FRA', name:'France', region:'RGEUR' },
+  { code:'GBR', name:'United Kingdom', region:'RGEUR' },
+  { code:'GRC', name:'Greece', region:'RGEUR' },
+  { code:'HRV', name:'Croatia', region:'RGEUR' },
+  { code:'HUN', name:'Hungary', region:'RGEUR' },
+  { code:'IRL', name:'Ireland', region:'RGEUR' },
+  { code:'ISL', name:'Iceland', region:'RGEUR' },
+  { code:'ITA', name:'Italy', region:'RGEUR' },
+  { code:'LIE', name:'Liechtenstein', region:'RGEUR' },
+  { code:'LTU', name:'Lithuania', region:'RGEUR' },
+  { code:'LUX', name:'Luxembourg', region:'RGEUR' },
+  { code:'LVA', name:'Latvia', region:'RGEUR' },
+  { code:'MDA', name:'Moldova', region:'RGEUR' },
+  { code:'MKD', name:'North Macedonia', region:'RGEUR' },
+  { code:'MLT', name:'Malta', region:'RGEUR' },
+  { code:'MNE', name:'Montenegro', region:'RGEUR' },
+  { code:'NLD', name:'Netherlands', region:'RGEUR' },
+  { code:'NOR', name:'Norway', region:'RGEUR' },
+  { code:'POL', name:'Poland', region:'RGEUR' },
+  { code:'PRT', name:'Portugal', region:'RGEUR' },
+  { code:'ROU', name:'Romania', region:'RGEUR' },
+  { code:'RUS', name:'Russia', region:'RGEUR' },
+  { code:'SRB', name:'Serbia', region:'RGEUR' },
+  { code:'SVK', name:'Slovakia', region:'RGEUR' },
+  { code:'SVN', name:'Slovenia', region:'RGEUR' },
+  { code:'SWE', name:'Sweden', region:'RGEUR' },
+  { code:'TUR', name:'Turkey', region:'RGEUR' },
+  { code:'UKR', name:'Ukraine', region:'RGEUR' },
+  { code:'ARE', name:'United Arab Emirates', region:'RGME' },
+  { code:'BHR', name:'Bahrain', region:'RGME' },
+  { code:'IRN', name:'Iran', region:'RGME' },
+  { code:'IRQ', name:'Iraq', region:'RGME' },
+  { code:'ISR', name:'Israel', region:'RGME' },
+  { code:'JOR', name:'Jordan', region:'RGME' },
+  { code:'KWT', name:'Kuwait', region:'RGME' },
+  { code:'LBN', name:'Lebanon', region:'RGME' },
+  { code:'OMN', name:'Oman', region:'RGME' },
+  { code:'PSE', name:'Palestine', region:'RGME' },
+  { code:'QAT', name:'Qatar', region:'RGME' },
+  { code:'SAU', name:'Saudi Arabia', region:'RGME' },
+  { code:'SYR', name:'Syria', region:'RGME' },
+  { code:'YEM', name:'Yemen', region:'RGME' },
+  { code:'CAN', name:'Canada', region:'RGNA' },
+  { code:'MEX', name:'Mexico', region:'RGNA' },
+  { code:'USA', name:'United States', region:'RGNA' },
+  { code:'AUS', name:'Australia', region:'RGOC' },
+  { code:'FJI', name:'Fiji', region:'RGOC' },
+  { code:'NZL', name:'New Zealand', region:'RGOC' },
+  { code:'PNG', name:'Papua New Guinea', region:'RGOC' },
+  { code:'ARG', name:'Argentina', region:'RGSA' },
+  { code:'BOL', name:'Bolivia', region:'RGSA' },
+  { code:'BRA', name:'Brazil', region:'RGSA' },
+  { code:'CHL', name:'Chile', region:'RGSA' },
+  { code:'COL', name:'Colombia', region:'RGSA' },
+  { code:'ECU', name:'Ecuador', region:'RGSA' },
+  { code:'PER', name:'Peru', region:'RGSA' },
+  { code:'PRY', name:'Paraguay', region:'RGSA' },
+  { code:'URY', name:'Uruguay', region:'RGSA' },
+  { code:'VEN', name:'Venezuela', region:'RGSA' },
+];
+
+const SUBJURISDICTIONS = [
+  { code:'US-AL', name:'Alabama', jurisdiction:'USA' },
+  { code:'US-AK', name:'Alaska', jurisdiction:'USA' },
+  { code:'US-AZ', name:'Arizona', jurisdiction:'USA' },
+  { code:'US-AR', name:'Arkansas', jurisdiction:'USA' },
+  { code:'US-CA', name:'California', jurisdiction:'USA' },
+  { code:'US-CO', name:'Colorado', jurisdiction:'USA' },
+  { code:'US-CT', name:'Connecticut', jurisdiction:'USA' },
+  { code:'US-DE', name:'Delaware', jurisdiction:'USA' },
+  { code:'US-FL', name:'Florida', jurisdiction:'USA' },
+  { code:'US-GA', name:'Georgia (US)', jurisdiction:'USA' },
+  { code:'US-HI', name:'Hawaii', jurisdiction:'USA' },
+  { code:'US-ID', name:'Idaho', jurisdiction:'USA' },
+  { code:'US-IL', name:'Illinois', jurisdiction:'USA' },
+  { code:'US-IN', name:'Indiana', jurisdiction:'USA' },
+  { code:'US-IA', name:'Iowa', jurisdiction:'USA' },
+  { code:'US-KS', name:'Kansas', jurisdiction:'USA' },
+  { code:'US-KY', name:'Kentucky', jurisdiction:'USA' },
+  { code:'US-LA', name:'Louisiana', jurisdiction:'USA' },
+  { code:'US-ME', name:'Maine', jurisdiction:'USA' },
+  { code:'US-MD', name:'Maryland', jurisdiction:'USA' },
+  { code:'US-MA', name:'Massachusetts', jurisdiction:'USA' },
+  { code:'US-MI', name:'Michigan', jurisdiction:'USA' },
+  { code:'US-MN', name:'Minnesota', jurisdiction:'USA' },
+  { code:'US-MS', name:'Mississippi', jurisdiction:'USA' },
+  { code:'US-MO', name:'Missouri', jurisdiction:'USA' },
+  { code:'US-MT', name:'Montana', jurisdiction:'USA' },
+  { code:'US-NE', name:'Nebraska', jurisdiction:'USA' },
+  { code:'US-NV', name:'Nevada', jurisdiction:'USA' },
+  { code:'US-NH', name:'New Hampshire', jurisdiction:'USA' },
+  { code:'US-NJ', name:'New Jersey', jurisdiction:'USA' },
+  { code:'US-NM', name:'New Mexico', jurisdiction:'USA' },
+  { code:'US-NY', name:'New York', jurisdiction:'USA' },
+  { code:'US-NC', name:'North Carolina', jurisdiction:'USA' },
+  { code:'US-ND', name:'North Dakota', jurisdiction:'USA' },
+  { code:'US-OH', name:'Ohio', jurisdiction:'USA' },
+  { code:'US-OK', name:'Oklahoma', jurisdiction:'USA' },
+  { code:'US-OR', name:'Oregon', jurisdiction:'USA' },
+  { code:'US-PA', name:'Pennsylvania', jurisdiction:'USA' },
+  { code:'US-RI', name:'Rhode Island', jurisdiction:'USA' },
+  { code:'US-SC', name:'South Carolina', jurisdiction:'USA' },
+  { code:'US-SD', name:'South Dakota', jurisdiction:'USA' },
+  { code:'US-TN', name:'Tennessee', jurisdiction:'USA' },
+  { code:'US-TX', name:'Texas', jurisdiction:'USA' },
+  { code:'US-UT', name:'Utah', jurisdiction:'USA' },
+  { code:'US-VT', name:'Vermont', jurisdiction:'USA' },
+  { code:'US-VA', name:'Virginia', jurisdiction:'USA' },
+  { code:'US-WA', name:'Washington', jurisdiction:'USA' },
+  { code:'US-WV', name:'West Virginia', jurisdiction:'USA' },
+  { code:'US-WI', name:'Wisconsin', jurisdiction:'USA' },
+  { code:'US-WY', name:'Wyoming', jurisdiction:'USA' },
+  { code:'CA-AB', name:'Alberta', jurisdiction:'CAN' },
+  { code:'CA-BC', name:'British Columbia', jurisdiction:'CAN' },
+  { code:'CA-MB', name:'Manitoba', jurisdiction:'CAN' },
+  { code:'CA-NB', name:'New Brunswick', jurisdiction:'CAN' },
+  { code:'CA-NL', name:'Newfoundland and Labrador', jurisdiction:'CAN' },
+  { code:'CA-NS', name:'Nova Scotia', jurisdiction:'CAN' },
+  { code:'CA-ON', name:'Ontario', jurisdiction:'CAN' },
+  { code:'CA-PE', name:'Prince Edward Island', jurisdiction:'CAN' },
+  { code:'CA-QC', name:'Quebec', jurisdiction:'CAN' },
+  { code:'CA-SK', name:'Saskatchewan', jurisdiction:'CAN' },
+  { code:'AU-ACT', name:'Australian Capital Territory', jurisdiction:'AUS' },
+  { code:'AU-NSW', name:'New South Wales', jurisdiction:'AUS' },
+  { code:'AU-NT',  name:'Northern Territory', jurisdiction:'AUS' },
+  { code:'AU-QLD', name:'Queensland', jurisdiction:'AUS' },
+  { code:'AU-SA',  name:'South Australia', jurisdiction:'AUS' },
+  { code:'AU-TAS', name:'Tasmania', jurisdiction:'AUS' },
+  { code:'AU-VIC', name:'Victoria', jurisdiction:'AUS' },
+  { code:'AU-WA',  name:'Western Australia', jurisdiction:'AUS' },
+];
+
+const HAS_SUBJURIS = new Set(SUBJURISDICTIONS.map(s => s.jurisdiction));
+
+const REGULATORY_CATEGORIES = [
+  'Cybersecurity','Environmental','Energy Efficiency','EMC','Safety',
+  'Chemical Compliance','Labeling','Wireless/Radio','Medical Device',
+  'Sanctions and Trade Controls','Product Registration','Type Approval'
+];
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+const state = {
+  selectedTGs: new Set(),
+  selectedJuris: new Set(),
+  selectedSubj: new Set(),
+  selectedRegCats: new Set(),
+  expandedSections: new Set(['tg']), // 'tg' or 'regions'
+  expandedRegions: new Set(),
+  expandedJuris: new Set(),
+  marketOpen: false,
+  regcatOpen: false,
+};
+
+// ══════════════════════════════════════════════════════
+//  OPEN/CLOSE MARKET DROPDOWN
+// ══════════════════════════════════════════════════════
+const marketTrigger = document.getElementById('market-trigger');
+const marketDropdown = document.getElementById('market-dropdown');
+
+marketTrigger.addEventListener('click', e => {
+  e.stopPropagation();
+  state.marketOpen = !state.marketOpen;
+  marketTrigger.classList.toggle('open', state.marketOpen);
+  marketDropdown.classList.toggle('open', state.marketOpen);
+  if (state.marketOpen) renderTree();
+});
+
+// ══════════════════════════════════════════════════════
+//  OPEN/CLOSE REGCAT DROPDOWN
+// ══════════════════════════════════════════════════════
+const regcatTrigger = document.getElementById('regcat-trigger');
+const regcatDropdown = document.getElementById('regcat-dropdown');
+
+regcatTrigger.addEventListener('click', e => {
+  e.stopPropagation();
+  state.regcatOpen = !state.regcatOpen;
+  regcatTrigger.classList.toggle('open', state.regcatOpen);
+  regcatDropdown.classList.toggle('open', state.regcatOpen);
+  if (state.regcatOpen) renderRegCatOptions();
+});
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if (state.marketOpen && !document.getElementById('market-field').contains(e.target)) {
+    state.marketOpen = false;
+    marketTrigger.classList.remove('open');
+    marketDropdown.classList.remove('open');
+  }
+  if (state.regcatOpen && !document.getElementById('regcat-field').contains(e.target)) {
+    state.regcatOpen = false;
+    regcatTrigger.classList.remove('open');
+    regcatDropdown.classList.remove('open');
+  }
+});
+
+// Stop dropdown clicks from closing
+marketDropdown.addEventListener('click', e => e.stopPropagation());
+regcatDropdown.addEventListener('click', e => e.stopPropagation());
+
+// ══════════════════════════════════════════════════════
+//  RENDER TREE
+// ══════════════════════════════════════════════════════
+function renderTree() {
+  const container = document.getElementById('market-dropdown');
+  container.innerHTML = '';
+
+  // ─── Trade Groups section ───
+  const tgExpanded = state.expandedSections.has('tg');
+  const tgHdr = document.createElement('div');
+  tgHdr.className = 'tree-section-hdr' + (tgExpanded ? ' expanded' : '');
+  tgHdr.innerHTML = `<span class="chevron">▶</span> TRADE GROUPS`;
+  tgHdr.addEventListener('click', () => {
+    tgExpanded ? state.expandedSections.delete('tg') : state.expandedSections.add('tg');
+    renderTree();
+  });
+  container.appendChild(tgHdr);
+
+  if (tgExpanded) {
+    TRADE_GROUPS.forEach(tg => {
+      const node = document.createElement('div');
+      node.className = 'tree-node indent-1';
+      const isChecked = state.selectedTGs.has(tg.code);
+      const hasMembers = TG_MEMBERS[tg.code] && TG_MEMBERS[tg.code].length > 0;
+      node.innerHTML =
+        `<span class="node-expand ${hasMembers ? 'has-children' : ''}">▸</span>` +
+        `<input type="checkbox" ${isChecked ? 'checked' : ''} />` +
+        `<span>${tg.name}</span>`;
+      node.querySelector('input').addEventListener('change', e => {
+        e.stopPropagation();
+        toggleTradeGroup(tg.code);
+      });
+      node.addEventListener('click', e => {
+        if (e.target.tagName === 'INPUT') return;
+        toggleTradeGroup(tg.code);
+      });
+      container.appendChild(node);
+    });
+  }
+
+  // ─── Regions section ───
+  const regExpanded = state.expandedSections.has('regions');
+  const regHdr = document.createElement('div');
+  regHdr.className = 'tree-section-hdr' + (regExpanded ? ' expanded' : '');
+  regHdr.innerHTML = `<span class="chevron">▶</span> REGIONS`;
+  regHdr.addEventListener('click', () => {
+    regExpanded ? state.expandedSections.delete('regions') : state.expandedSections.add('regions');
+    renderTree();
+  });
+  container.appendChild(regHdr);
+
+  if (regExpanded) {
+    REGIONS.forEach(region => {
+      const regionJuris = JURISDICTIONS.filter(j => j.region === region.code).sort((a,b) => a.name.localeCompare(b.name));
+      const regionExpanded = state.expandedRegions.has(region.code);
+      const allChecked = regionJuris.every(j => state.selectedJuris.has(j.code));
+      const someChecked = regionJuris.some(j => state.selectedJuris.has(j.code));
+
+      const regionNode = document.createElement('div');
+      regionNode.className = 'tree-node indent-1';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = allChecked;
+      cb.indeterminate = someChecked && !allChecked;
+
+      regionNode.innerHTML = `<span class="node-expand has-children">${regionExpanded ? '▾' : '▸'}</span>`;
+      regionNode.appendChild(cb);
+      const label = document.createElement('span');
+      label.textContent = region.name;
+      regionNode.appendChild(label);
+
+      cb.addEventListener('change', e => {
+        e.stopPropagation();
+        toggleRegion(region.code);
+      });
+      regionNode.querySelector('.node-expand').addEventListener('click', e => {
+        e.stopPropagation();
+        regionExpanded ? state.expandedRegions.delete(region.code) : state.expandedRegions.add(region.code);
+        renderTree();
+      });
+      regionNode.addEventListener('click', e => {
+        if (e.target.tagName === 'INPUT' || e.target.classList.contains('node-expand')) return;
+        regionExpanded ? state.expandedRegions.delete(region.code) : state.expandedRegions.add(region.code);
+        renderTree();
+      });
+      container.appendChild(regionNode);
+
+      if (regionExpanded) {
+        regionJuris.forEach(j => {
+          const jurisExpanded = state.expandedJuris.has(j.code);
+          const hasSub = HAS_SUBJURIS.has(j.code);
+          const isChecked = state.selectedJuris.has(j.code);
+
+          const jNode = document.createElement('div');
+          jNode.className = 'tree-node indent-2';
+          jNode.innerHTML =
+            `<span class="node-expand ${hasSub ? 'has-children' : ''}">${hasSub ? (jurisExpanded ? '▾' : '▸') : ' '}</span>` +
+            `<input type="checkbox" ${isChecked ? 'checked' : ''} />` +
+            `<span>${j.name}</span>`;
+
+          jNode.querySelector('input').addEventListener('change', e => {
+            e.stopPropagation();
+            toggleJuris(j.code);
+          });
+          if (hasSub) {
+            jNode.querySelector('.node-expand').addEventListener('click', e => {
+              e.stopPropagation();
+              jurisExpanded ? state.expandedJuris.delete(j.code) : state.expandedJuris.add(j.code);
+              renderTree();
+            });
+          }
+          jNode.addEventListener('click', e => {
+            if (e.target.tagName === 'INPUT' || e.target.classList.contains('node-expand')) return;
+            if (hasSub) {
+              jurisExpanded ? state.expandedJuris.delete(j.code) : state.expandedJuris.add(j.code);
+              renderTree();
+            } else {
+              toggleJuris(j.code);
+            }
+          });
+          container.appendChild(jNode);
+
+          // Sub-jurisdictions
+          if (hasSub && jurisExpanded) {
+            const subs = SUBJURISDICTIONS.filter(s => s.jurisdiction === j.code);
+            subs.forEach(s => {
+              const sNode = document.createElement('div');
+              sNode.className = 'tree-node';
+              sNode.style.paddingLeft = '74px';
+              sNode.innerHTML =
+                `<span class="node-expand"> </span>` +
+                `<input type="checkbox" ${state.selectedSubj.has(s.code) ? 'checked' : ''} />` +
+                `<span>${s.name}</span>`;
+              sNode.querySelector('input').addEventListener('change', e => {
+                e.stopPropagation();
+                toggleSubj(s.code, j.code);
+              });
+              sNode.addEventListener('click', e => {
+                if (e.target.tagName === 'INPUT') return;
+                toggleSubj(s.code, j.code);
+              });
+              container.appendChild(sNode);
+            });
+          }
+        });
+      }
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  TOGGLE FUNCTIONS
+// ══════════════════════════════════════════════════════
+
+function toggleTradeGroup(code) {
+  if (state.selectedTGs.has(code)) {
+    state.selectedTGs.delete(code);
+    // Remove member jurisdictions that were added by this TG
+    const members = TG_MEMBERS[code] || [];
+    members.forEach(m => state.selectedJuris.delete(m));
+  } else {
+    state.selectedTGs.add(code);
+    // Select all member jurisdictions
+    const members = TG_MEMBERS[code] || [];
+    members.forEach(m => {
+      if (JURISDICTIONS.find(j => j.code === m)) {
+        state.selectedJuris.add(m);
+        // Also select all sub-jurisdictions
+        SUBJURISDICTIONS.filter(s => s.jurisdiction === m).forEach(s => state.selectedSubj.add(s.code));
+      }
+    });
+  }
+  renderTree();
+  renderChips();
+  renderRegionChips();
+  updateMarketTriggerText();
+}
+
+function toggleRegion(regionCode) {
+  const regionJuris = JURISDICTIONS.filter(j => j.region === regionCode);
+  const allChecked = regionJuris.every(j => state.selectedJuris.has(j.code));
+  regionJuris.forEach(j => {
+    if (allChecked) {
+      state.selectedJuris.delete(j.code);
+      SUBJURISDICTIONS.filter(s => s.jurisdiction === j.code).forEach(s => state.selectedSubj.delete(s.code));
+    } else {
+      state.selectedJuris.add(j.code);
+      SUBJURISDICTIONS.filter(s => s.jurisdiction === j.code).forEach(s => state.selectedSubj.add(s.code));
+    }
+  });
+  renderTree();
+  renderChips();
+  renderRegionChips();
+  updateMarketTriggerText();
+}
+
+function toggleJuris(code) {
+  if (state.selectedJuris.has(code)) {
+    state.selectedJuris.delete(code);
+    SUBJURISDICTIONS.filter(s => s.jurisdiction === code).forEach(s => state.selectedSubj.delete(s.code));
+  } else {
+    state.selectedJuris.add(code);
+    SUBJURISDICTIONS.filter(s => s.jurisdiction === code).forEach(s => state.selectedSubj.add(s.code));
+  }
+  renderTree();
+  renderChips();
+  renderRegionChips();
+  updateMarketTriggerText();
+}
+
+function toggleSubj(code, parentCode) {
+  if (state.selectedSubj.has(code)) {
+    state.selectedSubj.delete(code);
+  } else {
+    state.selectedSubj.add(code);
+    state.selectedJuris.add(parentCode);
+  }
+  renderTree();
+  renderChips();
+  renderRegionChips();
+  updateMarketTriggerText();
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER CHIPS
+// ══════════════════════════════════════════════════════
+
+function renderChips() {
+  const area = document.getElementById('market-chips');
+  area.innerHTML = '';
+
+  // Trade group chips
+  state.selectedTGs.forEach(code => {
+    const tg = TRADE_GROUPS.find(t => t.code === code);
+    if (!tg) return;
+    const chip = document.createElement('span');
+    chip.className = 'chip chip-tg';
+    chip.innerHTML = `${tg.name} (Trade Group) <button class="chip-x" data-type="tg" data-code="${code}">×</button>`;
+    area.appendChild(chip);
+  });
+
+  // Jurisdiction chips
+  state.selectedJuris.forEach(code => {
+    const j = JURISDICTIONS.find(j => j.code === code);
+    if (!j) return;
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `${j.name} <button class="chip-x" data-type="juris" data-code="${code}">×</button>`;
+    area.appendChild(chip);
+  });
+
+  // Sub-jurisdiction chips (only if parent is not selected)
+  state.selectedSubj.forEach(code => {
+    const s = SUBJURISDICTIONS.find(s => s.code === code);
+    if (!s || state.selectedJuris.has(s.jurisdiction)) return;
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `${s.name} <button class="chip-x" data-type="subj" data-code="${code}">×</button>`;
+    area.appendChild(chip);
+  });
+
+  // Chip remove handlers
+  area.querySelectorAll('.chip-x').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const type = btn.dataset.type;
+      const code = btn.dataset.code;
+      if (type === 'tg') {
+        state.selectedTGs.delete(code);
+        const members = TG_MEMBERS[code] || [];
+        members.forEach(m => {
+          state.selectedJuris.delete(m);
+          SUBJURISDICTIONS.filter(s => s.jurisdiction === m).forEach(s => state.selectedSubj.delete(s.code));
+        });
+      } else if (type === 'juris') {
+        state.selectedJuris.delete(code);
+        SUBJURISDICTIONS.filter(s => s.jurisdiction === code).forEach(s => state.selectedSubj.delete(s.code));
+      } else if (type === 'subj') {
+        state.selectedSubj.delete(code);
+      }
+      renderTree();
+      renderChips();
+      renderRegionChips();
+    });
+  });
+}
+
+function renderRegionChips() {
+  const area = document.getElementById('region-chips');
+  const placeholder = document.getElementById('region-placeholder');
+  area.innerHTML = '';
+
+  const regionCodes = [...new Set(
+    [...state.selectedJuris]
+      .map(code => { const j = JURISDICTIONS.find(j => j.code === code); return j ? j.region : null; })
+      .filter(Boolean)
+  )];
+
+  if (!regionCodes.length) {
+    area.innerHTML = '<span style="font-size:13px;color:#999;font-style:italic;" id="region-placeholder">Auto-populated from market selections above</span>';
+    return;
+  }
+
+  regionCodes.forEach(code => {
+    const r = REGIONS.find(r => r.code === code);
+    if (!r) return;
+    const chip = document.createElement('span');
+    chip.className = 'chip chip-region';
+    chip.textContent = r.name;
+    area.appendChild(chip);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  TEXT INPUT (type-to-add)
+// ══════════════════════════════════════════════════════
+
+document.getElementById('market-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/,'');
+    if (!val) return;
+    // Try to match a jurisdiction
+    const match = JURISDICTIONS.find(j => j.name.toLowerCase() === val.toLowerCase() || j.code.toLowerCase() === val.toLowerCase());
+    if (match) {
+      state.selectedJuris.add(match.code);
+      SUBJURISDICTIONS.filter(s => s.jurisdiction === match.code).forEach(s => state.selectedSubj.add(s.code));
+    }
+    // Try trade group
+    const tgMatch = TRADE_GROUPS.find(tg => tg.name.toLowerCase() === val.toLowerCase() || tg.code.toLowerCase() === val.toLowerCase());
+    if (tgMatch && !match) {
+      toggleTradeGroup(tgMatch.code);
+      e.target.value = '';
+      return;
+    }
+    e.target.value = '';
+    renderTree();
+    renderChips();
+    renderRegionChips();
+    updateMarketTriggerText();
+  }
+});
+
+// Handle paste (Excel column)
+document.getElementById('market-input').addEventListener('paste', e => {
+  setTimeout(() => {
+    const raw = e.target.value;
+    const values = raw.split(/[\n,;]+/).map(v => v.trim()).filter(Boolean);
+    values.forEach(val => {
+      const match = JURISDICTIONS.find(j => j.name.toLowerCase() === val.toLowerCase() || j.code.toLowerCase() === val.toLowerCase());
+      if (match) {
+        state.selectedJuris.add(match.code);
+        SUBJURISDICTIONS.filter(s => s.jurisdiction === match.code).forEach(s => state.selectedSubj.add(s.code));
+      }
+    });
+    e.target.value = '';
+    renderTree();
+    renderChips();
+    renderRegionChips();
+    updateMarketTriggerText();
+  }, 0);
+});
+
+// ══════════════════════════════════════════════════════
+//  REGULATORY CATEGORY OPTIONS
+// ══════════════════════════════════════════════════════
+
+function renderRegCatOptions() {
+  const container = document.getElementById('regcat-dropdown');
+  container.innerHTML = '';
+  REGULATORY_CATEGORIES.forEach(cat => {
+    const item = document.createElement('div');
+    item.className = 'option-item';
+    const isChecked = state.selectedRegCats.has(cat);
+    item.innerHTML =
+      `<input type="checkbox" ${isChecked ? 'checked' : ''} />` +
+      `<span>${cat}</span>`;
+    item.querySelector('input').addEventListener('change', e => {
+      e.stopPropagation();
+      if (state.selectedRegCats.has(cat)) state.selectedRegCats.delete(cat);
+      else state.selectedRegCats.add(cat);
+      renderRegCatOptions();
+      renderRegCatChips();
+      updateRegcatTriggerText();
+    });
+    item.addEventListener('click', e => {
+      if (e.target.tagName === 'INPUT') return;
+      if (state.selectedRegCats.has(cat)) state.selectedRegCats.delete(cat);
+      else state.selectedRegCats.add(cat);
+      renderRegCatOptions();
+      renderRegCatChips();
+      updateRegcatTriggerText();
+    });
+    container.appendChild(item);
+  });
+}
+
+function renderRegCatChips() {
+  const area = document.getElementById('regcat-chips');
+  area.innerHTML = '';
+  state.selectedRegCats.forEach(cat => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `${cat} <button class="chip-x" data-cat="${cat}">×</button>`;
+    chip.querySelector('.chip-x').addEventListener('click', () => {
+      state.selectedRegCats.delete(cat);
+      renderRegCatChips();
+      renderRegCatOptions();
+      updateRegcatTriggerText();
+    });
+    area.appendChild(chip);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  TRIGGER TEXT UPDATES
+// ══════════════════════════════════════════════════════
+
+function updateMarketTriggerText() {
+  const textEl = document.getElementById('market-trigger-text');
+  const total = state.selectedTGs.size + state.selectedJuris.size;
+  if (total === 0) {
+    textEl.textContent = 'Click to select Trade Groups, Regions, or Jurisdictions';
+    textEl.style.color = '#999';
+  } else {
+    textEl.textContent = `${total} item${total > 1 ? 's' : ''} selected`;
+    textEl.style.color = '#1b3a5c';
+  }
+}
+
+function updateRegcatTriggerText() {
+  const textEl = document.getElementById('regcat-trigger-text');
+  const total = state.selectedRegCats.size;
+  if (total === 0) {
+    textEl.textContent = 'Click to select regulatory categories';
+    textEl.style.color = '#999';
+  } else {
+    textEl.textContent = `${total} categor${total > 1 ? 'ies' : 'y'} selected`;
+    textEl.style.color = '#1b3a5c';
+  }
+}
+
+document.getElementById('regcat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/,'');
+    if (!val) return;
+    const match = REGULATORY_CATEGORIES.find(c => c.toLowerCase() === val.toLowerCase());
+    if (match) state.selectedRegCats.add(match);
+    else state.selectedRegCats.add(val); // allow free-text
+    e.target.value = '';
+    renderRegCatChips();
+    renderRegCatOptions();
+    updateRegcatTriggerText();
+  }
+});
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+renderChips();
+renderRegionChips();
+renderRegCatChips();
+updateMarketTriggerText();
+updateRegcatTriggerText();
+</script>
+</body>
+</html>
