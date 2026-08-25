@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GMA News – Country Hierarchy Mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans','Segoe UI',Arial,sans-serif; font-size: 14px; background: #f4f6f8; color: #222; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ── NAV ── */
+    .navbar { display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #dce1e7; padding: 0; height: 52px; }
+    .nav-hamburger { width: 52px; height: 52px; border: none; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; border-right: 1px solid #dce1e7; }
+    .nav-hamburger:hover { background: #f4f6f8; }
+    .nav-hamburger-bar { display: block; width: 18px; height: 2px; background: #555; border-radius: 1px; }
+    .nav-hamburger-inner { display: flex; flex-direction: column; gap: 4px; }
+    .navbar-left { display: flex; align-items: center; gap: 0; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: #c00; padding: 0 20px; }
+    .logo svg { width: 36px; height: 36px; }
+    .nav-items { display: flex; align-items: center; gap: 4px; }
+    .nav-item { padding: 0 14px; height: 52px; display: flex; align-items: center; cursor: pointer; font-size: 14px; color: #444; border-bottom: 3px solid transparent; gap: 4px; user-select: none; }
+    .nav-item:hover { color: #0057b8; }
+    .nav-item.active { color: #0057b8; border-bottom-color: #0057b8; font-weight: 600; }
+    .nav-item .chevron { font-size: 10px; }
+    .avatar { width: 34px; height: 34px; background: #c00; color: #fff; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+    /* ── PAGE SHELL ── */
+    .page-shell { display: flex; flex: 1; overflow: hidden; }
+    .left-nav { width: 232px; flex-shrink: 0; background: #fff; box-shadow: 0px 1px 5px rgba(38,50,56,.12), 0px 4px 5px rgba(38,50,56,.14); overflow-y: auto; overflow-x: hidden; transition: width .22s ease; z-index: 50; position: relative; }
+    .left-nav.lnav-collapsed { width: 0; }
+    .lnav-section-hdr { padding: 24px 21px 8px; font-weight: 600; font-size: 16px; line-height: 22px; color: #3E3E3E; white-space: nowrap; }
+    .lnav-items { padding: 0 8px 8px; }
+    .lnav-item { display: flex; align-items: center; gap: 0; height: 32px; border-radius: 4px; cursor: pointer; position: relative; margin-bottom: 2px; white-space: nowrap; background: #fff; transition: background .12s; }
+    .lnav-item:hover { background: #f0f6ff; }
+    .lnav-item.active { background: #3E3E3E; }
+    .lnav-item .lnav-icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-left: 8px; }
+    .lnav-item .lnav-icon svg { width: 16px; height: 16px; }
+    .lnav-item.active .lnav-icon svg path, .lnav-item.active .lnav-icon svg rect, .lnav-item.active .lnav-icon svg circle { fill: #fff; stroke: #fff; }
+    .lnav-item .lnav-label { flex: 1; padding: 0 8px 0 4px; font-size: 14px; font-weight: 400; line-height: 20px; color: #3E3E3E; white-space: nowrap; }
+    .lnav-item.active .lnav-label { color: #fff; font-weight: 600; }
+    .lnav-item .lnav-star { width: 16px; height: 16px; margin-right: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #0A99FF; font-size: 12px; cursor: pointer; }
+    .lnav-item.active .lnav-star { display: none; }
+    .lnav-item .lnav-chevron { width: 20px; height: 20px; margin-right: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #1C1B1F; }
+    .page-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+    /* ── BUTTONS ── */
+    .btn { padding: 8px 18px; border-radius: 4px; font-size: 14px; cursor: pointer; border: 1px solid #ccc; background: #fff; color: #333; transition: background .15s, border-color .15s; }
+    .btn:hover { background: #f0f2f5; }
+    .btn-next { background: #01518A; color: #fff; border-color: #01518A; font-weight: 700; }
+    .btn-next:hover { background: #013f6e; }
+    .btn-save { background: #fff; color: #146615; border-color: #146615; font-weight: 700; }
+    .btn-save:hover { background: #f0faf0; }
+
+    /* ── GMA FORM ── */
+    #gmaPage { display: flex; flex-direction: row; min-height: calc(100vh - 52px); }
+    .gma-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .gma-topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; background: #fff; border-bottom: 1px solid #BBC1C8; flex-shrink: 0; }
+    .gma-topbar-left { display: flex; align-items: baseline; gap: 16px; }
+    .gma-topbar-title { font-size: 20px; font-weight: 700; color: #000; }
+    .gma-topbar-meta { font-size: 14px; color: #595959; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .gma-topbar-meta .meta-key { font-weight: 700; }
+    .gma-topbar-meta .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #096072; display: inline-block; margin-right: 4px; }
+    .gma-topbar-actions { display: flex; gap: 10px; align-items: center; }
+    .gma-steptabs { display: flex; align-items: center; background: #fff; border-bottom: 2px solid #e0e4ea; padding: 0 28px; flex-shrink: 0; }
+    .gma-steptab { display: flex; align-items: center; gap: 8px; padding: 14px 20px; cursor: pointer; color: #666; font-size: 13.5px; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; user-select: none; }
+    .gma-steptab:hover:not(.gst-active) { color: #333; }
+    .gma-steptab.gst-active { color: #01518A; border-bottom-color: #01518A; font-weight: 600; }
+    .steptab-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px dashed #4D4D4D; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; color: #4D4D4D; }
+    .gma-steptab.gst-active .steptab-icon { border-color: #01518A; border-style: solid; color: #01518A; background: #e3f0fa; }
+    .gma-body { flex: 1; overflow-y: auto; padding: 24px 40px; background: #f4f6f8; }
+    .gma-form-section { background: #fff; max-width: 880px; padding: 28px 32px; width: 100%; margin: 0 auto; }
+    .gma-footer { background: #1A1A1A; color: #fff; padding: 12px 44px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; flex-shrink: 0; }
+    .gma-footer-links { text-decoration: underline; color: #fff; }
+    .gma-sidebar { width: 48px; background: #fff; border-left: 1px solid #dce1e7; display: flex; flex-direction: column; align-items: center; padding-top: 16px; gap: 12px; flex-shrink: 0; }
+    .sidebar-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #dce1e7; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #555; }
+    .sidebar-btn:hover { background: #f0f2f5; border-color: #bbb; }
+    .gma-form-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #000; }
+    .form-subtitle { font-size: 13px; color: #595959; margin-bottom: 20px; line-height: 1.5; }
+    .field-group { margin-bottom: 16px; }
+    .field-row { display: flex; gap: 20px; margin-bottom: 16px; }
+    .field-row .field-group { flex: 1; margin-bottom: 0; }
+    .field-label { display: block; font-size: 11px; font-weight: 600; color: #595959; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .field-label .ext { font-weight: 400; font-size: 11px; color: #595959; text-transform: none; letter-spacing: 0; }
+    .field-label .req { color: #c00; margin-left: 2px; }
+    .field-label .disabled-note { font-weight: 400; color: #aaa; font-size: 11px; font-style: italic; text-transform: none; }
+    .field-input, .field-select { width: 100%; padding: 8px 10px; border: 1px solid #4D4D4D; border-radius: 0; font-size: 14px; font-family: 'Open Sans',sans-serif; color: #333; background: #fff; outline: none; transition: border-color .15s; height: 38px; }
+    .field-input:focus, .field-select:focus { border-color: #01518A; box-shadow: 0 0 0 2px rgba(1,81,138,.1); }
+    .field-input::placeholder { color: #999; }
+    input[type="date"].field-input { max-width: 300px; height: 38px; }
+    .field-select { appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+    .field-select:disabled { background-color: #f9f9f9; color: #999; cursor: not-allowed; border-color: #E2E2E2; }
+    .field-input:disabled { background-color: #f9f9f9; color: #999; cursor: not-allowed; border-color: #E2E2E2; }
+    .field-label.dim { color: #bbb; }
+    .field-hint { font-size: 11px; color: #767676; margin-top: 3px; }
+    .field-hint a { color: #01518A; }
+    .sme-note { font-size: 12px; color: #4D4D4D; line-height: 1.5; margin-top: 6px; }
+    .rte-wrap { border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
+    .rte-na { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; margin-bottom: 6px; }
+    .rte-na input[type=checkbox] { cursor: pointer; }
+    .rte-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; padding: 6px 8px; background: #f8f9fa; border-bottom: 1px solid #ddd; }
+    .rte-btn { background: none; border: none; padding: 3px 6px; cursor: pointer; font-size: 13px; color: #444; border-radius: 3px; line-height: 1.4; }
+    .rte-btn:hover { background: #e9ecef; }
+    .rte-sep { width: 1px; height: 18px; background: #ddd; margin: 0 4px; }
+    .rte-select { font-size: 12px; padding: 2px 6px; border: 1px solid #ddd; border-radius: 3px; background: #fff; cursor: pointer; color: #444; }
+    .rte-body { min-height: 160px; padding: 12px; outline: none; font-size: 14px; color: #333; background: #fff; line-height: 1.6; }
+    .rte-body.rte-disabled { background: #fafafa; pointer-events: none; }
+
+    /* ── HIERARCHY BANNER ── */
+    .hierarchy-banner {
+      display: flex; align-items: center;
+      background: #f0f6ff; border: 1px solid #c0d8f0;
+      border-radius: 6px; padding: 12px 18px;
+      margin-bottom: 20px; font-size: 13px; color: #01518A;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .hb-node {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fff; border: 1.5px solid #01518A;
+      border-radius: 20px; padding: 4px 14px;
+      font-weight: 600; font-size: 13px; color: #01518A;
+    }
+    .hb-node.optional { border-style: dashed; border-color: #6c757d; color: #6c757d; background: #f8f9fa; }
+    .hb-node.auto { border-color: #2e7d32; color: #2e7d32; background: #e8f5e9; }
+    .hb-arrow { font-size: 16px; color: #01518A; font-weight: 700; }
+    .hb-sep { width: 1px; height: 28px; background: #c0d8f0; margin: 0 8px; }
+    .hb-label { font-size: 12px; color: #777; font-style: italic; }
+
+    /* ── REGION READ-ONLY ── */
+    .region-readonly {
+      display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+      min-height: 38px; padding: 6px 10px;
+      border: 1px solid #E2E2E2; background: #f9f9f9;
+      cursor: default;
+    }
+    .region-placeholder { font-size: 14px; color: #bbb; font-style: italic; }
+    .auto-badge { font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #fff; background: #2e7d32; border-radius: 3px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+
+    /* ── TREE SELECT ── */
+    .tree-select-wrap { position: relative; }
+    .tree-trigger {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
+      min-height: 38px; padding: 4px 32px 4px 10px;
+      border: 1px solid #4D4D4D; background: #fff;
+      cursor: pointer; position: relative; transition: border-color .15s;
+    }
+    .tree-trigger:hover { border-color: #01518A; }
+    .tree-trigger.open { border-color: #01518A; box-shadow: 0 0 0 2px rgba(1,81,138,.1); }
+    .tree-trigger-chevron {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 12px; color: #666; pointer-events: none; transition: transform .15s;
+    }
+    .tree-trigger.open .tree-trigger-chevron { transform: translateY(-50%) rotate(180deg); }
+    .tree-placeholder { font-size: 14px; color: #aaa; font-style: italic; }
+    .tree-dropdown {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 300;
+      background: #fff; border: 1px solid #BBC1C8; border-top: none;
+      box-shadow: 0 6px 20px rgba(0,0,0,.13); max-height: 340px;
+      flex-direction: column;
+    }
+    .tree-dropdown.open { display: flex; }
+    .tree-search-box { padding: 8px 10px; border-bottom: 1px solid #e0e4ea; flex-shrink: 0; }
+    .tree-search-box input {
+      width: 100%; border: 1px solid #dce1e7; border-radius: 3px;
+      padding: 7px 10px; font-size: 13px; color: #333; outline: none;
+      font-family: 'Open Sans', sans-serif; background: #f8f9fa;
+    }
+    .tree-search-box input:focus { border-color: #01518A; background: #fff; }
+    .tree-body { overflow-y: auto; flex: 1; }
+    .tree-region-hdr {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px; cursor: pointer;
+      font-size: 13px; font-weight: 700; color: #01518A;
+      border-bottom: 1px solid #eef0f3; background: #f8faff;
+      user-select: none;
+    }
+    .tree-region-hdr:hover { background: #eef4ff; }
+    .tree-expand-icon {
+      font-size: 10px; color: #01518A; width: 12px; flex-shrink: 0;
+      transition: transform .15s; display: inline-block;
+    }
+    .tree-region-hdr.expanded .tree-expand-icon { transform: rotate(90deg); }
+    .tree-juris-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 14px 7px 30px;
+      border-bottom: 1px solid #f4f6f8; font-size: 14px; color: #333;
+      user-select: none; cursor: pointer;
+    }
+    .tree-juris-row:hover { background: #f0f6ff; }
+    .tree-juris-row.dimmed { color: #c0c0c0; }
+    .row-expand-btn {
+      margin-left: auto; font-size: 11px; color: #666; padding: 2px 8px;
+      border: 1px solid #dce1e7; border-radius: 3px; background: #f4f6f8;
+      cursor: pointer; flex-shrink: 0; font-family: 'Open Sans', sans-serif;
+    }
+    .row-expand-btn:hover { background: #e3f0fa; border-color: #01518A; color: #01518A; }
+    .tree-subj-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px 6px 50px;
+      border-bottom: 1px solid #f4f6f8; font-size: 13px; color: #555;
+      background: #fbfcff; user-select: none; cursor: pointer;
+    }
+    .tree-subj-row:hover { background: #eaf4ff; }
+    .tree-cb { width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; accent-color: #01518A; }
+    .tree-hidden { display: none !important; }
+    .tree-no-results { padding: 14px 16px; font-size: 13px; color: #999; font-style: italic; }
+    .tree-region-count { margin-left: auto; font-size: 11px; color: #999; font-weight: 400; }
+
+    /* ── TAG-CHIP MULTI-SELECT ── */
+    .tag-input-wrap { position: relative; }
+
+    .tag-input {
+      display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+      min-height: 38px; padding: 4px 10px;
+      border: 1px solid #4D4D4D; background: #fff;
+      cursor: text; transition: border-color .15s;
+    }
+    .tag-input:focus-within { border-color: #01518A; box-shadow: 0 0 0 2px rgba(1,81,138,.1); }
+    .tag-input.disabled {
+      background: #fafafa; border-color: #E2E2E2; cursor: not-allowed; pointer-events: none;
+    }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #e3f0fa; color: #01518A; border: 1px solid #b3d4f0;
+      border-radius: 12px; padding: 2px 10px; font-size: 13px; font-weight: 600;
+      max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tag-chip .chip-remove {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; color: #01518A; padding: 0; line-height: 1;
+      flex-shrink: 0; opacity: .7;
+    }
+    .tag-chip .chip-remove:hover { opacity: 1; color: #c00; }
+    .tag-chip.chip-region { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+    .tag-chip.chip-region .chip-remove { color: #2e7d32; }
+    .tag-chip.chip-tg { background: #fce4ec; color: #c62828; border-color: #f48fb1; }
+    .tag-chip.chip-tg .chip-remove { color: #c62828; }
+    .tag-chip.chip-subj { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
+    .tag-chip.chip-subj .chip-remove { color: #e65100; }
+
+    .tag-text-input {
+      border: none; outline: none; font-size: 14px; color: #333;
+      font-family: 'Open Sans',sans-serif; background: transparent;
+      min-width: 160px; flex: 1;
+      padding: 2px 4px;
+    }
+    .tag-text-input::placeholder { color: #aaa; }
+    .tag-text-input:disabled { cursor: not-allowed; }
+
+    .tag-dropdown {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+      background: #fff; border: 1px solid #BBC1C8; border-top: none;
+      max-height: 240px; overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    }
+    .tag-dropdown.open { display: block; }
+    .tag-dropdown-item {
+      padding: 9px 14px; cursor: pointer; font-size: 14px; color: #333;
+      border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; gap: 8px;
+    }
+    .tag-dropdown-item:last-child { border-bottom: none; }
+    .tag-dropdown-item:hover, .tag-dropdown-item.focused { background: #f0f6ff; color: #01518A; }
+    .tag-dropdown-item .item-code { font-size: 11px; color: #999; background: #f4f6f8; padding: 1px 6px; border-radius: 3px; }
+    .tag-dropdown-item .item-parent { font-size: 11px; color: #6c757d; }
+    .tag-dropdown-empty { padding: 10px 14px; color: #999; font-size: 13px; font-style: italic; }
+
+    .tag-count-badge {
+      font-size: 11px; color: #888; margin-left: 4px;
+    }
+
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      border: none; border-top: 1px solid #e0e4ea;
+      margin: 18px 0;
+    }
+
+    /* ── CHANGED FIELD HIGHLIGHT ── */
+    .field-group.changed > .field-label::after {
+      content: 'NEW'; font-size: 10px; font-weight: 700; color: #fff;
+      background: #01518A; border-radius: 3px; padding: 1px 5px;
+      margin-left: 8px; vertical-align: middle; letter-spacing: .5px;
+    }
+    .field-group.changed-sep > .field-label::after {
+      content: 'SPLIT'; font-size: 10px; font-weight: 700; color: #fff;
+      background: #2e7d32; border-radius: 3px; padding: 1px 5px;
+      margin-left: 8px; vertical-align: middle; letter-spacing: .5px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="navbar-left" style="display:flex;align-items:center;gap:0;">
+    <button class="nav-hamburger" id="lnavToggle" aria-label="Toggle navigation" style="display:none;">
+      <div class="nav-hamburger-inner">
+        <span class="nav-hamburger-bar"></span>
+        <span class="nav-hamburger-bar"></span>
+        <span class="nav-hamburger-bar"></span>
+      </div>
+    </button>
+    <div class="logo" style="padding:0 20px;">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="17" stroke="#c00" stroke-width="2"/>
+        <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#c00" font-size="11" font-weight="bold" font-family="Arial">UL</text>
+      </svg>
+      Solutions &nbsp;<span style="color:#999;font-weight:400;">|</span>&nbsp; Workbench Admin – Beta
+    </div>
+    <div class="nav-items">
+      <div class="nav-item">Scheme Master <span class="chevron">▾</span></div>
+      <div class="nav-item">Product <span class="chevron">▾</span></div>
+      <div class="nav-item">AI <span class="chevron">▾</span></div>
+      <div class="nav-item">Capstone UI</div>
+      <div class="nav-item active">GMA News</div>
+    </div>
+  </div>
+  <div class="avatar" style="margin-right:20px;">LS</div>
+</nav>
+
+<!-- ══ PAGE SHELL ══ -->
+<div class="page-shell">
+
+<!-- ══ PAGE CONTENT ══ -->
+<div class="page-content" id="pageContent">
+
+<!-- ══ GMA NEWS FORM PAGE ══ -->
+<div id="gmaPage">
+  <div class="gma-main">
+
+    <!-- Top bar -->
+    <div class="gma-topbar">
+      <div class="gma-topbar-left">
+        <span class="gma-topbar-title">New GMA News</span>
+        <div class="gma-topbar-meta">
+          <span><span class="meta-key">Status:</span> <span class="status-dot"></span>Draft</span>
+          <span><span class="meta-key">Originator:</span> Lakshminarayanan, Sharvanika</span>
+          <span><span class="meta-key">Last saved at:</span> -</span>
+        </div>
+      </div>
+      <div class="gma-topbar-actions">
+        <button class="btn" style="border-color:#000;font-weight:700;font-size:16px;">Close</button>
+        <button class="btn btn-next" style="font-size:16px;">Next &nbsp;&#8594;</button>
+        <button class="btn btn-save" style="font-size:16px;">Save</button>
+      </div>
+    </div>
+
+    <!-- Step tabs -->
+    <div class="gma-steptabs">
+      <div class="gma-steptab gst-active">
+        <span style="font-size:16px;color:#01518A;">&#9202;</span> News content
+      </div>
+      <div class="gma-steptab"><div class="steptab-icon">&#8226;</div> Impact analysis</div>
+      <div class="gma-steptab"><div class="steptab-icon">&#8226;</div> Documents</div>
+      <div class="gma-steptab"><div class="steptab-icon">&#8226;</div> Triggers</div>
+      <div class="gma-steptab"><div class="steptab-icon">&#8226;</div> Standard and regulations</div>
+      <div class="gma-steptab"><div class="steptab-icon">&#8226;</div> Review</div>
+    </div>
+
+    <!-- Form body -->
+    <div class="gma-body">
+      <div class="gma-form-section">
+        <h2 style="font-size:18px;font-weight:700;color:#000;margin-bottom:6px;">Add news contents</h2>
+        <p class="form-subtitle" style="font-size:13px;color:#595959;margin-bottom:20px;">Fill out the following fields to add a new news item. Click the question mark icon to find out more about the requirements for each field.</p>
+
+        <!-- Scanned date -->
+        <div class="field-group">
+          <label class="field-label">Scanned Date <span class="req">*</span></label>
+          <input type="date" class="field-input" value="2026-03-26" />
+        </div>
+
+        <!-- Title -->
+        <div class="field-group">
+          <label class="field-label">Title <span class="ext">(External)</span> <span class="req">*</span></label>
+          <input type="text" class="field-input" placeholder="" />
+        </div>
+
+        <!-- Scheme -->
+        <div class="field-group">
+          <label class="field-label">Scheme <span class="ext">(External)</span></label>
+          <select class="field-select">
+            <option value="">[5] schemes selected</option>
+            <option>IECEE CB Scheme</option>
+            <option>IECQ Scheme</option>
+            <option>ISO/IEC 17025</option>
+          </select>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- ══ NEW LOCATION HIERARCHY SECTION ══ -->
+
+        <!-- Remove hierarchy banner to keep clean layout -->
+
+        <!-- Trade Group (optional TG filter) -->
+        <div class="field-group changed">
+          <label class="field-label">Trade Group <span class="ext">(External)</span></label>
+          <div class="tag-input-wrap">
+            <div class="tag-input" id="tg-box" tabindex="0">
+              <input type="text" class="tag-text-input" id="tg-input" placeholder="Search trade groups… (optional — filters jurisdiction tree)" autocomplete="off" />
+            </div>
+            <div class="tag-dropdown" id="tg-dropdown"></div>
+          </div>
+          <p class="field-hint">Optional. Selecting a trade group (e.g. EU, ASEAN, GCC) will dim non-member countries in the tree below.</p>
+        </div>
+
+        <!-- Unified Tree Select: Region › Jurisdiction › Sub-Jurisdiction -->
+        <div class="field-group changed-sep">
+          <label class="field-label">Country and Jurisdiction <span class="req">*</span> <span class="ext">(External)</span></label>
+          <div class="tree-select-wrap">
+            <div class="tree-trigger" id="tree-trigger" role="combobox" aria-haspopup="tree" aria-expanded="false">
+              <span class="tree-placeholder" id="tree-placeholder">Select countries, states or regions…</span>
+              <span class="tree-trigger-chevron">▾</span>
+            </div>
+            <div class="tree-dropdown" id="tree-dropdown" role="tree">
+              <div class="tree-search-box">
+                <input type="text" id="tree-search" placeholder="Search text" autocomplete="off" />
+              </div>
+              <div class="tree-body" id="tree-body"></div>
+            </div>
+          </div>
+          <p class="field-hint">Expand a region to see its countries. Countries with states/provinces (USA, Canada, Australia) can be further expanded.</p>
+        </div>
+
+        <!-- Region (read-only, auto-derived) -->
+        <div class="field-group">
+          <label class="field-label">Region <span class="ext">(External)</span> <span class="auto-badge">AUTO</span></label>
+          <div class="region-readonly" id="region-display">
+            <span class="region-placeholder" id="region-placeholder">Auto-populated when you select jurisdictions above</span>
+          </div>
+          <p class="field-hint">Automatically derived from your jurisdiction selections. Not editable.</p>
+        </div>
+
+        <hr class="section-divider">
+        <!-- ══ END LOCATION HIERARCHY ══ -->
+
+        <!-- Regulation type + News level -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Regulation Type <span class="ext">(External)</span></label>
+            <select class="field-select">
+              <option value="">Select an item</option>
+              <option>Directive</option>
+              <option>Regulation</option>
+              <option>Standard</option>
+              <option>Technical Specification</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">News Level <span class="ext">(External)</span></label>
+            <select class="field-select">
+              <option value="">Select an item</option>
+              <option>Draft</option>
+              <option>In Development</option>
+              <option>Finalized</option>
+              <option>Notification</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Impacted Industries -->
+        <div class="field-group">
+          <label class="field-label">Impacted Industries</label>
+          <select class="field-select">
+            <option value="">Select options</option>
+            <option>Manufacturers</option>
+            <option>Importers</option>
+            <option>Retailers</option>
+          </select>
+        </div>
+
+        <!-- Issuer -->
+        <div class="field-group">
+          <label class="field-label">Issuer <span class="ext">(External)</span></label>
+          <select class="field-select">
+            <option value="">Select an item</option>
+            <option>European Commission</option>
+            <option>IEC</option>
+            <option>ISO</option>
+          </select>
+          <div style="margin-top:5px;display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="issuerNotFound" style="cursor:pointer;" />
+            <label for="issuerNotFound" style="font-size:12px;color:#333;cursor:pointer;">I don't find the right value from the dropdown choices</label>
+          </div>
+        </div>
+
+        <!-- Affected Industries + Affected Products -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Affected Industries</label>
+            <select class="field-select">
+              <option value="">Select an item</option>
+              <option>EIA</option>
+              <option>Consumer Electronics</option>
+              <option>Industrial</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Affected Products</label>
+            <select class="field-select">
+              <option value="">Select products individually</option>
+              <option>Automation Equipment</option>
+              <option>Circuit Protection</option>
+              <option>E-Mobility</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Details Affected Products -->
+        <div class="field-group">
+          <label class="field-label">Details Affected Products <span class="ext">(External)</span></label>
+          <div class="rte-na"><input type="checkbox" id="naDetails" /><label for="naDetails">N/A</label></div>
+          <div class="rte-wrap">
+            <div class="rte-toolbar">
+              <select class="rte-select"><option>Paragraph</option><option>Heading 1</option><option>Heading 2</option></select>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" onclick="fmt('bold')"><b>B</b></button>
+              <button class="rte-btn" onclick="fmt('italic')"><i>I</i></button>
+              <button class="rte-btn" onclick="fmt('underline')"><u>U</u></button>
+              <button class="rte-btn" onclick="fmt('strikeThrough')"><s>S</s></button>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" onclick="fmt('insertUnorderedList')">&#8226;&#8212;</button>
+              <button class="rte-btn" onclick="fmt('insertOrderedList')">1&#8212;</button>
+            </div>
+            <div class="rte-body" id="rteDetails" contenteditable="true"></div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="field-group">
+          <label class="field-label">Summary <span class="ext">(External)</span></label>
+          <div class="rte-na"><input type="checkbox" id="naSummary" /><label for="naSummary">N/A</label></div>
+          <div class="rte-wrap">
+            <div class="rte-toolbar">
+              <select class="rte-select"><option>Paragraph</option><option>Heading 1</option><option>Heading 2</option></select>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" onclick="fmt2('bold')"><b>B</b></button>
+              <button class="rte-btn" onclick="fmt2('italic')"><i>I</i></button>
+              <button class="rte-btn" onclick="fmt2('underline')"><u>U</u></button>
+              <button class="rte-btn" onclick="fmt2('strikeThrough')"><s>S</s></button>
+              <span class="rte-sep"></span>
+              <button class="rte-btn" onclick="fmt2('insertUnorderedList')">&#8226;&#8212;</button>
+              <button class="rte-btn" onclick="fmt2('insertOrderedList')">1&#8212;</button>
+            </div>
+            <div class="rte-body" id="rteSummary" contenteditable="true"></div>
+          </div>
+        </div>
+
+        <!-- Dates row 1 -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Published date <span class="ext">(External)</span></label>
+            <input type="date" class="field-input" />
+          </div>
+          <div class="field-group">
+            <label class="field-label dim">Mandatory date <span class="ext dim">(External)</span></label>
+            <input type="date" class="field-input" disabled />
+          </div>
+        </div>
+
+        <!-- Dates row 2 -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label dim">Effective date <span class="ext dim">(External)</span></label>
+            <input type="date" class="field-input" disabled />
+          </div>
+          <div class="field-group">
+            <label class="field-label dim">Consultation closing date <span class="ext dim">(External)</span></label>
+            <input type="date" class="field-input" disabled />
+          </div>
+        </div>
+
+        <!-- News originator + SME -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">News originator</label>
+            <select class="field-select">
+              <option value="">Select an item</option>
+              <option>Lakshminarayanan, Sharvanika</option>
+              <option>Collins, Phil</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">SME</label>
+            <select class="field-select"><option value="">Default value here</option></select>
+            <p class="sme-note">The default SME gets added only after you have selected Impacted schemes, Regulations and Country. If any changes are made to aforementioned items, please click update.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="gma-footer">
+      <span style="font-size:20px;">&#9679;</span>&nbsp;
+      <span>UL LLC ©2025. All rights reserved.</span>
+      <span class="gma-footer-links">Online Policies &nbsp;&nbsp; About Cookies &nbsp;&nbsp; Data Subject Access Request Portal</span>
+    </div>
+  </div>
+
+  <!-- Right sidebar -->
+  <div class="gma-sidebar">
+    <button class="sidebar-btn" title="Comments">💬</button>
+    <button class="sidebar-btn" title="Help">?</button>
+  </div>
+</div><!-- /gmaPage -->
+
+</div><!-- /page-content -->
+</div><!-- /page-shell -->
+
+<script>
+// ══════════════════════════════════════════════════════
+//  RI DATA (derived from Country name.xlsx)
+// ══════════════════════════════════════════════════════
+
+const REGIONS = [
+  { code: 'RGAF',  name: 'Africa' },
+  { code: 'RGAS',  name: 'Asia' },
+  { code: 'RGCA',  name: 'Central America' },
+  { code: 'RGCAR', name: 'Caribbean' },
+  { code: 'RGEUR', name: 'Europe' },
+  { code: 'RGME',  name: 'Middle East' },
+  { code: 'RGNA',  name: 'North America' },
+  { code: 'RGOC',  name: 'Oceania' },
+  { code: 'RGSA',  name: 'South America' },
+];
+
+const TRADE_GROUPS = [
+  { code: 'AFRUN',   name: 'African Union' },
+  { code: 'APEC',    name: 'Asia-Pacific Economic Cooperation' },
+  { code: 'ARABL',   name: 'League of Arab States' },
+  { code: 'ASEAN',   name: 'Association of Southeast Asian Nations' },
+  { code: 'CARICOM', name: 'The Caribbean Community' },
+  { code: 'CBS',     name: 'CB Scheme' },
+  { code: 'CELAC',   name: 'Community of Latin American and Caribbean States' },
+  { code: 'CIS',     name: 'Commonwealth of Independent States' },
+  { code: 'EAC',     name: 'East African Community' },
+  { code: 'EAEU',    name: 'Eurasian Economic Union' },
+  { code: 'ECO',     name: 'Economic Cooperation Organization' },
+  { code: 'EEA',     name: 'European Economic Area' },
+  { code: 'EU',      name: 'European Union' },
+  { code: 'GCC',     name: 'Gulf Cooperation Council' },
+  { code: 'GLO',     name: 'Global' },
+  { code: 'IECEE',   name: 'Certification Body (CB) Scheme' },
+  { code: 'MERCOSUR',name: 'Southern Common Market' },
+  { code: 'SAARC',   name: 'South Asian Association for Regional Cooperation' },
+  { code: 'SICA',    name: 'Central American Integration System' },
+];
+
+const JURISDICTIONS = [
+  // Africa (RGAF)
+  { code:'AGO', name:'Angola',                         region:'RGAF' },
+  { code:'BDI', name:'Burundi',                        region:'RGAF' },
+  { code:'BEN', name:'Benin',                          region:'RGAF' },
+  { code:'BFA', name:'Burkina Faso',                   region:'RGAF' },
+  { code:'BWA', name:'Botswana',                       region:'RGAF' },
+  { code:'CAF', name:'Central African Republic',       region:'RGAF' },
+  { code:'CAI', name:'Canary Islands',                 region:'RGAF' },
+  { code:'CEU', name:'Ceuta',                          region:'RGAF' },
+  { code:'CIV', name:'Ivory Coast',                    region:'RGAF' },
+  { code:'CMR', name:'Cameroon',                       region:'RGAF' },
+  { code:'COD', name:'Democratic Republic Of Congo',   region:'RGAF' },
+  { code:'COG', name:'Republic Of Congo',              region:'RGAF' },
+  { code:'COM', name:'Comoros',                        region:'RGAF' },
+  { code:'CPV', name:'Cape Verde',                     region:'RGAF' },
+  { code:'DJI', name:'Djibouti',                       region:'RGAF' },
+  { code:'DZA', name:'Algeria',                        region:'RGAF' },
+  { code:'EGY', name:'Egypt',                          region:'RGAF' },
+  { code:'ERI', name:'Eritrea',                        region:'RGAF' },
+  { code:'ESH', name:'Western Sahara',                 region:'RGAF' },
+  { code:'ETH', name:'Ethiopia',                       region:'RGAF' },
+  { code:'GAB', name:'Gabon',                          region:'RGAF' },
+  { code:'GHA', name:'Ghana',                          region:'RGAF' },
+  { code:'GIN', name:'Guinea',                         region:'RGAF' },
+  { code:'GMB', name:'Gambia',                         region:'RGAF' },
+  { code:'GNB', name:'Guinea-Bissau',                  region:'RGAF' },
+  { code:'GNQ', name:'Equatorial Guinea',              region:'RGAF' },
+  { code:'KEN', name:'Kenya',                          region:'RGAF' },
+  { code:'LBR', name:'Liberia',                        region:'RGAF' },
+  { code:'LBY', name:'Libya',                          region:'RGAF' },
+  { code:'LSO', name:'Lesotho',                        region:'RGAF' },
+  { code:'MAR', name:'Morocco',                        region:'RGAF' },
+  { code:'MDG', name:'Madagascar',                     region:'RGAF' },
+  { code:'MEL', name:'Melilla',                        region:'RGAF' },
+  { code:'MLI', name:'Mali',                           region:'RGAF' },
+  { code:'MOZ', name:'Mozambique',                     region:'RGAF' },
+  { code:'MRT', name:'Mauritania',                     region:'RGAF' },
+  { code:'MUS', name:'Mauritius',                      region:'RGAF' },
+  { code:'MWI', name:'Malawi',                         region:'RGAF' },
+  { code:'MYT', name:'Mayotte',                        region:'RGAF' },
+  { code:'NAM', name:'Namibia',                        region:'RGAF' },
+  { code:'NER', name:'Niger',                          region:'RGAF' },
+  { code:'NGA', name:'Nigeria',                        region:'RGAF' },
+  { code:'RWA', name:'Rwanda',                         region:'RGAF' },
+  { code:'SDN', name:'Sudan',                          region:'RGAF' },
+  { code:'SEN', name:'Senegal',                        region:'RGAF' },
+  { code:'SLE', name:'Sierra Leone',                   region:'RGAF' },
+  { code:'SOM', name:'Somalia',                        region:'RGAF' },
+  { code:'SSD', name:'South Sudan',                    region:'RGAF' },
+  { code:'STP', name:'Sao Tome and Principe',          region:'RGAF' },
+  { code:'SWZ', name:'Eswatini (Swaziland)',           region:'RGAF' },
+  { code:'SYC', name:'Seychelles',                     region:'RGAF' },
+  { code:'TCD', name:'Chad',                           region:'RGAF' },
+  { code:'TGO', name:'Togo',                           region:'RGAF' },
+  { code:'TUN', name:'Tunisia',                        region:'RGAF' },
+  { code:'TZA', name:'Tanzania',                       region:'RGAF' },
+  { code:'TZ-07',name:'Zanzibar',                      region:'RGAF' },
+  { code:'UGA', name:'Uganda',                         region:'RGAF' },
+  { code:'ZAF', name:'South Africa',                   region:'RGAF' },
+  { code:'ZMB', name:'Zambia',                         region:'RGAF' },
+  { code:'ZWE', name:'Zimbabwe',                       region:'RGAF' },
+  // Asia (RGAS)
+  { code:'AFG', name:'Afghanistan',                    region:'RGAS' },
+  { code:'ARM', name:'Armenia',                        region:'RGAS' },
+  { code:'AUS', name:'Australia',                      region:'RGOC' }, // moved to Oceania below
+  { code:'AZE', name:'Azerbaijan',                     region:'RGAS' },
+  { code:'BDG', name:'Bangladesh',                     region:'RGAS' },
+  { code:'BEG', name:'Bengal',                         region:'RGAS' },
+  { code:'BGD', name:'Bangladesh',                     region:'RGAS' },
+  { code:'BRN', name:'Brunei Darussalam',              region:'RGAS' },
+  { code:'BTN', name:'Bhutan',                         region:'RGAS' },
+  { code:'CHN', name:'China',                          region:'RGAS' },
+  { code:'GEO', name:'Georgia',                        region:'RGAS' },
+  { code:'HKG', name:'Hong Kong',                      region:'RGAS' },
+  { code:'IDN', name:'Indonesia',                      region:'RGAS' },
+  { code:'IND', name:'India',                          region:'RGAS' },
+  { code:'JPN', name:'Japan',                          region:'RGAS' },
+  { code:'KAZ', name:'Kazakhstan',                     region:'RGEUR' },
+  { code:'KGZ', name:'Kyrgyzstan',                     region:'RGAS' },
+  { code:'KHM', name:'Cambodia',                       region:'RGAS' },
+  { code:'KOR', name:'South Korea',                    region:'RGAS' },
+  { code:'LAO', name:'Laos',                           region:'RGAS' },
+  { code:'LKA', name:'Sri Lanka',                      region:'RGAS' },
+  { code:'MAC', name:'Macao',                          region:'RGAS' },
+  { code:'MDV', name:'Maldives',                       region:'RGAS' },
+  { code:'MMR', name:'Myanmar',                        region:'RGAS' },
+  { code:'MNG', name:'Mongolia',                       region:'RGAS' },
+  { code:'MYS', name:'Malaysia',                       region:'RGAS' },
+  { code:'NPL', name:'Nepal',                          region:'RGAS' },
+  { code:'PAK', name:'Pakistan',                       region:'RGAS' },
+  { code:'PHL', name:'Philippines',                    region:'RGAS' },
+  { code:'PRK', name:'North Korea',                    region:'RGAS' },
+  { code:'SGP', name:'Singapore',                      region:'RGAS' },
+  { code:'THA', name:'Thailand',                       region:'RGAS' },
+  { code:'TJK', name:'Tajikistan',                     region:'RGAS' },
+  { code:'TKM', name:'Turkmenistan',                   region:'RGAS' },
+  { code:'TLS', name:'Timor-Leste',                    region:'RGAS' },
+  { code:'TWN', name:'Taiwan',                         region:'RGAS' },
+  { code:'UZB', name:'Uzbekistan',                     region:'RGAS' },
+  { code:'VNM', name:'Vietnam',                        region:'RGAS' },
+  // Central America (RGCA)
+  { code:'BLZ', name:'Belize',                         region:'RGCA' },
+  { code:'CRI', name:'Costa Rica',                     region:'RGCA' },
+  { code:'GTM', name:'Guatemala',                      region:'RGCA' },
+  { code:'HND', name:'Honduras',                       region:'RGCA' },
+  { code:'MEX', name:'Mexico',                         region:'RGNA' },
+  { code:'NIC', name:'Nicaragua',                      region:'RGCA' },
+  { code:'PAN', name:'Panama',                         region:'RGCA' },
+  { code:'SLV', name:'El Salvador',                    region:'RGCA' },
+  // Caribbean (RGCAR)
+  { code:'ABW', name:'Aruba',                          region:'RGCAR' },
+  { code:'AIA', name:'Anguilla',                       region:'RGCAR' },
+  { code:'ANT', name:'Netherlands Antilles',           region:'RGCAR' },
+  { code:'ATG', name:'Antigua and Barbuda',            region:'RGCAR' },
+  { code:'BES', name:'Bonaire, Sint Eustatius and Saba', region:'RGCAR' },
+  { code:'BHS', name:'Bahamas',                        region:'RGCAR' },
+  { code:'BLM', name:'St. Barthelemy',                 region:'RGCAR' },
+  { code:'BMU', name:'Bermuda',                        region:'RGCAR' },
+  { code:'BRB', name:'Barbados',                       region:'RGCAR' },
+  { code:'CUB', name:'Cuba',                           region:'RGCAR' },
+  { code:'CUW', name:'Curacao',                        region:'RGCAR' },
+  { code:'CYM', name:'Cayman Islands',                 region:'RGCAR' },
+  { code:'DMA', name:'Dominica',                       region:'RGCAR' },
+  { code:'DOM', name:'Dominican Republic',             region:'RGCAR' },
+  { code:'GLP', name:'Guadeloupe',                     region:'RGCAR' },
+  { code:'GRD', name:'Grenada',                        region:'RGCAR' },
+  { code:'GUY', name:'Guyana',                         region:'RGCAR' },
+  { code:'HTI', name:'Haiti',                          region:'RGCAR' },
+  { code:'JAM', name:'Jamaica',                        region:'RGCAR' },
+  { code:'KNA', name:'St. Kitts & Nevis',              region:'RGCAR' },
+  { code:'LCA', name:'St. Lucia',                      region:'RGCAR' },
+  { code:'MAF', name:'St. Martin',                     region:'RGCAR' },
+  { code:'MSR', name:'Montserrat',                     region:'RGCAR' },
+  { code:'MTQ', name:'Martinique',                     region:'RGCAR' },
+  { code:'PRI', name:'Puerto Rico',                    region:'RGCAR' },
+  { code:'SUR', name:'Suriname',                       region:'RGCAR' },
+  { code:'SXM', name:'St. Maarten',                    region:'RGCAR' },
+  { code:'TCA', name:'Turks and Caicos Islands',       region:'RGCAR' },
+  { code:'TTO', name:'Trinidad and Tobago',            region:'RGCAR' },
+  { code:'VCT', name:'St. Vincent And The Grenadines', region:'RGCAR' },
+  { code:'VGB', name:'British Virgin Islands',         region:'RGCAR' },
+  { code:'VIR', name:'US Virgin Islands',              region:'RGCAR' },
+  // Europe (RGEUR)
+  { code:'ALA', name:'Aland Island',                   region:'RGEUR' },
+  { code:'ALB', name:'Albania',                        region:'RGEUR' },
+  { code:'AND', name:'Andorra',                        region:'RGEUR' },
+  { code:'ATB', name:'British Antarctic Territories',  region:'RGEUR' },
+  { code:'ATF', name:'French Southern Territories',    region:'RGEUR' },
+  { code:'AUT', name:'Austria',                        region:'RGEUR' },
+  { code:'AZE2',name:'Azerbaijan',                     region:'RGEUR' },
+  { code:'BEL', name:'Belgium',                        region:'RGEUR' },
+  { code:'BGR', name:'Bulgaria',                       region:'RGEUR' },
+  { code:'BIH', name:'Bosnia and Herzegovina',         region:'RGEUR' },
+  { code:'BLR', name:'Belarus',                        region:'RGEUR' },
+  { code:'CHE', name:'Switzerland',                    region:'RGEUR' },
+  { code:'CYP', name:'Cyprus',                         region:'RGEUR' },
+  { code:'CZE', name:'Czech Republic',                 region:'RGEUR' },
+  { code:'DEU', name:'Germany',                        region:'RGEUR' },
+  { code:'DNK', name:'Denmark',                        region:'RGEUR' },
+  { code:'ESP', name:'Spain',                          region:'RGEUR' },
+  { code:'EST', name:'Estonia',                        region:'RGEUR' },
+  { code:'FIN', name:'Finland',                        region:'RGEUR' },
+  { code:'FRA', name:'France',                         region:'RGEUR' },
+  { code:'FRO', name:'Faroe Islands',                  region:'RGEUR' },
+  { code:'GBR', name:'United Kingdom',                 region:'RGEUR' },
+  { code:'GGY', name:'Guernsey',                       region:'RGEUR' },
+  { code:'GIB', name:'Gibraltar',                      region:'RGEUR' },
+  { code:'GRC', name:'Greece',                         region:'RGEUR' },
+  { code:'HRV', name:'Croatia',                        region:'RGEUR' },
+  { code:'HUN', name:'Hungary',                        region:'RGEUR' },
+  { code:'IMN', name:'Isle of Man',                    region:'RGEUR' },
+  { code:'IOT', name:'British Indian Ocean Territory', region:'RGEUR' },
+  { code:'IRL', name:'Ireland',                        region:'RGEUR' },
+  { code:'ISL', name:'Iceland',                        region:'RGEUR' },
+  { code:'ITA', name:'Italy',                          region:'RGEUR' },
+  { code:'JEY', name:'Jersey',                         region:'RGEUR' },
+  { code:'KOS', name:'Kosovo',                         region:'RGEUR' },
+  { code:'LIE', name:'Liechtenstein',                  region:'RGEUR' },
+  { code:'LTU', name:'Lithuania',                      region:'RGEUR' },
+  { code:'LUX', name:'Luxembourg',                     region:'RGEUR' },
+  { code:'LVA', name:'Latvia',                         region:'RGEUR' },
+  { code:'MDA', name:'Moldova',                        region:'RGEUR' },
+  { code:'MKD', name:'Macedonia',                      region:'RGEUR' },
+  { code:'MLT', name:'Malta',                          region:'RGEUR' },
+  { code:'MCO', name:'Monaco',                         region:'RGEUR' },
+  { code:'MNE', name:'Montenegro',                     region:'RGEUR' },
+  { code:'NLD', name:'Netherlands',                    region:'RGEUR' },
+  { code:'NOR', name:'Norway',                         region:'RGEUR' },
+  { code:'POL', name:'Poland',                         region:'RGEUR' },
+  { code:'PRT', name:'Portugal',                       region:'RGEUR' },
+  { code:'REU', name:'Reunion',                        region:'RGEUR' },
+  { code:'ROU', name:'Romania',                        region:'RGEUR' },
+  { code:'RUS', name:'Russia',                         region:'RGEUR' },
+  { code:'SGS', name:'South Georgia and South Sandwich Islands', region:'RGEUR' },
+  { code:'SH-AC', name:'Ascension Island',             region:'RGEUR' },
+  { code:'SHN', name:'St. Helena',                     region:'RGEUR' },
+  { code:'SJM', name:'Svalbard and Jan Mayen',         region:'RGEUR' },
+  { code:'SMR', name:'San Marino',                     region:'RGEUR' },
+  { code:'SRB', name:'Serbia',                         region:'RGEUR' },
+  { code:'SVK', name:'Slovakia',                       region:'RGEUR' },
+  { code:'SVN', name:'Slovenia',                       region:'RGEUR' },
+  { code:'SWE', name:'Sweden',                         region:'RGEUR' },
+  { code:'TUR', name:'Turkey',                         region:'RGEUR' },
+  { code:'UKR', name:'Ukraine',                        region:'RGEUR' },
+  { code:'VAT', name:'Vatican City',                   region:'RGEUR' },
+  // Middle East (RGME)
+  { code:'ARE', name:'United Arab Emirates',           region:'RGME' },
+  { code:'BHR', name:'Bahrain',                        region:'RGME' },
+  { code:'IRN', name:'Iran',                           region:'RGME' },
+  { code:'IRQ', name:'Iraq',                           region:'RGME' },
+  { code:'ISR', name:'Israel',                         region:'RGME' },
+  { code:'JOR', name:'Jordan',                         region:'RGME' },
+  { code:'KWT', name:'Kuwait',                         region:'RGME' },
+  { code:'LBN', name:'Lebanon',                        region:'RGME' },
+  { code:'OMN', name:'Oman',                           region:'RGME' },
+  { code:'PSE', name:'Palestine',                      region:'RGME' },
+  { code:'QAT', name:'Qatar',                          region:'RGME' },
+  { code:'SAU', name:'Saudi Arabia',                   region:'RGME' },
+  { code:'SYR', name:'Syria',                          region:'RGME' },
+  { code:'YEM', name:'Yemen',                          region:'RGME' },
+  // North America (RGNA)
+  { code:'CAN', name:'Canada',                         region:'RGNA' },
+  { code:'GRL', name:'Greenland',                      region:'RGNA' },
+  { code:'MEX', name:'Mexico',                         region:'RGNA' },
+  { code:'SPM', name:'St. Pierre and Miquelon',        region:'RGNA' },
+  { code:'USA', name:'USA',                            region:'RGNA' },
+  // Oceania (RGOC)
+  { code:'ASM', name:'American Samoa',                 region:'RGOC' },
+  { code:'AUS', name:'Australia',                      region:'RGOC' },
+  { code:'COK', name:'Cook Islands',                   region:'RGOC' },
+  { code:'FJI', name:'Fiji',                           region:'RGOC' },
+  { code:'FSM', name:'Micronesia',                     region:'RGOC' },
+  { code:'GUM', name:'Guam',                           region:'RGOC' },
+  { code:'KIR', name:'Kiribati',                       region:'RGOC' },
+  { code:'MHL', name:'Marshall Islands',               region:'RGOC' },
+  { code:'MNP', name:'Northern Mariana Islands',       region:'RGOC' },
+  { code:'NCL', name:'New Caledonia',                  region:'RGOC' },
+  { code:'NFK', name:'Norfolk Island',                 region:'RGOC' },
+  { code:'NIU', name:'Niue',                           region:'RGOC' },
+  { code:'NRU', name:'Nauru',                          region:'RGOC' },
+  { code:'NZL', name:'New Zealand',                    region:'RGOC' },
+  { code:'PCN', name:'Pitcairn',                       region:'RGOC' },
+  { code:'PLW', name:'Palau',                          region:'RGOC' },
+  { code:'PNG', name:'Papua New Guinea',               region:'RGOC' },
+  { code:'PYF', name:'French Polynesia',               region:'RGOC' },
+  { code:'SLB', name:'Solomon Islands',                region:'RGOC' },
+  { code:'TKL', name:'Tokelau',                        region:'RGOC' },
+  { code:'TON', name:'Tonga',                          region:'RGOC' },
+  { code:'TUV', name:'Tuvalu',                         region:'RGOC' },
+  { code:'VUT', name:'Vanuatu',                        region:'RGOC' },
+  { code:'WLF', name:'Wallis and Futuna',              region:'RGOC' },
+  { code:'WSM', name:'Samoa',                          region:'RGOC' },
+  // South America (RGSA)
+  { code:'ARG', name:'Argentina',                      region:'RGSA' },
+  { code:'BOL', name:'Bolivia',                        region:'RGSA' },
+  { code:'BRA', name:'Brazil',                         region:'RGSA' },
+  { code:'CHL', name:'Chile',                          region:'RGSA' },
+  { code:'COL', name:'Colombia',                       region:'RGSA' },
+  { code:'ECU', name:'Ecuador',                        region:'RGSA' },
+  { code:'FLK', name:'Falkland Islands',               region:'RGSA' },
+  { code:'GUF', name:'French Guiana',                  region:'RGSA' },
+  { code:'PER', name:'Peru',                           region:'RGSA' },
+  { code:'PRY', name:'Paraguay',                       region:'RGSA' },
+  { code:'URY', name:'Uruguay',                        region:'RGSA' },
+  { code:'VEN', name:'Venezuela',                      region:'RGSA' },
+];
+
+// Deduplicate jurisdictions by code (keep first occurrence)
+const _seenJCodes = new Set();
+const JURISDICTIONS_CLEAN = JURISDICTIONS.filter(j => {
+  if (_seenJCodes.has(j.code)) return false;
+  _seenJCodes.add(j.code);
+  return true;
+}).sort((a,b) => a.name.localeCompare(b.name));
+
+const SUBJURISDICTIONS = [
+  // USA – States + DC
+  { code:'US-AL', name:'Alabama',             jurisdiction:'USA' },
+  { code:'US-AK', name:'Alaska',              jurisdiction:'USA' },
+  { code:'US-AZ', name:'Arizona',             jurisdiction:'USA' },
+  { code:'US-AR', name:'Arkansas',            jurisdiction:'USA' },
+  { code:'US-CA', name:'California',          jurisdiction:'USA' },
+  { code:'US-CO', name:'Colorado',            jurisdiction:'USA' },
+  { code:'US-CT', name:'Connecticut',         jurisdiction:'USA' },
+  { code:'US-DE', name:'Delaware',            jurisdiction:'USA' },
+  { code:'US-DC', name:'District of Columbia',jurisdiction:'USA' },
+  { code:'US-FL', name:'Florida',             jurisdiction:'USA' },
+  { code:'US-GA', name:'Georgia (US)',         jurisdiction:'USA' },
+  { code:'US-HI', name:'Hawaii',              jurisdiction:'USA' },
+  { code:'US-ID', name:'Idaho',               jurisdiction:'USA' },
+  { code:'US-IL', name:'Illinois',            jurisdiction:'USA' },
+  { code:'US-IN', name:'Indiana',             jurisdiction:'USA' },
+  { code:'US-IA', name:'Iowa',                jurisdiction:'USA' },
+  { code:'US-KS', name:'Kansas',              jurisdiction:'USA' },
+  { code:'US-KY', name:'Kentucky',            jurisdiction:'USA' },
+  { code:'US-LA', name:'Louisiana',           jurisdiction:'USA' },
+  { code:'US-ME', name:'Maine',               jurisdiction:'USA' },
+  { code:'US-MD', name:'Maryland',            jurisdiction:'USA' },
+  { code:'US-MA', name:'Massachusetts',       jurisdiction:'USA' },
+  { code:'US-MI', name:'Michigan',            jurisdiction:'USA' },
+  { code:'US-MN', name:'Minnesota',           jurisdiction:'USA' },
+  { code:'US-MS', name:'Mississippi',         jurisdiction:'USA' },
+  { code:'US-MO', name:'Missouri',            jurisdiction:'USA' },
+  { code:'US-MT', name:'Montana',             jurisdiction:'USA' },
+  { code:'US-NE', name:'Nebraska',            jurisdiction:'USA' },
+  { code:'US-NV', name:'Nevada',              jurisdiction:'USA' },
+  { code:'US-NH', name:'New Hampshire',       jurisdiction:'USA' },
+  { code:'US-NJ', name:'New Jersey',          jurisdiction:'USA' },
+  { code:'US-NM', name:'New Mexico',          jurisdiction:'USA' },
+  { code:'US-NY', name:'New York',            jurisdiction:'USA' },
+  { code:'US-NC', name:'North Carolina',      jurisdiction:'USA' },
+  { code:'US-ND', name:'North Dakota',        jurisdiction:'USA' },
+  { code:'US-OH', name:'Ohio',                jurisdiction:'USA' },
+  { code:'US-OK', name:'Oklahoma',            jurisdiction:'USA' },
+  { code:'US-OR', name:'Oregon',              jurisdiction:'USA' },
+  { code:'US-PA', name:'Pennsylvania',        jurisdiction:'USA' },
+  { code:'US-RI', name:'Rhode Island',        jurisdiction:'USA' },
+  { code:'US-SC', name:'South Carolina',      jurisdiction:'USA' },
+  { code:'US-SD', name:'South Dakota',        jurisdiction:'USA' },
+  { code:'US-TN', name:'Tennessee',           jurisdiction:'USA' },
+  { code:'US-TX', name:'Texas',               jurisdiction:'USA' },
+  { code:'US-UT', name:'Utah',                jurisdiction:'USA' },
+  { code:'US-VT', name:'Vermont',             jurisdiction:'USA' },
+  { code:'US-VA', name:'Virginia',            jurisdiction:'USA' },
+  { code:'US-WA', name:'Washington',          jurisdiction:'USA' },
+  { code:'US-WV', name:'West Virginia',       jurisdiction:'USA' },
+  { code:'US-WI', name:'Wisconsin',           jurisdiction:'USA' },
+  { code:'US-WY', name:'Wyoming',             jurisdiction:'USA' },
+  // Canada – Provinces & Territories
+  { code:'CA-AB', name:'Alberta',                      jurisdiction:'CAN' },
+  { code:'CA-BC', name:'British Columbia',             jurisdiction:'CAN' },
+  { code:'CA-MB', name:'Manitoba',                     jurisdiction:'CAN' },
+  { code:'CA-NB', name:'New Brunswick',                jurisdiction:'CAN' },
+  { code:'CA-NL', name:'Newfoundland and Labrador',    jurisdiction:'CAN' },
+  { code:'CA-NS', name:'Nova Scotia',                  jurisdiction:'CAN' },
+  { code:'CA-ON', name:'Ontario',                      jurisdiction:'CAN' },
+  { code:'CA-PE', name:'Prince Edward Island',         jurisdiction:'CAN' },
+  { code:'CA-QC', name:'Quebec',                       jurisdiction:'CAN' },
+  { code:'CA-SK', name:'Saskatchewan',                 jurisdiction:'CAN' },
+  // Australia – States & Territories
+  { code:'AU-ACT', name:'Australian Capital Territory', jurisdiction:'AUS' },
+  { code:'AU-NSW', name:'New South Wales',              jurisdiction:'AUS' },
+  { code:'AU-NT',  name:'Northern Territory',           jurisdiction:'AUS' },
+  { code:'AU-QLD', name:'Queensland',                   jurisdiction:'AUS' },
+  { code:'AU-SA',  name:'South Australia',              jurisdiction:'AUS' },
+  { code:'AU-TAS', name:'Tasmania',                     jurisdiction:'AUS' },
+  { code:'AU-VIC', name:'Victoria',                     jurisdiction:'AUS' },
+  { code:'AU-WA',  name:'Western Australia',            jurisdiction:'AUS' },
+];
+
+// Set of jurisdiction codes that HAVE sub-jurisdictions
+const HAS_SUBJURIS = new Set(SUBJURISDICTIONS.map(s => s.jurisdiction));
+
+// ══════════════════════════════════════════════════════
+//  TAG-CHIP WIDGET FACTORY
+// ══════════════════════════════════════════════════════
+
+function makeTagWidget({ boxId, inputId, dropdownId, options, chipClass, placeholder, onChanged }) {
+  const box      = document.getElementById(boxId);
+  const input    = document.getElementById(inputId);
+  const dropdown = document.getElementById(dropdownId);
+  let selected   = []; // array of { code, name }
+  let focusedIdx = -1;
+
+  function render() {
+    // Remove existing chips (keep the input)
+    Array.from(box.querySelectorAll('.tag-chip')).forEach(el => el.remove());
+    selected.forEach(item => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip ' + (chipClass || '');
+      chip.innerHTML = `${item.name} <button class="chip-remove" data-code="${item.code}" tabindex="-1" aria-label="Remove ${item.name}">×</button>`;
+      box.insertBefore(chip, input);
+    });
+    if (typeof onChanged === 'function') onChanged(selected);
+  }
+
+  function getFilteredOptions(q) {
+    const existing = new Set(selected.map(s => s.code));
+    const query = q.toLowerCase().trim();
+    return options
+      .filter(o => !existing.has(o.code))
+      .filter(o => !query || o.name.toLowerCase().includes(query) || o.code.toLowerCase().includes(query))
+      .slice(0, 60);
+  }
+
+  function openDropdown(q) {
+    const filtered = getFilteredOptions(q);
+    dropdown.innerHTML = '';
+    focusedIdx = -1;
+    if (!filtered.length) {
+      dropdown.innerHTML = '<div class="tag-dropdown-empty">No results</div>';
+    } else {
+      filtered.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'tag-dropdown-item';
+        div.dataset.code = item.code;
+        div.innerHTML = `<span>${item.name}</span><span class="item-code">${item.code}</span>`;
+        div.addEventListener('mousedown', e => { e.preventDefault(); addItem(item); });
+        dropdown.appendChild(div);
+      });
+    }
+    dropdown.classList.add('open');
+  }
+
+  function closeDropdown() {
+    dropdown.classList.remove('open');
+    focusedIdx = -1;
+  }
+
+  function addItem(item) {
+    if (!selected.find(s => s.code === item.code)) {
+      selected.push(item);
+      render();
+    }
+    input.value = '';
+    closeDropdown();
+    input.focus();
+  }
+
+  function removeItem(code) {
+    selected = selected.filter(s => s.code !== code);
+    render();
+  }
+
+  function setEnabled(enabled) {
+    if (enabled) {
+      box.classList.remove('disabled');
+      input.disabled = false;
+      input.placeholder = placeholder || 'Search…';
+    } else {
+      box.classList.add('disabled');
+      input.disabled = true;
+      closeDropdown();
+    }
+  }
+
+  function setOptions(newOptions) {
+    options = newOptions;
+  }
+
+  function clearSelection() {
+    selected = [];
+    render();
+  }
+
+  function getSelected() { return [...selected]; }
+
+  // Events
+  input.addEventListener('input', () => {
+    if (!input.disabled) openDropdown(input.value);
+  });
+  input.addEventListener('focus', () => {
+    if (!input.disabled) openDropdown(input.value);
+  });
+  input.addEventListener('keydown', e => {
+    const items = dropdown.querySelectorAll('.tag-dropdown-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedIdx = Math.min(focusedIdx + 1, items.length - 1);
+      items.forEach((el,i) => el.classList.toggle('focused', i === focusedIdx));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedIdx = Math.max(focusedIdx - 1, 0);
+      items.forEach((el,i) => el.classList.toggle('focused', i === focusedIdx));
+    } else if (e.key === 'Enter' && focusedIdx >= 0) {
+      e.preventDefault();
+      const code = items[focusedIdx].dataset.code;
+      const opt  = options.find(o => o.code === code);
+      if (opt) addItem(opt);
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+    } else if (e.key === 'Backspace' && input.value === '' && selected.length) {
+      removeItem(selected[selected.length - 1].code);
+    }
+  });
+
+  box.addEventListener('click', e => {
+    const rm = e.target.closest('.chip-remove');
+    if (rm) { removeItem(rm.dataset.code); return; }
+    if (!input.disabled) input.focus();
+  });
+
+  document.addEventListener('click', e => {
+    if (!box.contains(e.target) && !dropdown.contains(e.target)) closeDropdown();
+  });
+
+  return { setEnabled, setOptions, clearSelection, getSelected, addItem };
+}
+
+
+// ══════════════════════════════════════════════════════
+//  TRADE GROUP → MEMBER JURISDICTIONS MAP
+// ══════════════════════════════════════════════════════
+const TG_MEMBERS = {
+  EU:       ['AUT','BEL','BGR','HRV','CYP','CZE','DNK','EST','FIN','FRA','DEU','GRC','HUN','IRL','ITA','LVA','LTU','LUX','MLT','NLD','POL','PRT','ROU','SVK','SVN','ESP','SWE'],
+  EEA:      ['AUT','BEL','BGR','HRV','CYP','CZE','DNK','EST','FIN','FRA','DEU','GRC','HUN','IRL','ITA','LVA','LTU','LUX','MLT','NLD','POL','PRT','ROU','SVK','SVN','ESP','SWE','NOR','ISL','LIE'],
+  ASEAN:    ['BRN','KHM','IDN','LAO','MYS','MMR','PHL','SGP','THA','VNM'],
+  GCC:      ['ARE','BHR','KWT','OMN','QAT','SAU'],
+  MERCOSUR: ['ARG','BRA','PRY','URY','BOL','CHL'],
+  SAARC:    ['AFG','BGD','BTN','IND','MDV','NPL','PAK','LKA'],
+  CARICOM:  ['ATG','BHS','BRB','BLZ','DMA','GRD','GUY','HTI','JAM','MSR','KNA','LCA','SUR','TTO','VCT'],
+  CELAC:    ['ARG','BOL','BRA','CHL','COL','CRI','CUB','DOM','ECU','SLV','GTM','GUY','HTI','HND','JAM','MEX','NIC','PAN','PRY','PER','TTO','URY','VEN'],
+  SICA:     ['BLZ','CRI','SLV','GTM','HND','NIC','PAN'],
+  APEC:     ['AUS','BRN','CAN','CHL','CHN','HKG','IDN','JPN','KOR','MYS','MEX','NZL','PNG','PER','PHL','RUS','SGP','TWN','THA','USA','VNM'],
+  EAC:      ['BDI','KEN','RWA','SSD','TZA','UGA'],
+  AFRUN:    ['DZA','AGO','BEN','BWA','BFA','BDI','CMR','CPV','CAF','TCD','COM','COD','COG','CIV','DJI','EGY','ERI','ETH','GAB','GMB','GHA','GIN','GNB','GNQ','KEN','LSO','LBR','LBY','MDG','MWI','MLI','MRT','MUS','MYT','MAR','MOZ','NAM','NER','NGA','RWA','STP','SEN','SLE','SOM','ZAF','SSD','SDN','SWZ','TZA','TGO','TUN','UGA','ZMB','ZWE'],
+  ARABL:    ['DZA','BHR','COM','DJI','EGY','IRQ','JOR','KWT','LBN','LBY','MAR','MRT','OMN','PSE','QAT','SAU','SOM','SDN','SYR','TUN','ARE','YEM'],
+  ECO:      ['AFG','AZE','IRN','KAZ','KGZ','PAK','TJK','TKM','TUR','UZB'],
+  CIS:      ['ARM','AZE','BLR','KAZ','KGZ','MDA','RUS','TJK','TKM','UZB','UKR'],
+  EAEU:     ['ARM','BLR','KAZ','KGZ','RUS'],
+  GLO:      [],
+  IECEE:    [],
+  CBS:      [],
+};
+
+// ══════════════════════════════════════════════════════
+//  INITIALISE TRADE GROUP TAG WIDGET
+// ══════════════════════════════════════════════════════
+
+const tgWidget = makeTagWidget({
+  boxId: 'tg-box', inputId: 'tg-input', dropdownId: 'tg-dropdown',
+  options: TRADE_GROUPS, chipClass: 'chip-tg',
+  placeholder: 'Search trade groups…',
+  onChanged: onTGChanged
+});
+
+// ══════════════════════════════════════════════════════
+//  TREE SELECT STATE
+// ══════════════════════════════════════════════════════
+
+const tree = {
+  selectedJuris: new Set(),   // jurisdiction codes
+  selectedSubj:  new Set(),   // sub-jurisdiction codes
+  expandedRegions: new Set(), // region codes
+  expandedJuris:   new Set(), // jurisdiction codes with sub-juris
+  filterCodes: null,          // null = no TG filter; Set = allowed codes
+  query: '',
+  isOpen: false,
+};
+
+function buildTree() {
+  const body = document.getElementById('tree-body');
+  body.innerHTML = '';
+  const q = tree.query.toLowerCase().trim();
+  let anyVisible = false;
+
+  REGIONS.forEach(region => {
+    const jurisList = JURISDICTIONS_CLEAN.filter(j => j.region === region.code);
+    // Match jurisdictions by search query
+    const matchingJuris = jurisList.filter(j =>
+      !q ||
+      j.name.toLowerCase().includes(q) ||
+      j.code.toLowerCase().includes(q) ||
+      region.name.toLowerCase().includes(q) ||
+      SUBJURISDICTIONS.some(s => s.jurisdiction === j.code && s.name.toLowerCase().includes(q))
+    );
+    if (!matchingJuris.length) return;
+    anyVisible = true;
+
+    const isExpanded = tree.expandedRegions.has(region.code) || (q.length > 0);
+
+    // Region header
+    const hdr = document.createElement('div');
+    hdr.className = 'tree-region-hdr' + (isExpanded ? ' expanded' : '');
+    hdr.innerHTML =
+      `<span class="tree-expand-icon">▶</span>` +
+      `<span>${region.name}</span>` +
+      `<span class="tree-region-count">${matchingJuris.length}</span>`;
+    hdr.addEventListener('click', () => {
+      tree.expandedRegions.has(region.code)
+        ? tree.expandedRegions.delete(region.code)
+        : tree.expandedRegions.add(region.code);
+      buildTree();
+    });
+    body.appendChild(hdr);
+
+    matchingJuris.forEach(j => {
+      const isDimmed  = tree.filterCodes !== null && !tree.filterCodes.has(j.code);
+      const isChecked = tree.selectedJuris.has(j.code);
+      const hasSub    = HAS_SUBJURIS.has(j.code);
+      const isJExp    = tree.expandedJuris.has(j.code);
+
+      const row = document.createElement('div');
+      row.className = 'tree-juris-row' +
+        (isDimmed   ? ' dimmed'      : '') +
+        (!isExpanded ? ' tree-hidden' : '');
+
+      // Show sub-jurisdiction search matches
+      const subjMatches = q ? SUBJURISDICTIONS.filter(s =>
+        s.jurisdiction === j.code && s.name.toLowerCase().includes(q)) : [];
+
+      row.innerHTML =
+        `<input type="checkbox" class="tree-cb" ${isChecked ? 'checked' : ''} />` +
+        `<span>${j.name}</span>` +
+        (hasSub
+          ? `<button class="row-expand-btn" data-juris="${j.code}">${isJExp ? '▾ Hide' : '▸ States'}</button>`
+          : '');
+
+      row.querySelector('.tree-cb').addEventListener('change', e => {
+        e.stopPropagation();
+        toggleJuris(j.code);
+      });
+      row.addEventListener('click', e => {
+        if (e.target.classList.contains('tree-cb') || e.target.classList.contains('row-expand-btn')) return;
+        toggleJuris(j.code);
+      });
+      const expBtn = row.querySelector('.row-expand-btn');
+      if (expBtn) expBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        tree.expandedJuris.has(j.code)
+          ? tree.expandedJuris.delete(j.code)
+          : tree.expandedJuris.add(j.code);
+        buildTree();
+      });
+      body.appendChild(row);
+
+      if (hasSub) {
+        const showSubjRows = isExpanded && (isJExp || subjMatches.length > 0);
+        const subjList = q && subjMatches.length ? subjMatches
+                       : SUBJURISDICTIONS.filter(s => s.jurisdiction === j.code);
+        subjList.forEach(s => {
+          const subRow = document.createElement('div');
+          subRow.className = 'tree-subj-row' + (!showSubjRows ? ' tree-hidden' : '');
+          subRow.innerHTML =
+            `<input type="checkbox" class="tree-cb" ${tree.selectedSubj.has(s.code) ? 'checked' : ''} />` +
+            `<span>${s.name}</span>`;
+          subRow.querySelector('.tree-cb').addEventListener('change', e => { e.stopPropagation(); toggleSubj(s.code, j.code); });
+          subRow.addEventListener('click', e => { if (!e.target.classList.contains('tree-cb')) toggleSubj(s.code, j.code); });
+          body.appendChild(subRow);
+        });
+      }
+    });
+  });
+
+  if (!anyVisible) {
+    body.innerHTML = '<div class="tree-no-results">No results found</div>';
+  }
+}
+
+function toggleJuris(code) {
+  if (tree.selectedJuris.has(code)) {
+    tree.selectedJuris.delete(code);
+    SUBJURISDICTIONS.filter(s => s.jurisdiction === code).forEach(s => tree.selectedSubj.delete(s.code));
+  } else {
+    tree.selectedJuris.add(code);
+  }
+  buildTree();
+  syncTrigger();
+  syncRegionDisplay();
+}
+
+function toggleSubj(code, parentCode) {
+  if (tree.selectedSubj.has(code)) {
+    tree.selectedSubj.delete(code);
+  } else {
+    tree.selectedSubj.add(code);
+    tree.selectedJuris.add(parentCode); // auto-select parent
+  }
+  buildTree();
+  syncTrigger();
+  syncRegionDisplay();
+}
+
+function syncTrigger() {
+  const trigger = document.getElementById('tree-trigger');
+  const placeholder = document.getElementById('tree-placeholder');
+  const chevron = trigger.querySelector('.tree-trigger-chevron');
+  Array.from(trigger.querySelectorAll('.tag-chip')).forEach(el => el.remove());
+
+  if (!tree.selectedJuris.size && !tree.selectedSubj.size) {
+    placeholder.style.display = '';
+    return;
+  }
+  placeholder.style.display = 'none';
+
+  tree.selectedJuris.forEach(code => {
+    const j = JURISDICTIONS_CLEAN.find(j => j.code === code);
+    if (!j) return;
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = j.name + ' <button class="chip-remove" tabindex="-1">×</button>';
+    chip.querySelector('.chip-remove').addEventListener('click', e => {
+      e.stopPropagation();
+      tree.selectedJuris.delete(code);
+      SUBJURISDICTIONS.filter(s => s.jurisdiction === code).forEach(s => tree.selectedSubj.delete(s.code));
+      buildTree(); syncTrigger(); syncRegionDisplay();
+    });
+    trigger.insertBefore(chip, chevron);
+  });
+
+  tree.selectedSubj.forEach(code => {
+    // Only show as separate chip if its parent jurisdiction is NOT also selected
+    const s = SUBJURISDICTIONS.find(s => s.code === code);
+    if (!s || tree.selectedJuris.has(s.jurisdiction)) return;
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip chip-subj';
+    chip.innerHTML = s.name + ' <button class="chip-remove" tabindex="-1">×</button>';
+    chip.querySelector('.chip-remove').addEventListener('click', e => {
+      e.stopPropagation();
+      tree.selectedSubj.delete(code);
+      buildTree(); syncTrigger(); syncRegionDisplay();
+    });
+    trigger.insertBefore(chip, chevron);
+  });
+}
+
+function syncRegionDisplay() {
+  const display = document.getElementById('region-display');
+  const placeholder = document.getElementById('region-placeholder');
+  Array.from(display.querySelectorAll('.tag-chip')).forEach(el => el.remove());
+
+  const jurisList = [...tree.selectedJuris]
+    .map(code => JURISDICTIONS_CLEAN.find(j => j.code === code))
+    .filter(Boolean);
+  const regionCodes = [...new Set(jurisList.map(j => j.region).filter(Boolean))];
+
+  if (!regionCodes.length) { placeholder.style.display = ''; return; }
+  placeholder.style.display = 'none';
+  regionCodes.forEach(code => {
+    const r = REGIONS.find(r => r.code === code);
+    if (!r) return;
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip chip-region';
+    chip.textContent = r.name;
+    display.appendChild(chip);
+  });
+}
+
+// Open / close tree
+document.getElementById('tree-trigger').addEventListener('click', (e) => {
+  e.stopPropagation();
+  tree.isOpen = !tree.isOpen;
+  document.getElementById('tree-dropdown').classList.toggle('open', tree.isOpen);
+  document.getElementById('tree-trigger').classList.toggle('open', tree.isOpen);
+  document.getElementById('tree-trigger').setAttribute('aria-expanded', String(tree.isOpen));
+  if (tree.isOpen) { buildTree(); setTimeout(() => document.getElementById('tree-search').focus(), 50); }
+});
+
+document.getElementById('tree-dropdown').addEventListener('click', e => {
+  e.stopPropagation();
+});
+
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.tree-select-wrap');
+  if (wrap && !wrap.contains(e.target) && tree.isOpen) {
+    tree.isOpen = false;
+    document.getElementById('tree-dropdown').classList.remove('open');
+    document.getElementById('tree-trigger').classList.remove('open');
+    document.getElementById('tree-trigger').setAttribute('aria-expanded', 'false');
+  }
+});
+
+document.getElementById('tree-search').addEventListener('input', e => {
+  tree.query = e.target.value;
+  buildTree();
+});
+
+// Initial tree render (hidden until opened)
+buildTree();
+
+// Trade Group filter
+function onTGChanged(selectedTGs) {
+  if (!selectedTGs.length) {
+    tree.filterCodes = null;
+    tree.selectedJuris.clear();
+    tree.selectedSubj.clear();
+  } else {
+    const memberCodes = new Set();
+    let hasGlobal = false;
+    selectedTGs.forEach(tg => {
+      const members = TG_MEMBERS[tg.code];
+      if (!members || members.length === 0) { hasGlobal = true; return; }
+      members.forEach(c => memberCodes.add(c));
+    });
+    tree.filterCodes = (hasGlobal || !memberCodes.size) ? null : memberCodes;
+
+    // Auto-select all member countries that exist in our jurisdiction list
+    tree.selectedJuris.clear();
+    tree.selectedSubj.clear();
+    if (tree.filterCodes) {
+      JURISDICTIONS_CLEAN.forEach(j => {
+        if (tree.filterCodes.has(j.code)) tree.selectedJuris.add(j.code);
+      });
+    }
+  }
+  buildTree();
+  syncTrigger();
+  syncRegionDisplay();
+}
+
+// ══ Other existing form listeners ══
+
+document.getElementById('naDetails').addEventListener('change', function() {
+  const rte = document.getElementById('rteDetails');
+  rte.contentEditable = this.checked ? 'false' : 'true';
+  rte.classList.toggle('rte-disabled', this.checked);
+  if (this.checked) rte.innerHTML = '';
+});
+
+document.getElementById('naSummary').addEventListener('change', function() {
+  const rte = document.getElementById('rteSummary');
+  rte.contentEditable = this.checked ? 'false' : 'true';
+  rte.classList.toggle('rte-disabled', this.checked);
+  if (this.checked) rte.innerHTML = '';
+});
+
+function fmt(cmd)  { document.getElementById('rteDetails').focus(); document.execCommand(cmd, false, null); }
+function fmt2(cmd) { document.getElementById('rteSummary').focus(); document.execCommand(cmd, false, null); }
+
+document.getElementById('lnavToggle').addEventListener('click', () => {
+  const lnav = document.getElementById('leftNav');
+  const collapsed = lnav.classList.toggle('lnav-collapsed');
+  document.getElementById('lnavToggle').setAttribute('aria-expanded', String(!collapsed));
+});
+</script>
+</body>
+</html>
